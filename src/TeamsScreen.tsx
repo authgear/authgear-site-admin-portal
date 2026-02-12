@@ -1,5 +1,4 @@
-import React, { useMemo, useContext, useState, useCallback } from "react";
-import cn from "classnames";
+import React, { useMemo, useState, useCallback } from "react";
 import {
   ShimmeredDetailsList,
   DetailsListLayoutMode,
@@ -32,11 +31,6 @@ const COLUMN_WIDTHS = {
   plan: 120,
   createdAt: 280,
 } as const;
-const TOTAL_TABLE_WIDTH =
-  COLUMN_WIDTHS.projectName +
-  COLUMN_WIDTHS.ownerEmail +
-  COLUMN_WIDTHS.plan +
-  COLUMN_WIDTHS.createdAt;
 
 const PAGE_SIZE = 5;
 
