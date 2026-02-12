@@ -1,0 +1,12 @@
+.logoContainer {
+  display: flex;
+  align-items: center;
+  height: 24px;
+}
+
+.logoImg {
+  height: 100%;
+  width: auto;
+  max-width: 130px;
+  object-fit: contain;
+}
