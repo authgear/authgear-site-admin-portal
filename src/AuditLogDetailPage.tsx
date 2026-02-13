@@ -102,7 +102,7 @@ const AuditLogDetailPage: React.VFC = () => {
   const [rawLogCopied, setRawLogCopied] = useState(false);
   const copyButtonRef = useRef<HTMLSpanElement>(null);
 
-  const backUrl = projectId ? `/teams/${projectId}` : "/teams";
+  const backUrl = projectId ? `/${projectId}` : "/";
   const backState = projectId ? { tab: "auditLog" as const } : undefined;
 
   if (!logEntry) {

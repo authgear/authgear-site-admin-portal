@@ -127,7 +127,7 @@ const TeamsScreen: React.VFC = function TeamsScreen() {
     if (props == null) return null;
     const item = props.item as TeamListItem;
     return (
-      <Link to={`/teams/${item.projectId}`} className={styles.rowLink}>
+      <Link to={`/${item.projectId}`} className={styles.rowLink}>
         <DetailsRow {...props} />
       </Link>
     );

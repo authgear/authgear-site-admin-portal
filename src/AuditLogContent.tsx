@@ -276,7 +276,7 @@ const AuditLogContent: React.VFC<AuditLogContentProps> = ({ projectId }) => {
         width: 280,
         isResizable: true,
         onRender: (item: AuditLogEntry) => {
-          const detailUrl = `/teams/${projectId}/audit-log/${encodeURIComponent(item.key)}`;
+          const detailUrl = `/${projectId}/audit-log/${encodeURIComponent(item.key)}`;
           const detailState = {
             logEntry: {
               key: item.key,

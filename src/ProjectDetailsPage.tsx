@@ -82,7 +82,7 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
     return (
       <div className={styles.root}>
         <div className={styles.notFound}>Project not found.</div>
-        <Link to="/teams" className={styles.breadcrumbLink}>
+        <Link to="/" className={styles.breadcrumbLink}>
           Back to Teams
         </Link>
       </div>
@@ -101,7 +101,7 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
     <div className={showSaveBar ? `${styles.root} ${styles.rootWithSaveBar}` : styles.root}>
       <div className={styles.breadcrumbRow}>
         <Text as="h1" variant="xxLarge" block className={styles.breadcrumb}>
-          <Link to="/teams" className={styles.breadcrumbLink}>
+          <Link to="/" className={styles.breadcrumbLink}>
             Teams
           </Link>
           <Icon iconName="ChevronRight" className={styles.breadcrumbSepIcon} />

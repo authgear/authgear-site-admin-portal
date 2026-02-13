@@ -5,7 +5,8 @@ import { Nav, INavLinkGroup } from "@fluentui/react";
 const ScreenNav: React.VFC = function ScreenNav() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const isTeamsRoute = pathname === "/teams" || pathname.startsWith("/teams/");
+  const isTeamsRoute =
+    pathname === "/" || /^\/[^/]+(\/audit-log\/[^/]+)?$/.test(pathname);
 
   const navGroups: INavLinkGroup[] = useMemo(
     () => [
@@ -14,7 +15,7 @@ const ScreenNav: React.VFC = function ScreenNav() {
           {
             key: "teams",
             name: "Teams",
-            url: "/teams",
+            url: "/",
           },
         ],
       },

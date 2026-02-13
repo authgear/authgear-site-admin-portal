@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { initializeIcons } from "@fluentui/react";
 import ScreenLayout from "./ScreenLayout";
 import TeamsScreen from "./TeamsScreen";
@@ -15,13 +15,9 @@ const isEmbedded = typeof window !== "undefined" && window.self !== window.top;
 const App: React.VFC = function App() {
   const routes = (
     <Routes>
-      <Route path="/" element={<Navigate to="/teams" replace />} />
-      <Route path="/teams" element={<TeamsScreen />} />
-      <Route path="/teams/:projectId" element={<ProjectDetailsPage />} />
-      <Route
-        path="/teams/:projectId/audit-log/:logKey"
-        element={<AuditLogDetailPage />}
-      />
+      <Route path="/" element={<TeamsScreen />} />
+      <Route path="/:projectId" element={<ProjectDetailsPage />} />
+      <Route path="/:projectId/audit-log/:logKey" element={<AuditLogDetailPage />} />
     </Routes>
   );
 
