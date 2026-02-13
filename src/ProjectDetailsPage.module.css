@@ -1,0 +1,369 @@
+.root {
+  padding: 24px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  row-gap: 24px;
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Noto Sans", "Helvetica", "Arial", sans-serif;
+}
+
+@media (max-width: 640px) {
+  .root {
+    padding: 16px;
+    row-gap: 16px;
+  }
+}
+
+.rootWithSaveBar {
+  padding-bottom: 88px;
+}
+
+/* Breadcrumb row — match auth-fraud UserDetail */
+.breadcrumbRow {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.breadcrumb {
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Noto Sans", "Helvetica", "Arial", sans-serif;
+  color: #605e5c;
+  font-size: 28px;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.breadcrumbLink {
+  color: #605e5c;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.breadcrumbLink:hover {
+  color: #201f1e;
+  text-decoration: none;
+}
+
+.breadcrumbSepIcon {
+  font-size: 14px;
+  color: #605e5c;
+  margin: 0 4px;
+}
+
+.breadcrumbCurrent {
+  color: #201f1e;
+  font-weight: 600;
+}
+
+.projectHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 0;
+}
+
+.projectIcon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background-color: #176df3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: "Segoe UI", sans-serif;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 1;
+  color: #ffffff;
+}
+
+.projectInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.projectName {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #201f1e;
+  margin: 0;
+}
+
+.projectIdRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.projectIdText {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  color: #605e5c;
+  margin: 0;
+}
+
+.projectMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.metaText {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 12px;
+  color: #605e5c;
+}
+
+.tabsSection {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.pivotTabs :global(.ms-FocusZone),
+.pivotTabs :global(.ms-Pivot) {
+  display: flex;
+  border-bottom: 1px solid #edebe9;
+  padding-bottom: 0;
+}
+
+.pivotTabs :global(.ms-Pivot-link) {
+  color: #323130;
+  padding: 0 8px;
+  margin: 0;
+  margin-right: 8px;
+  min-height: 40px;
+  line-height: 40px;
+  transition: none;
+}
+
+.pivotTabs :global(.ms-Pivot-link:hover) {
+  color: #323130;
+  background-color: #f3f2f1;
+}
+
+.pivotTabs :global(.ms-Pivot-link.is-selected) {
+  color: #323130;
+  font-weight: 600;
+  transition: none;
+}
+
+.pivotTabs :global(.ms-Pivot-link.is-selected:before) {
+  background-color: #176df3;
+  transition: none;
+  left: 0;
+  right: 0;
+}
+
+.pivotTabs :global(.ms-Pivot-link:before) {
+  transition: none;
+}
+
+/* Tab content — match auth-fraud UserDetail */
+.tabContent {
+  padding: 20px 8px 0 8px;
+  min-height: 400px;
+  max-width: 752px;
+  width: 100%;
+}
+
+/* Audit Log tab: use full content width */
+.tabContentFullWidth {
+  max-width: none;
+  width: 100%;
+}
+
+/* Section headings — match auth-fraud UserDetail */
+.sectionHeading {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #201f1e;
+  margin: 0 0 16px 0;
+  padding: 0;
+}
+
+.sectionDivider {
+  height: 1px;
+  background-color: #edebe9;
+  margin: 24px 0;
+  width: 100%;
+}
+
+.usageGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 8px;
+}
+
+@media (max-width: 540px) {
+  .usageGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.usageCard {
+  padding: 16px;
+  border: 1px solid #edebe9;
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.usageCardLabel {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #323130;
+  margin: 0 0 8px 0;
+}
+
+.usageCardValue {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #323130;
+  margin: 0;
+}
+
+.usageCardProgressRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.usageCardProgressBar {
+  flex: 1;
+  min-width: 0;
+}
+
+.usageCardProgressValue {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #323130;
+  flex-shrink: 0;
+}
+
+.projectStatusSection {
+  margin-top: 24px;
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+.projectStatusRow {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 16px 0;
+}
+
+.projectStatusContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.projectStatusHeading {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #323130;
+  margin: 0 0 4px 0;
+}
+
+.projectStatusDescription {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  color: #605e5c;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.projectStatusAction {
+  flex-shrink: 0;
+}
+
+.projectStatusDivider {
+  height: 1px;
+  background-color: #edebe9;
+  margin: 0;
+  width: 100%;
+}
+
+.saveSection {
+  position: fixed;
+  bottom: 0;
+  left: 260px;
+  right: 0;
+  background-color: #ffffff;
+  border-top: 1px solid #edebe9;
+  padding: 24px;
+  z-index: 10;
+}
+
+@media (max-width: 640px) {
+  .saveSection {
+    left: 0;
+    padding: 16px;
+  }
+}
+
+.saveSectionInner {
+  max-width: 720px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+/* Force Discard button to gray when disabled (Fluent ActionButton overrides inline styles) */
+.discardButtonWrap button[disabled],
+.discardButtonWrap button[disabled]:hover {
+  color: #a19f9d !important;
+  cursor: not-allowed !important;
+}
+
+.discardButtonWrap button[disabled] :global(.ms-Button-icon),
+.discardButtonWrap button[disabled] :global(.ms-Button-label),
+.discardButtonWrap button[disabled]:hover :global(.ms-Button-icon),
+.discardButtonWrap button[disabled]:hover :global(.ms-Button-label) {
+  color: #a19f9d !important;
+}
+
+.notFound {
+  font-family: "Segoe UI", sans-serif;
+  padding: 24px;
+  font-size: 16px;
+  color: #605e5c;
+}
+
+.dialogMessage {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  color: #323130;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.dialogMessage strong {
+  font-weight: 600;
+  color: #201f1e;
+}

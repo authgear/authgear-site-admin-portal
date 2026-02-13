@@ -1,0 +1,134 @@
+/* Portal Admin tab — Invite button + Owner email table (align with Audit Log / UI) */
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  width: 100%;
+  padding-bottom: 48px;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Noto Sans", "Helvetica", "Arial", sans-serif;
+}
+
+.inviteRow {
+  display: flex;
+  align-items: center;
+}
+
+/* Card — no outer border (table has row borders only) */
+.card {
+  border: none;
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+/* Table aligns with Fluent DetailsList: header 14px/600, row 12px, padding 8px 16px */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.table th {
+  text-align: left;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #201f1e;
+  background-color: #ffffff;
+  border-bottom: 1px solid #edebe9;
+}
+
+.table td {
+  padding: 10px 16px;
+  font-size: 12px;
+  line-height: 16px;
+  color: #605e5c;
+  border-bottom: 1px solid #edebe9;
+  vertical-align: middle;
+  box-sizing: border-box;
+}
+
+.table tbody tr {
+  background-color: #ffffff;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background-color: #f3f2f1;
+}
+
+.emailCell {
+  font-size: 12px;
+  color: #605e5c;
+}
+
+.ownerBadge {
+  color: #605e5c;
+  font-weight: 400;
+}
+
+.statusAccepted {
+  color: #33ba89;
+  font-weight: 500;
+}
+
+.actionRemove {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 12px;
+  color: #e23d3d;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+}
+
+.actionRemove:hover {
+  text-decoration: underline;
+  color: #c93535;
+}
+
+/* Invite modal */
+.inviteModalBody {
+  margin-bottom: 20px;
+}
+
+.inviteModalLabel {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #323130;
+  margin: 0 0 8px 0;
+  display: block;
+}
+
+.inviteModalButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+/* Remove modal */
+.removeModalMessage {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  color: #323130;
+  line-height: 1.5;
+  margin: 0 0 24px 0;
+}
+
+.removeModalEmail {
+  font-weight: 600;
+}
+
+.removeModalButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}

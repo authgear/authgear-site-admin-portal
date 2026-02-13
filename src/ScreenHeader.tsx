@@ -158,25 +158,27 @@ const ScreenHeader: React.VFC = function ScreenHeader() {
           },
         }}
       >
-        <div className={styles.mobilePanelContent}>
-          <div className={styles.mobileSidebarHeader}>
-            <div className={styles.mobileSidebarLogoRow}>
-              <button
-                type="button"
-                className={styles.mobileSidebarGridButton}
-                onClick={onDismissMobilePanel}
-                aria-label="Close menu"
-              >
-                <Icon iconName="WaffleOffice365" className={styles.mobileSidebarGridIcon} />
-              </button>
-              <Logo />
-              <Text className={styles.mobileSidebarAppName}>admin</Text>
+        {isMobilePanelOpen && (
+          <div className={styles.mobilePanelContent}>
+            <div className={styles.mobileSidebarHeader}>
+              <div className={styles.mobileSidebarLogoRow}>
+                <button
+                  type="button"
+                  className={styles.mobileSidebarGridButton}
+                  onClick={onDismissMobilePanel}
+                  aria-label="Close menu"
+                >
+                  <Icon iconName="WaffleOffice365" className={styles.mobileSidebarGridIcon} />
+                </button>
+                <Logo />
+                <Text className={styles.mobileSidebarAppName}>admin</Text>
+              </div>
+            </div>
+            <div className={styles.mobilePanelNav}>
+              <ScreenNav />
             </div>
           </div>
-          <div className={styles.mobilePanelNav}>
-            <ScreenNav />
-          </div>
-        </div>
+        )}
       </Panel>
     </>
   );

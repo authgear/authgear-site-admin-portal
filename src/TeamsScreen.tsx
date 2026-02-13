@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useCallback } from "react";
+import { Link } from "react-router-dom";
 import {
   ShimmeredDetailsList,
   DetailsListLayoutMode,
@@ -15,8 +16,8 @@ import {
   IconButton,
   IListProps,
 } from "@fluentui/react";
-import ScreenLayout from "./ScreenLayout";
 import ScreenTitle from "./ScreenTitle";
+import { MOCK_TEAMS, type TeamListItem } from "./data/teams";
 
 import styles from "./TeamsScreen.module.css";
 
@@ -33,91 +34,6 @@ const COLUMN_WIDTHS = {
 } as const;
 
 const PAGE_SIZE = 5;
-
-interface TeamListItem {
-  id: string;
-  projectName: string;
-  projectId: string;
-  ownerEmail: string;
-  plan: string;
-  createdAt: string;
-}
-
-// Mock data - replace with actual data fetching
-const MOCK_TEAMS: TeamListItem[] = [
-  {
-    id: "1",
-    projectName: "SuperApp",
-    projectId: "super-app-234",
-    ownerEmail: "alex.tsai@superapp.com",
-    plan: "Enterprise",
-    createdAt: "Oct 7, 2025, 5:16:47 PM UTC+08:00",
-  },
-  {
-    id: "2",
-    projectName: "SuperCampaign",
-    projectId: "super-abcd-123",
-    ownerEmail: "admin@superapp.com",
-    plan: "Free",
-    createdAt: "Oct 7, 2025, 5:16:47 PM UTC+08:00",
-  },
-  {
-    id: "3",
-    projectName: "ACME Corp",
-    projectId: "acme-corp-999",
-    ownerEmail: "it@sample-acme.com",
-    plan: "Enterprise",
-    createdAt: "Oct 7, 2025, 5:16:47 PM UTC+08:00",
-  },
-  {
-    id: "4",
-    projectName: "SuperApp",
-    projectId: "print-promote-359",
-    ownerEmail: "alex.chang@superapp.com",
-    plan: "Business",
-    createdAt: "Oct 7, 2025, 5:16:47 PM UTC+08:00",
-  },
-  {
-    id: "5",
-    projectName: "Wisemart",
-    projectId: "wise-apple-201",
-    ownerEmail: "alex.chang@superapp.com",
-    plan: "Developers",
-    createdAt: "Oct 7, 2025, 5:16:47 PM UTC+08:00",
-  },
-  {
-    id: "6",
-    projectName: "SuperApp",
-    projectId: "print-promote-146",
-    ownerEmail: "alex.chang@superapp.com",
-    plan: "Free",
-    createdAt: "Oct 7, 2025, 5:16:47 PM UTC+08:00",
-  },
-  {
-    id: "7",
-    projectName: "SuperApp",
-    projectId: "print-promote-147",
-    ownerEmail: "alex.chang@superapp.com",
-    plan: "Free",
-    createdAt: "Oct 7, 2025, 5:16:47 PM UTC+08:00",
-  },
-  {
-    id: "8",
-    projectName: "SuperApp",
-    projectId: "print-promote-148",
-    ownerEmail: "alex.chang@superapp.com",
-    plan: "Free",
-    createdAt: "Oct 7, 2025, 5:16:47 PM UTC+08:00",
-  },
-  {
-    id: "9",
-    projectName: "SuperApp",
-    projectId: "print-promote-149",
-    ownerEmail: "alex.chang@superapp.com",
-    plan: "Free",
-    createdAt: "Oct 7, 2025, 5:16:47 PM UTC+08:00",
-  },
-];
 
 const SEARCH_BY_OPTIONS: IDropdownOption[] = [
   { key: "projectId", text: "Project ID" },
@@ -208,10 +124,13 @@ const TeamsScreen: React.VFC = function TeamsScreen() {
   const onPageClick = useCallback((page: number) => setCurrentPage(page), []);
 
   const onRenderRow = useCallback((props?: IDetailsRowProps) => {
-    if (props == null) {
-      return null;
-    }
-    return <DetailsRow {...props} />;
+    if (props == null) return null;
+    const item = props.item as TeamListItem;
+    return (
+      <Link to={`/teams/${item.projectId}`} className={styles.rowLink}>
+        <DetailsRow {...props} />
+      </Link>
+    );
   }, []);
 
   const onRenderItemColumn = useCallback(
@@ -261,12 +180,11 @@ const TeamsScreen: React.VFC = function TeamsScreen() {
   }, []);
 
   return (
-    <ScreenLayout>
-      <div className={styles.root}>
-        <div className={styles.header}>
-          <ScreenTitle>Teams</ScreenTitle>
-        </div>
-        <div className={styles.content}>
+    <div className={styles.root}>
+      <div className={styles.header}>
+        <ScreenTitle>Teams</ScreenTitle>
+      </div>
+      <div className={styles.content}>
           <div className={styles.toolbar}>
             <Text className={styles.searchByLabel}>Search By</Text>
             <Dropdown
@@ -404,7 +322,6 @@ const TeamsScreen: React.VFC = function TeamsScreen() {
           )}
         </div>
       </div>
-    </ScreenLayout>
   );
 };
 

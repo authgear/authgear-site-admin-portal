@@ -50,6 +50,17 @@
   color: #605e5c;
 }
 
+.rowLink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.rowLink:hover {
+  text-decoration: none;
+  color: inherit;
+}
+
 .listContainer {
   @apply flex flex-col relative;
   min-width: 900px;
@@ -149,8 +160,8 @@
   width: 100%;
 }
 
-/* Hide default Fluent UI header - we use custom header above */
-:global(.ms-DetailsList .ms-DetailsHeader) {
+/* Hide default Fluent UI header only in Teams list - we use custom header above */
+.listContainer :global(.ms-DetailsList .ms-DetailsHeader) {
   display: none !important;
 }
 

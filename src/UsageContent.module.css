@@ -1,0 +1,290 @@
+/* Usage tab — Subscription Fee, SMS/WhatsApp Cost, Monthly Active User */
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  width: 100%;
+  padding-bottom: 48px;
+}
+
+.card {
+  border: 1px solid #edebe9;
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  padding: 20px 24px;
+  min-width: 0;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.cardTitle {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #323130;
+  margin: 0;
+}
+
+.cardHeaderControl {
+  flex-shrink: 0;
+}
+
+/* Subscription Fee card */
+.subscriptionRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.subscriptionLeft {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  color: #605e5c;
+  margin: 0;
+}
+
+.subscriptionRight {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  color: #323130;
+  margin: 0;
+  text-align: right;
+}
+
+.subscriptionInclude {
+  font-size: 14px;
+  color: #605e5c;
+  margin: 0 0 4px 0;
+}
+
+.subscriptionPlan {
+  font-size: 14px;
+  font-weight: 500;
+  color: #323130;
+  margin: 0;
+}
+
+/* SMS/WhatsApp Cost card */
+.smsDateRangeRowClickable {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.smsDateRangeRowClickable:hover .smsDateRangeText {
+  color: #323130;
+}
+
+.smsDateRangeText {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 12px;
+  color: #605e5c;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.smsDateRangeCalendarIcon {
+  font-size: 14px;
+  color: #605e5c;
+}
+
+.smsDivider {
+  height: 1px;
+  background-color: #edebe9;
+  margin: 0 0 16px 0;
+  width: 100%;
+}
+
+.smsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f2f1;
+}
+
+.smsRow:last-child {
+  border-bottom: none;
+}
+
+.smsLabel {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  color: #323130;
+  margin: 0;
+}
+
+.smsValue {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  color: #605e5c;
+  margin: 0;
+}
+
+/* Monthly Active User card — month-only picker trigger */
+.mauMonthWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+  height: 32px;
+  padding: 0 8px 0 12px;
+  border: 1px solid #edebe9;
+  border-radius: 2px;
+  background-color: #ffffff;
+  cursor: pointer;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  color: #323130;
+}
+
+.mauMonthWrap:hover {
+  border-color: #323130;
+}
+
+.mauMonthTriggerText {
+  flex: 1;
+  text-align: left;
+  min-width: 0;
+}
+
+.mauMonthTriggerIcon {
+  font-size: 16px;
+  color: #605e5c;
+  flex-shrink: 0;
+}
+
+/* Month picker callout panel */
+.mauMonthCallout :global(.ms-Callout-main) {
+  padding: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #edebe9;
+}
+
+.mauMonthPanel {
+  padding: 16px;
+  min-width: 220px;
+  background-color: #ffffff;
+}
+
+.mauMonthPanelYearRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.mauMonthPanelYear {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #323130;
+}
+
+.mauMonthPanelYearArrows {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.mauMonthGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.mauMonthCell {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  color: #323130;
+  background: none;
+  border: none;
+  border-radius: 2px;
+  padding: 8px;
+  cursor: pointer;
+  min-height: 32px;
+}
+
+.mauMonthCell:hover {
+  background-color: #f3f2f1;
+  color: #323130;
+}
+
+.mauMonthCellSelected {
+  background-color: #176df3;
+  color: #ffffff;
+}
+
+.mauMonthCellSelected:hover {
+  background-color: #1562db;
+  color: #ffffff;
+}
+
+.mauMonthGoToTodayWrap {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.mauMonthGoToToday {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  color: #176df3;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  text-decoration: none;
+}
+
+.mauMonthGoToToday:hover {
+  text-decoration: underline;
+  color: #1562db;
+}
+
+.mauDivider {
+  height: 1px;
+  background-color: #edebe9;
+  margin: 16px 0;
+  width: 100%;
+}
+
+.mauProgressValueRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.mauProgressBar {
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 12px;
+}
+
+.mauProgressValue {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #323130;
+}
+
+.mauLastMonth {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  color: #605e5c;
+  margin: 0;
+}
