@@ -9,9 +9,7 @@ import "./App.css";
 
 initializeIcons();
 
-/** When embedded in an iframe (e.g. portal shell), parent provides header/sidebar — render only content to avoid double top bar and sidebar. */
-const isEmbedded = typeof window !== "undefined" && window.self !== window.top;
-
+/** Always show full layout (header + sidebar). If you need content-only for a specific embedder later, use a URL param or env check instead of window.self !== window.top, which also triggers in Ruttl/Vercel preview iframes. */
 const App: React.VFC = function App() {
   const routes = (
     <Routes>
@@ -23,13 +21,7 @@ const App: React.VFC = function App() {
 
   return (
     <BrowserRouter>
-      {isEmbedded ? (
-        <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
-          {routes}
-        </div>
-      ) : (
-        <ScreenLayout>{routes}</ScreenLayout>
-      )}
+      <ScreenLayout>{routes}</ScreenLayout>
     </BrowserRouter>
   );
 };
