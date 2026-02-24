@@ -13,7 +13,7 @@ import {
   DialogFooter,
 } from "@fluentui/react";
 import { getProjectByProjectId, updateProjectPlan } from "./data/teams";
-import AuditLogContent from "./AuditLogContent";
+import AuditLogContent, { type AuditLogFiltersSnapshot } from "./AuditLogContent";
 import UsageContent, { getMauDataForMonth, MAU_CAP } from "./UsageContent";
 import PlanContent from "./PlanContent";
 import PortalAdminContent from "./PortalAdminContent";
@@ -327,7 +327,7 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
           {selectedTab === "auditLog" && project && (
             <AuditLogContent
               projectId={project.projectId}
-              initialFilters={(location.state as { auditLogFilters?: unknown } | null)?.auditLogFilters ?? undefined}
+              initialFilters={(location.state as { auditLogFilters?: AuditLogFiltersSnapshot } | null)?.auditLogFilters ?? undefined}
             />
           )}
           {selectedTab === "usage" && project && (

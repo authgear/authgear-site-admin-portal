@@ -88,7 +88,7 @@ const ScreenNav: React.VFC = function ScreenNav() {
     [navigate]
   );
 
-  const onRenderLink = useCallback((link?: INavLink & { projectId?: string; projectName?: string }, defaultRender?: (l?: INavLink) => React.ReactNode) => {
+  const onRenderLink = useCallback((link?: INavLink & { projectId?: string; projectName?: string }, defaultRender?: (l?: INavLink) => React.ReactNode): React.ReactElement | null => {
     if (!link) return null;
     if (link.projectId != null && link.projectName != null) {
       const isSelected =
@@ -101,7 +101,8 @@ const ScreenNav: React.VFC = function ScreenNav() {
         </div>
       );
     }
-    return defaultRender ? defaultRender(link) : <span>{link.name}</span>;
+    const rendered = defaultRender ? defaultRender(link) : null;
+    return (rendered != null && typeof rendered === "object" && "type" in rendered ? rendered : <span>{link.name}</span>) as React.ReactElement;
   }, [selectedKey, pathname]);
 
   const noAnimation = { transition: "none", animation: "none" };
