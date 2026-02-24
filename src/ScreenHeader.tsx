@@ -100,14 +100,6 @@ const ScreenHeader: React.VFC = function ScreenHeader() {
           }}
         />
 
-        <div className={styles.links}>
-          <Text variant="small" className={styles.link}>
-            Schedule demo
-          </Text>
-          <Text variant="small" className={styles.link}>
-            Documentation
-          </Text>
-        </div>
         <CommandButton
           className={styles.userButton}
           menuProps={menuProps}
