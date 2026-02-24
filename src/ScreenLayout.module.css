@@ -22,28 +22,44 @@
   }
 }
 
-/* Hide sidebar on mobile (max-width: 640px) – nav shown in header Panel */
-.body > .nav {
-  display: block;
-}
-
-@media (max-width: 640px) {
-  .body > .nav {
-    display: none;
-  }
-}
-
 .nav {
   width: 260px;
   flex-shrink: 0;
   min-height: 0;
   border-right: 1px solid #edebe9;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
   height: 100%;
+}
+
+/* Disable transition/animation only on Nav (project list), not on SearchBox */
+.nav :global(.ms-Nav),
+.nav :global(.ms-Nav) * {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Selected sidebar item: background + left border (all routes including audit-log log details) */
+.nav :global(.ms-Nav-compositeLink.is-selected .ms-Nav-link),
+.nav :global(.ms-Nav-link[aria-current="page"]),
+.nav :global([aria-current="page"]) {
+  background-color: #f3f2f1 !important;
+  font-weight: 600;
+}
+
+.nav :global(.ms-Nav-compositeLink.is-selected .ms-Nav-link)::after,
+.nav :global(.ms-Nav-link[aria-current="page"])::after,
+.nav :global([aria-current="page"])::after {
+  border-left: 2px solid #176df3;
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  pointer-events: none;
 }
 
 @media (min-width: 641px) {
@@ -53,11 +69,17 @@
   }
 }
 
+@media (max-width: 640px) {
+  .nav {
+    display: none;
+  }
+}
+
 .content {
   flex: 1 0 0;
   min-width: 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
 }

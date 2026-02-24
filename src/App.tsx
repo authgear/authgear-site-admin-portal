@@ -15,7 +15,7 @@ const App: React.VFC = function App() {
     <Routes>
       <Route path="/" element={<TeamsScreen />} />
       <Route path="/:projectId" element={<ProjectDetailsPage />} />
-      <Route path="/:projectId/audit-log/:logKey" element={<AuditLogDetailPage />} />
+      <Route path="/:projectId/audit-log/:logNum" element={<AuditLogDetailPage />} />
     </Routes>
   );
 

@@ -25,15 +25,16 @@ function onShouldVirtualize(_: IListProps): boolean {
   return false;
 }
 
-/* Single source of truth for column widths - header and content must match */
+/* Single source of truth for column widths - header and content must match (equal width) */
+const COLUMN_WIDTH = 225;
 const COLUMN_WIDTHS = {
-  projectName: 260,
-  ownerEmail: 240,
-  plan: 120,
-  createdAt: 280,
+  projectName: COLUMN_WIDTH,
+  ownerEmail: COLUMN_WIDTH,
+  plan: COLUMN_WIDTH,
+  createdAt: COLUMN_WIDTH,
 } as const;
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 10;
 
 const SEARCH_BY_OPTIONS: IDropdownOption[] = [
   { key: "projectId", text: "Project ID" },

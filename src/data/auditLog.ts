@@ -46,7 +46,10 @@ function getSampleUserIds(): string[] {
 
 const SAMPLE_USER_IDS = getSampleUserIds();
 
-export function generateUserActivityLogs(projectId: string, count = 25): AuditLogEntry[] {
+/** Cache logs per project so they stay the same when navigating to log details and back */
+const logsCache = new Map<string, AuditLogEntry[]>();
+
+function generateLogsUncached(projectId: string, count: number): AuditLogEntry[] {
   const logs: AuditLogEntry[] = [];
   const now = new Date();
 
@@ -73,4 +76,12 @@ export function generateUserActivityLogs(projectId: string, count = 25): AuditLo
   }
 
   return logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+}
+
+export function generateUserActivityLogs(projectId: string, count = 25): AuditLogEntry[] {
+  const cached = logsCache.get(projectId);
+  if (cached) return cached;
+  const logs = generateLogsUncached(projectId, count);
+  logsCache.set(projectId, logs);
+  return logs;
 }

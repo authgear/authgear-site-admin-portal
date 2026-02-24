@@ -77,24 +77,55 @@ function escapeCsvCell(value: string): string {
   return value;
 }
 
-interface AuditLogContentProps {
-  projectId: string;
+/** Snapshot of audit log filters for restoring when returning from log details */
+export interface AuditLogFiltersSnapshot {
+  searchQuery: string;
+  flowActionFilter: string;
+  dateRangeType: "full" | "custom";
+  startDateIso: string | null;
+  endDateIso: string | null;
+  currentPage: number;
+  timestampSortDirection: "asc" | "desc" | null;
 }
 
-const AuditLogContent: React.VFC<AuditLogContentProps> = ({ projectId }) => {
+interface AuditLogContentProps {
+  projectId: string;
+  initialFilters?: AuditLogFiltersSnapshot | null;
+}
+
+const AuditLogContent: React.VFC<AuditLogContentProps> = ({
+  projectId,
+  initialFilters,
+}) => {
   const navigate = useNavigate();
+
+  const parseInitialDate = (iso: string | null): Date | null =>
+    iso ? (() => { const d = new Date(iso); return Number.isNaN(d.getTime()) ? null : d; })() : null;
+
   const [logs, setLogs] = useState<AuditLogEntry[]>(() =>
     generateUserActivityLogs(projectId, 25)
   );
-  const [searchQuery, setSearchQuery] = useState("");
-  const [flowActionFilter, setFlowActionFilter] = useState<string>("all");
-  const [dateRangeType, setDateRangeType] = useState<"full" | "custom">("full");
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState(
+    () => initialFilters?.searchQuery ?? ""
+  );
+  const [flowActionFilter, setFlowActionFilter] = useState<string>(
+    () => initialFilters?.flowActionFilter ?? "all"
+  );
+  const [dateRangeType, setDateRangeType] = useState<"full" | "custom">(
+    () => initialFilters?.dateRangeType ?? "full"
+  );
+  const [startDate, setStartDate] = useState<Date | null>(
+    () => parseInitialDate(initialFilters?.startDateIso ?? null)
+  );
+  const [endDate, setEndDate] = useState<Date | null>(
+    () => parseInitialDate(initialFilters?.endDateIso ?? null)
+  );
+  const [currentPage, setCurrentPage] = useState(
+    () => initialFilters?.currentPage ?? 1
+  );
   const [timestampSortDirection, setTimestampSortDirection] = useState<
     "asc" | "desc" | null
-  >(null);
+  >(() => initialFilters?.timestampSortDirection ?? null);
   const [isExportingCsv, setIsExportingCsv] = useState(false);
   const [showExportCsvModal, setShowExportCsvModal] = useState(false);
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
@@ -276,7 +307,20 @@ const AuditLogContent: React.VFC<AuditLogContentProps> = ({ projectId }) => {
         width: 280,
         isResizable: true,
         onRender: (item: AuditLogEntry) => {
-          const detailUrl = `/${projectId}/audit-log/${encodeURIComponent(item.key)}`;
+          const index = logs.findIndex((l) => l.key === item.key);
+          const detailUrl =
+            index >= 0
+              ? `/${projectId}/audit-log/${index}`
+              : `/${projectId}/audit-log/0`;
+          const auditLogFilters: AuditLogFiltersSnapshot = {
+            searchQuery,
+            flowActionFilter: effectiveFlowActionFilter,
+            dateRangeType,
+            startDateIso: startDate?.toISOString() ?? null,
+            endDateIso: endDate?.toISOString() ?? null,
+            currentPage,
+            timestampSortDirection,
+          };
           const detailState = {
             logEntry: {
               key: item.key,
@@ -285,6 +329,7 @@ const AuditLogContent: React.VFC<AuditLogContentProps> = ({ projectId }) => {
               isError: item.verdict === "blocked",
             },
             userId: item.userId,
+            auditLogFilters,
           };
           return (
             <span
@@ -398,7 +443,18 @@ const AuditLogContent: React.VFC<AuditLogContentProps> = ({ projectId }) => {
         },
       },
     ],
-    [projectId, navigate, handleTimestampSort]
+    [
+      projectId,
+      navigate,
+      handleTimestampSort,
+      searchQuery,
+      effectiveFlowActionFilter,
+      dateRangeType,
+      startDate,
+      endDate,
+      currentPage,
+      timestampSortDirection,
+    ]
   );
 
   const onRenderRow = useCallback((props?: IDetailsRowProps) => {

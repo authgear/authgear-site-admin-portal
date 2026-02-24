@@ -6,8 +6,8 @@
   display: flex;
   flex-direction: column;
   row-gap: 32px;
-  flex: 1;
   max-width: 752px;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Noto Sans", "Helvetica", "Arial", sans-serif;
 }
 
 .titleRow {
@@ -18,41 +18,44 @@
 
 .breadcrumb {
   margin: 0;
+  padding: 0;
   font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Noto Sans", "Helvetica", "Arial", sans-serif;
+  color: #605e5c;
+  font-size: 28px;
+  font-weight: 400;
   display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
+  align-items: center;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .breadcrumbLink {
-  color: #616161;
+  color: #605e5c;
   text-decoration: none;
   font-weight: 400;
-  font-size: 16px;
   padding: 2px 8px;
   margin: -2px -8px;
   border-radius: 4px;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .breadcrumbLink:hover {
   background-color: #f3f2f1;
-  color: #616161;
+  color: #605e5c;
   text-decoration: none;
+  padding: 2px 8px;
+  margin: -2px -8px;
 }
 
 .breadcrumbSepIcon {
-  color: #616161;
-  font-size: 16px;
-  font-weight: 400;
+  font-size: 14px;
+  color: #605e5c;
+  margin: 0 4px;
 }
 
 .breadcrumbCurrent {
-  color: #333333;
+  color: #201f1e;
   font-weight: 600;
-  font-size: 28px;
-  line-height: 36px;
 }
 
 .breadcrumbInner {
@@ -69,6 +72,8 @@
   margin: 0;
   background: none;
   border: none;
+  color: #a19f9d;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Noto Sans", "Helvetica", "Arial", sans-serif;
 }
 
 .detailRow {
@@ -78,17 +83,20 @@
   gap: 6px;
   align-items: baseline;
   color: #a19f9d;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Noto Sans", "Helvetica", "Arial", sans-serif;
 }
 
 .detailLabel {
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Noto Sans", "Helvetica", "Arial", sans-serif;
   font-size: 14px;
   font-weight: 400;
-  color: #a19f9d;
+  color: #201f1e;
   margin: 0;
   flex-shrink: 0;
 }
 
 .detailValue {
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Noto Sans", "Helvetica", "Arial", sans-serif;
   font-size: 14px;
   font-weight: 400;
   color: #a19f9d;
@@ -106,6 +114,7 @@
 
 .rawSectionTitle {
   display: block;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Noto Sans", "Helvetica", "Arial", sans-serif;
   font-size: 14px;
   font-weight: 600;
   color: #201f1e;

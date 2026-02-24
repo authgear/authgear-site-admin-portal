@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { useParams, Link, useLocation } from "react-router-dom";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
+import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Icon,
   Text,
@@ -12,14 +12,37 @@ import {
   Dialog,
   DialogFooter,
 } from "@fluentui/react";
-import { getProjectByProjectId } from "./data/teams";
+import { getProjectByProjectId, updateProjectPlan } from "./data/teams";
 import AuditLogContent from "./AuditLogContent";
-import UsageContent from "./UsageContent";
+import UsageContent, { getMauDataForMonth, MAU_CAP } from "./UsageContent";
+import PlanContent from "./PlanContent";
 import PortalAdminContent from "./PortalAdminContent";
 import styles from "./ProjectDetailsPage.module.css";
 
 const TAB_KEYS = ["overview", "auditLog", "usage", "plan", "portalAdmin"] as const;
 type TabKey = (typeof TAB_KEYS)[number];
+
+/** URL hash segment for each tab: /(projectId)#overview, #audit-log, #usage, #plan, #portal-admin */
+const TAB_KEY_TO_HASH: Record<TabKey, string> = {
+  overview: "overview",
+  auditLog: "audit-log",
+  usage: "usage",
+  plan: "plan",
+  portalAdmin: "portal-admin",
+};
+
+const HASH_TO_TAB_KEY: Record<string, TabKey> = {
+  overview: "overview",
+  "audit-log": "auditLog",
+  usage: "usage",
+  plan: "plan",
+  "portal-admin": "portalAdmin",
+};
+
+function tabKeyFromHash(hash: string): TabKey {
+  const segment = hash.replace(/^#/, "").toLowerCase() || "overview";
+  return HASH_TO_TAB_KEY[segment] ?? "overview";
+}
 
 function getInitials(projectName: string): string {
   const words = projectName.trim().split(/\s+/);
@@ -27,6 +50,58 @@ function getInitials(projectName: string): string {
     return (words[0][0] + words[1][0]).toUpperCase().slice(0, 2);
   }
   return projectName.slice(0, 2).toUpperCase() || "PR";
+}
+
+/** Current calendar month key (YYYY-MM) — matches Usage tab "This Month" */
+function getCurrentMonthKey(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
+/** Deterministic total user count per project (different per projectId) */
+function getTotalUserCount(projectId: string | undefined): number {
+  if (!projectId) return 12;
+  let h = 0;
+  for (let i = 0; i < projectId.length; i++) {
+    h = (h * 31 + projectId.charCodeAt(i)) | 0;
+  }
+  return 8 + (Math.abs(h) % 493); // range 8–500
+}
+
+/** Overview usage cards: MAU and total users use same data as Usage tab / per-project values */
+function OverviewUsageCards({ projectId }: { projectId?: string }) {
+  const mauData = useMemo(() => getMauDataForMonth(getCurrentMonthKey(), projectId), [projectId]);
+  const totalUsers = useMemo(() => getTotalUserCount(projectId), [projectId]);
+  const mauPercent = Math.min(100, (mauData.current / MAU_CAP) * 100);
+  const mauDisplay =
+    mauData.current > 0
+      ? `${mauData.current.toLocaleString()} / ${MAU_CAP.toLocaleString()}`
+      : "—";
+  return (
+    <div className={styles.usageGrid}>
+      <div className={styles.usageCard}>
+        <p className={styles.usageCardLabel}>Total number of users</p>
+        <p className={styles.usageCardValue}>{totalUsers}</p>
+      </div>
+      <div className={styles.usageCard}>
+        <p className={styles.usageCardLabel}>Monthly Active User</p>
+        <div className={styles.usageCardProgressRow}>
+          <div className={styles.usageCardProgressBar}>
+            <ProgressIndicator
+              percentComplete={mauData.current > 0 ? mauPercent / 100 : 0}
+              barHeight={4}
+              styles={{
+                root: { margin: 0 },
+                progressTrack: { backgroundColor: "#edebe9" },
+                progressBar: { backgroundColor: "#176df3" },
+              }}
+            />
+          </div>
+          <span className={styles.usageCardProgressValue}>{mauDisplay}</span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 /** Blue outline, no hover effects */
@@ -51,25 +126,54 @@ const projectStatusDangerButtonStyles = {
 
 const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
   const { projectId } = useParams<"projectId">();
+  const navigate = useNavigate();
+  const location = useLocation();
   const project = projectId ? getProjectByProjectId(projectId) : undefined;
 
-  const [selectedTab, setSelectedTab] = useState<TabKey>("overview");
+  const [selectedTab, setSelectedTab] = useState<TabKey>(() =>
+    tabKeyFromHash(location.hash)
+  );
+  const [savedPlan, setSavedPlan] = useState<string>("Free");
+  const [selectedPlan, setSelectedPlan] = useState<string>("Free");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState(false);
   const [isProjectDisabled, setIsProjectDisabled] = useState(false);
   const [showReenableModal, setShowReenableModal] = useState(false);
   const [showDisableModal, setShowDisableModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const location = useLocation();
+
+  const currentPlan = savedPlan;
+  const hasUnsavedPlanChanges = selectedPlan !== savedPlan;
 
   useEffect(() => {
-    const tab = (location.state as { tab?: TabKey } | null)?.tab;
-    if (tab && TAB_KEYS.includes(tab)) setSelectedTab(tab);
-  }, [location.state]);
+    const tab = tabKeyFromHash(location.hash);
+    setSelectedTab(tab);
+  }, [location.hash]);
 
-  const onLinkClick = useCallback((item?: PivotItem) => {
-    if (item?.props.itemKey) setSelectedTab(item.props.itemKey as TabKey);
-  }, []);
+  useEffect(() => {
+    if (projectId && !location.hash) {
+      navigate(`/${projectId}#overview`, { replace: true });
+    }
+  }, [projectId, location.hash, navigate]);
+
+  useEffect(() => {
+    if (project?.plan != null) {
+      setSavedPlan(project.plan);
+      setSelectedPlan(project.plan);
+    }
+  }, [project?.plan, project?.projectId]);
+
+  const onLinkClick = useCallback(
+    (item?: PivotItem) => {
+      const key = item?.props.itemKey as TabKey | undefined;
+      if (key && projectId) {
+        const hash = TAB_KEY_TO_HASH[key];
+        navigate(`/${projectId}#${hash}`, { replace: true });
+        setSelectedTab(key);
+      }
+    },
+    [navigate, projectId]
+  );
 
   const copyProjectId = useCallback(() => {
     if (!project?.projectId) return;
@@ -91,11 +195,12 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
 
   const initials = getInitials(project.projectName);
   const showSaveBar =
-    selectedTab !== "overview" &&
-    selectedTab !== "auditLog" &&
-    selectedTab !== "usage" &&
-    selectedTab !== "plan" &&
-    selectedTab !== "portalAdmin";
+    selectedTab === "plan" ||
+    (hasUnsavedChanges &&
+      selectedTab !== "overview" &&
+      selectedTab !== "auditLog" &&
+      selectedTab !== "usage" &&
+      selectedTab !== "portalAdmin");
 
   return (
     <div className={showSaveBar ? `${styles.root} ${styles.rootWithSaveBar}` : styles.root}>
@@ -158,7 +263,7 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
 
         <div
           className={
-            selectedTab === "auditLog"
+            selectedTab === "auditLog" || selectedTab === "plan"
               ? `${styles.tabContent} ${styles.tabContentFullWidth}`
               : styles.tabContent
           }
@@ -166,29 +271,7 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
           {selectedTab === "overview" && (
             <>
               <h3 className={styles.sectionHeading}>Usage</h3>
-              <div className={styles.usageGrid}>
-                <div className={styles.usageCard}>
-                  <p className={styles.usageCardLabel}>Total number of users</p>
-                  <p className={styles.usageCardValue}>12</p>
-                </div>
-                <div className={styles.usageCard}>
-                  <p className={styles.usageCardLabel}>Monthly Active User</p>
-                  <div className={styles.usageCardProgressRow}>
-                    <div className={styles.usageCardProgressBar}>
-                      <ProgressIndicator
-                        percentComplete={13000 / 25000}
-                        barHeight={4}
-                        styles={{
-                          root: { margin: 0 },
-                          progressTrack: { backgroundColor: "#edebe9" },
-                          progressBar: { backgroundColor: "#176df3" },
-                        }}
-                      />
-                    </div>
-                    <span className={styles.usageCardProgressValue}>13,000 / 25,000</span>
-                  </div>
-                </div>
-              </div>
+              <OverviewUsageCards projectId={project?.projectId} />
 
               <div className={styles.sectionDivider} aria-hidden />
 
@@ -242,11 +325,20 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
             </>
           )}
           {selectedTab === "auditLog" && project && (
-            <AuditLogContent projectId={project.projectId} />
+            <AuditLogContent
+              projectId={project.projectId}
+              initialFilters={(location.state as { auditLogFilters?: unknown } | null)?.auditLogFilters ?? undefined}
+            />
           )}
-          {selectedTab === "usage" && <UsageContent />}
-          {selectedTab === "plan" && (
-            <p className={styles.metaText}>Plan information will be listed here.</p>
+          {selectedTab === "usage" && project && (
+            <UsageContent currentPlan={currentPlan} projectId={project.projectId} />
+          )}
+          {selectedTab === "plan" && project && (
+            <PlanContent
+              currentPlan={savedPlan}
+              selectedPlan={selectedPlan}
+              onPlanChange={setSelectedPlan}
+            />
           )}
           {selectedTab === "portalAdmin" && <PortalAdminContent />}
         </div>
@@ -257,9 +349,14 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
           <div className={styles.saveSectionInner}>
             <PrimaryButton
               text="Save"
-              disabled={!hasUnsavedChanges}
+              disabled={selectedTab === "plan" ? !hasUnsavedPlanChanges : !hasUnsavedChanges}
               onClick={() => {
-                setHasUnsavedChanges(false);
+                if (selectedTab === "plan" && projectId) {
+                  updateProjectPlan(projectId, selectedPlan);
+                  setSavedPlan(selectedPlan);
+                } else {
+                  setHasUnsavedChanges(false);
+                }
               }}
               styles={{
                 root: {
@@ -278,29 +375,33 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
               <ActionButton
                 text="Discard changes"
                 iconProps={{ iconName: "Refresh" }}
-                disabled={!hasUnsavedChanges}
-                onClick={() => setHasUnsavedChanges(false)}
+                disabled={selectedTab === "plan" ? !hasUnsavedPlanChanges : !hasUnsavedChanges}
+                onClick={() => {
+                  if (selectedTab === "plan") {
+                    setSelectedPlan(savedPlan);
+                  } else {
+                    setHasUnsavedChanges(false);
+                  }
+                }}
                 styles={{
                   root: {
                     fontSize: 14,
                     height: 32,
                     minWidth: 100,
-                    selectors: {
-                      ":not([disabled])": { color: "#E23D3D" },
-                      ":not([disabled]):hover": { color: "#c93535" },
-                    },
+                    color: "#E23D3D",
+                  },
+                  rootHovered: {
+                    color: "#c93535",
+                    backgroundColor: "transparent",
                   },
                   icon: {
-                    selectors: {
-                      ":not([disabled])": { color: "#E23D3D" },
-                      ":not([disabled]):hover": { color: "#c93535" },
-                    },
+                    color: "#E23D3D",
+                  },
+                  iconHovered: {
+                    color: "#c93535",
                   },
                   label: {
-                    selectors: {
-                      ":not([disabled])": { color: "#E23D3D" },
-                      ":not([disabled]):hover": { color: "#c93535" },
-                    },
+                    color: "#E23D3D",
                   },
                 }}
               />

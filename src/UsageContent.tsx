@@ -3,8 +3,8 @@ import {
   Icon,
   Dropdown,
   IDropdownOption,
-  ProgressIndicator,
   Callout,
+  TooltipHost,
   IconButton,
   DirectionalHint,
   Modal,
@@ -89,14 +89,26 @@ function formatShortDate(d: Date): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-const MAU_CAP = 25000;
+export const MAU_CAP = 25000;
 
-/** MAU count for a single month (YYYY-MM) — deterministic by month key */
-function getMauCountForMonth(monthKey: string): number {
+/** Stable numeric hash from projectId so each project gets different MAUs */
+function projectSeed(projectId: string | undefined): number {
+  if (!projectId) return 0;
+  let h = 0;
+  for (let i = 0; i < projectId.length; i++) {
+    h = (h * 31 + projectId.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+/** MAU count for a single month (YYYY-MM) — deterministic by month key and projectId */
+function getMauCountForMonth(monthKey: string, projectId?: string): number {
   const [y, m] = monthKey.split("-").map(Number);
   if (!y || !m) return 23173;
-  const seed = y * 12 + m;
-  return 18000 + (seed % 8000);
+  const monthSeed = y * 12 + m;
+  const proj = projectSeed(projectId);
+  const combined = (monthSeed * 31 + proj) | 0;
+  return 18000 + (Math.abs(combined) % 8000);
 }
 
 /** Previous calendar month key (e.g. 2026-02 → 2026-01, 2026-01 → 2025-12) */
@@ -107,14 +119,69 @@ function previousMonthKey(monthKey: string): string {
   return `${y}-${String(m - 1).padStart(2, "0")}`;
 }
 
-/** MAU data for the selected month: current = that month, lastMonth = previous month's MAU */
-function getMauDataForMonth(monthKey: string): { current: number; lastMonth: number } {
-  const current = getMauCountForMonth(monthKey);
-  const lastMonth = getMauCountForMonth(previousMonthKey(monthKey));
+/** True if monthKey is after the current calendar month (no data for future months) */
+function isMonthKeyInFuture(monthKey: string): boolean {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1; // 1–12
+  const [y, m] = monthKey.split("-").map(Number);
+  if (!y || !m) return false;
+  return y > currentYear || (y === currentYear && m > currentMonth);
+}
+
+/** MAU data for the selected month: current = that month, lastMonth = previous month's MAU. Future months return 0. */
+export function getMauDataForMonth(monthKey: string, projectId?: string): { current: number; lastMonth: number } {
+  const prevKey = previousMonthKey(monthKey);
+  const current = isMonthKeyInFuture(monthKey) ? 0 : getMauCountForMonth(monthKey, projectId);
+  const lastMonth = isMonthKeyInFuture(prevKey) ? 0 : getMauCountForMonth(prevKey, projectId);
   return { current, lastMonth };
 }
 
-const UsageContent: React.VFC = () => {
+/** Last N calendar months ending at endMonthKey (e.g. endMonthKey 2026-02, n 12 → Mar 2025 … Feb 2026) */
+function getMonthKeysBack(endMonthKey: string, n: number): string[] {
+  const keys: string[] = [];
+  let [y, m] = endMonthKey.split("-").map(Number);
+  if (!y || !m) return keys;
+  for (let i = 0; i < n; i++) {
+    keys.unshift(`${y}-${String(m).padStart(2, "0")}`);
+    m -= 1;
+    if (m < 1) {
+      m = 12;
+      y -= 1;
+    }
+  }
+  return keys;
+}
+
+/** One row for MAU monthly overview chart; future months have mau 0 */
+function getMauMonthlyOverview(endMonthKey: string, months: number = 12, projectId?: string): { monthKey: string; label: string; mau: number }[] {
+  const keys = getMonthKeysBack(endMonthKey, months);
+  return keys.map((monthKey) => {
+    const [y, m] = monthKey.split("-").map(Number);
+    const label = y != null && m != null ? `${MONTH_NAMES[m - 1]} ${y}` : monthKey;
+    const mau = isMonthKeyInFuture(monthKey) ? 0 : getMauCountForMonth(monthKey, projectId);
+    return { monthKey, label, mau };
+  });
+}
+
+const PLAN_FEE_LABELS: Record<string, string> = {
+  Free: "$0 /mo",
+  Developers: "$50 /mo",
+  Business: "$500 /mo",
+  Enterprise: "Custom Pricing",
+};
+
+function getSubscriptionFeeLabel(plan?: string): string {
+  if (!plan) return "—";
+  return PLAN_FEE_LABELS[plan] ?? plan;
+}
+
+interface UsageContentProps {
+  currentPlan?: string;
+  projectId?: string;
+}
+
+const UsageContent: React.VFC<UsageContentProps> = ({ currentPlan, projectId }) => {
   const [smsDateRangeKey, setSmsDateRangeKey] = useState<string>("last7");
   const [smsCustomStartDate, setSmsCustomStartDate] = useState<Date | null>(null);
   const [smsCustomEndDate, setSmsCustomEndDate] = useState<Date | null>(null);
@@ -133,6 +200,12 @@ const UsageContent: React.VFC = () => {
   const [showMonthPicker, setShowMonthPicker] = useState(false);
   const [pickerYear, setPickerYear] = useState(() => new Date().getFullYear());
   const mauMonthTriggerRef = useRef<HTMLDivElement>(null);
+  const [mauMonthTargetRect, setMauMonthTargetRect] = useState<DOMRect | null>(null);
+
+  const [mauOverviewYear, setMauOverviewYear] = useState(() => new Date().getFullYear());
+  const [showOverviewYearPicker, setShowOverviewYearPicker] = useState(false);
+  const mauOverviewYearTriggerRef = useRef<HTMLDivElement>(null);
+  const [mauOverviewYearTargetRect, setMauOverviewYearTargetRect] = useState<DOMRect | null>(null);
 
   useEffect(() => {
     if (showSmsDateModal) {
@@ -157,7 +230,7 @@ const UsageContent: React.VFC = () => {
   const mauYear = useMemo(() => parseInt(mauMonthKey.split("-")[0] ?? "2025", 10), [mauMonthKey]);
   const mauMonthIndex = useMemo(() => parseInt(mauMonthKey.split("-")[1] ?? "1", 10) - 1, [mauMonthKey]);
 
-  const mauData = useMemo(() => getMauDataForMonth(mauMonthKey), [mauMonthKey]);
+  const mauData = useMemo(() => getMauDataForMonth(mauMonthKey, projectId), [mauMonthKey, projectId]);
 
   /** Selected month is after current real date → show empty MAU data */
   const isMauMonthFuture = useMemo(() => {
@@ -172,6 +245,16 @@ const UsageContent: React.VFC = () => {
   const mauPercent = isMauMonthFuture
     ? 0
     : Math.min(100, (mauData.current / MAU_CAP) * 100);
+
+  const mauOverviewEndMonthKey = `${mauOverviewYear}-12`;
+  const mauMonthlyOverview = useMemo(
+    () => getMauMonthlyOverview(mauOverviewEndMonthKey, 12, projectId),
+    [mauOverviewEndMonthKey, projectId]
+  );
+  const mauOverviewMax = useMemo(
+    () => Math.max(1, ...mauMonthlyOverview.map((r) => r.mau)),
+    [mauMonthlyOverview]
+  );
 
   useEffect(() => {
     if (showMonthPicker) setPickerYear(mauYear);
@@ -192,15 +275,19 @@ const UsageContent: React.VFC = () => {
   return (
     <div className={styles.root}>
       {/* Subscription Fee */}
-      <div className={styles.card}>
-        <div className={styles.cardHeader}>
-          <h3 className={styles.cardTitle}>Subscription Fee</h3>
-        </div>
-        <div className={styles.subscriptionRow}>
-          <span className={styles.subscriptionLeft}>—</span>
-          <div className={styles.subscriptionRight}>
-            <p className={styles.subscriptionInclude}>Include:</p>
-            <p className={styles.subscriptionPlan}>Enterprise Plan</p>
+      <div className={`${styles.card} ${styles.cardSubscription}`}>
+        <div className={styles.subscriptionBlock}>
+          <div className={styles.subscriptionColLeft}>
+            <span className={styles.subscriptionLabel}>Subscription Fee</span>
+            <span className={styles.subscriptionPrice}>
+              {getSubscriptionFeeLabel(currentPlan)}
+            </span>
+          </div>
+          <div className={styles.subscriptionColRight}>
+            <span className={styles.subscriptionLabel}>Include:</span>
+            <span className={styles.subscriptionPlanName}>
+              {currentPlan ? `${currentPlan} Plan` : "—"}
+            </span>
           </div>
         </div>
       </div>
@@ -272,96 +359,107 @@ const UsageContent: React.VFC = () => {
         ))}
       </div>
 
-      {/* Monthly Active User */}
+      {/* Monthly Active Users — single month + chart */}
       <div className={styles.card}>
         <div className={styles.cardHeader}>
-          <h3 className={styles.cardTitle}>Monthly Active User</h3>
-          <div className={styles.cardHeaderControl}>
-            <div
-              ref={mauMonthTriggerRef}
-              className={styles.mauMonthWrap}
-              role="button"
-              tabIndex={0}
-              aria-haspopup="dialog"
-              aria-expanded={showMonthPicker}
-              aria-label={`Month: ${mauMonthLabel}. Click to choose month.`}
-              onClick={() => setShowMonthPicker((v) => !v)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  setShowMonthPicker((v) => !v);
+          <h3 className={styles.cardTitle}>Monthly Active Users</h3>
+        </div>
+        <div className={styles.mauCurrentMonthRow}>
+          <span className={styles.mauCurrentMonthLabel}>Month</span>
+          <div
+            ref={mauMonthTriggerRef}
+            className={styles.mauMonthWrap}
+            role="button"
+            tabIndex={0}
+            aria-haspopup="dialog"
+            aria-expanded={showMonthPicker}
+            aria-label={`Month: ${mauMonthLabel}. Click to choose month.`}
+            onClick={() => {
+              if (!showMonthPicker && mauMonthTriggerRef.current) {
+                setMauMonthTargetRect(mauMonthTriggerRef.current.getBoundingClientRect());
+              }
+              setShowMonthPicker((v) => !v);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                if (!showMonthPicker && mauMonthTriggerRef.current) {
+                  setMauMonthTargetRect(mauMonthTriggerRef.current.getBoundingClientRect());
                 }
-              }}
-            >
-              <span className={styles.mauMonthTriggerText}>{mauMonthLabel}</span>
-              <Icon iconName="Calendar" className={styles.mauMonthTriggerIcon} />
-            </div>
-            {showMonthPicker && mauMonthTriggerRef.current && (
-              <Callout
-                target={mauMonthTriggerRef.current}
-                onDismiss={() => setShowMonthPicker(false)}
-                directionalHint={DirectionalHint.bottomLeftEdge}
-                isBeakVisible={false}
-                gapSpace={4}
-                setInitialFocus
-                className={styles.mauMonthCallout}
-              >
-                <div className={styles.mauMonthPanel}>
-                  <div className={styles.mauMonthPanelYearRow}>
-                    <span className={styles.mauMonthPanelYear}>{pickerYear}</span>
-                    <div className={styles.mauMonthPanelYearArrows}>
-                      <IconButton
-                        iconProps={{ iconName: "ChevronUp" }}
-                        ariaLabel="Previous year"
-                        onClick={() => setPickerYear((y) => y - 1)}
-                        styles={{
-                          root: { width: 24, height: 24 },
-                          icon: { fontSize: 12, color: "#323130" },
-                        }}
-                      />
-                      <IconButton
-                        iconProps={{ iconName: "ChevronDown" }}
-                        ariaLabel="Next year"
-                        onClick={() => setPickerYear((y) => y + 1)}
-                        styles={{
-                          root: { width: 24, height: 24 },
-                          icon: { fontSize: 12, color: "#323130" },
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div className={styles.mauMonthGrid} role="grid" aria-label="Months">
-                    {MONTH_NAMES.map((name, idx) => (
-                      <button
-                        key={name}
-                        type="button"
-                        role="gridcell"
-                        className={
-                          pickerYear === mauYear && idx === mauMonthIndex
-                            ? `${styles.mauMonthCell} ${styles.mauMonthCellSelected}`
-                            : styles.mauMonthCell
-                        }
-                        onClick={() => selectMonth(idx)}
-                      >
-                        {name}
-                      </button>
-                    ))}
-                  </div>
-                  <div className={styles.mauMonthGoToTodayWrap}>
-                    <button
-                      type="button"
-                      className={styles.mauMonthGoToToday}
-                      onClick={goToToday}
-                    >
-                      Go to today
-                    </button>
-                  </div>
-                </div>
-              </Callout>
-            )}
+                setShowMonthPicker((v) => !v);
+              }
+            }}
+          >
+            <span className={styles.mauMonthTriggerText}>{mauMonthLabel}</span>
+            <Icon iconName="Calendar" className={styles.mauMonthTriggerIcon} />
           </div>
         </div>
-        <div className={styles.mauDivider} aria-hidden />
+        {showMonthPicker && (mauMonthTargetRect ?? mauMonthTriggerRef.current) && (
+          <Callout
+            target={mauMonthTargetRect ?? mauMonthTriggerRef.current!}
+            onDismiss={() => {
+              setShowMonthPicker(false);
+              setMauMonthTargetRect(null);
+            }}
+            directionalHint={DirectionalHint.bottomRightEdge}
+            directionalHintFixed
+            isBeakVisible={false}
+            gapSpace={4}
+            className={styles.mauMonthCallout}
+          >
+            <div className={styles.mauMonthPanel}>
+              <div className={styles.mauMonthPanelYearRow}>
+                <span className={styles.mauMonthPanelYear}>{pickerYear}</span>
+                <div className={styles.mauMonthPanelYearArrows}>
+                  <IconButton
+                    iconProps={{ iconName: "ChevronUp" }}
+                    ariaLabel="Previous year"
+                    onClick={() => setPickerYear((y) => y - 1)}
+                    styles={{
+                      root: { width: 24, height: 24 },
+                      icon: { fontSize: 12, color: "#323130" },
+                    }}
+                  />
+                  <IconButton
+                    iconProps={{ iconName: "ChevronDown" }}
+                    ariaLabel="Next year"
+                    onClick={() => setPickerYear((y) => y + 1)}
+                    styles={{
+                      root: { width: 24, height: 24 },
+                      icon: { fontSize: 12, color: "#323130" },
+                    }}
+                  />
+                </div>
+              </div>
+              <div className={styles.mauMonthGrid} role="grid" aria-label="Months">
+                {MONTH_NAMES.map((name, idx) => (
+                  <button
+                    key={name}
+                    type="button"
+                    role="gridcell"
+                    className={
+                      pickerYear === mauYear && idx === mauMonthIndex
+                        ? `${styles.mauMonthCell} ${styles.mauMonthCellSelected}`
+                        : styles.mauMonthCell
+                    }
+                    onClick={() => selectMonth(idx)}
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
+              <div className={styles.mauMonthGoToTodayWrap}>
+                <button
+                  type="button"
+                  className={styles.mauMonthGoToToday}
+                  onClick={goToToday}
+                >
+                  Go to today
+                </button>
+              </div>
+            </div>
+          </Callout>
+        )}
         <div className={styles.mauProgressValueRow}>
           <span className={styles.mauProgressValue}>
             {isMauMonthFuture
@@ -369,23 +467,167 @@ const UsageContent: React.VFC = () => {
               : `${mauData.current.toLocaleString()} / ${MAU_CAP.toLocaleString()}`}
           </span>
         </div>
-        <div className={styles.mauProgressBar}>
-          <ProgressIndicator
-            percentComplete={mauPercent / 100}
-            barHeight={8}
-            styles={{
-              root: { margin: 0 },
-              progressTrack: { backgroundColor: "#edebe9", borderRadius: 4 },
-              progressBar: { backgroundColor: "#176df3", borderRadius: 4 },
+        <TooltipHost
+          content={
+            isMauMonthFuture
+              ? "No data"
+              : `Monthly active users: ${mauData.current.toLocaleString()} of ${MAU_CAP.toLocaleString()}`
+          }
+          directionalHint={DirectionalHint.topCenter}
+          delay={0}
+          hostClassName={styles.mauProgressBarTooltipHost}
+          tooltipProps={{
+            calloutProps: {
+              gapSpace: 8,
+              isBeakVisible: true,
+            },
+          }}
+        >
+          <div className={styles.mauProgressBar} role="progressbar" aria-valuenow={mauData.current} aria-valuemin={0} aria-valuemax={MAU_CAP} aria-label={`Monthly active users: ${mauData.current.toLocaleString()} of ${MAU_CAP.toLocaleString()}`}>
+            <div className={styles.mauProgressTrack}>
+              <div
+                className={styles.mauProgressFill}
+                style={{ width: `${Math.min(100, mauPercent)}%` }}
+              />
+            </div>
+          </div>
+        </TooltipHost>
+
+        <div className={styles.mauCardDivider} aria-hidden />
+
+        <div className={styles.mauOverviewHeader}>
+          <h3 className={styles.mauOverviewTitle}>Year</h3>
+          <div
+            ref={mauOverviewYearTriggerRef}
+            className={styles.mauMonthWrap}
+            role="button"
+            tabIndex={0}
+            aria-haspopup="dialog"
+            aria-expanded={showOverviewYearPicker}
+            aria-label={`Year: ${mauOverviewYear}. Click to choose year.`}
+            onClick={() => {
+              if (!showOverviewYearPicker && mauOverviewYearTriggerRef.current) {
+                setMauOverviewYearTargetRect(mauOverviewYearTriggerRef.current.getBoundingClientRect());
+              }
+              setShowOverviewYearPicker((v) => !v);
             }}
-          />
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                if (!showOverviewYearPicker && mauOverviewYearTriggerRef.current) {
+                  setMauOverviewYearTargetRect(mauOverviewYearTriggerRef.current.getBoundingClientRect());
+                }
+                setShowOverviewYearPicker((v) => !v);
+              }
+            }}
+          >
+            <span className={styles.mauMonthTriggerText}>{mauOverviewYear}</span>
+            <Icon iconName="Calendar" className={styles.mauMonthTriggerIcon} />
+          </div>
         </div>
-        <p className={styles.mauLastMonth}>
-          Last month: {isMauMonthFuture ? "—" : mauData.lastMonth.toLocaleString()}
-        </p>
+        {showOverviewYearPicker && (mauOverviewYearTargetRect ?? mauOverviewYearTriggerRef.current) && (
+          <Callout
+            target={mauOverviewYearTargetRect ?? mauOverviewYearTriggerRef.current!}
+            onDismiss={() => {
+              setShowOverviewYearPicker(false);
+              setMauOverviewYearTargetRect(null);
+            }}
+            directionalHint={DirectionalHint.bottomRightEdge}
+            directionalHintFixed
+            isBeakVisible={false}
+            gapSpace={4}
+            className={styles.mauMonthCallout}
+          >
+            <div className={styles.mauMonthPanel}>
+              <div className={styles.mauMonthPanelYearRow}>
+                <span className={styles.mauMonthPanelYear}>{mauOverviewYear}</span>
+                <div className={styles.mauMonthPanelYearArrows}>
+                  <IconButton
+                    iconProps={{ iconName: "ChevronUp" }}
+                    ariaLabel="Previous year"
+                    onClick={() => setMauOverviewYear((y) => y - 1)}
+                    styles={{
+                      root: { width: 24, height: 24 },
+                      icon: { fontSize: 12, color: "#323130" },
+                    }}
+                  />
+                  <IconButton
+                    iconProps={{ iconName: "ChevronDown" }}
+                    ariaLabel="Next year"
+                    onClick={() => setMauOverviewYear((y) => y + 1)}
+                    styles={{
+                      root: { width: 24, height: 24 },
+                      icon: { fontSize: 12, color: "#323130" },
+                    }}
+                  />
+                </div>
+              </div>
+              <div className={styles.mauMonthGoToTodayWrap}>
+                <button
+                  type="button"
+                  className={styles.mauMonthGoToToday}
+                  onClick={() => {
+                    setMauOverviewYear(new Date().getFullYear());
+                    setShowOverviewYearPicker(false);
+                  }}
+                >
+                  Go to current year
+                </button>
+              </div>
+            </div>
+          </Callout>
+        )}
+        <div className={styles.mauOverviewChart} role="img" aria-label={`Monthly Active Users for ${mauOverviewYear}`}>
+          <div className={styles.mauOverviewChartArea}>
+            <div className={styles.mauOverviewBars}>
+            {mauMonthlyOverview.map(({ monthKey, label, mau }) => {
+              const pct = mauOverviewMax > 0 ? (mau / mauOverviewMax) * 100 : 0;
+              const hasData = mau > 0;
+              const monthOnly = label.split(" ")[0] ?? label;
+              const tooltipContent = isMonthKeyInFuture(monthKey)
+                ? `${label}: No data`
+                : `${label}: ${mau.toLocaleString()} MAUs`;
+              const fillClass = !hasData ? styles.mauOverviewBarFillEmpty : styles.mauOverviewBarFill;
+              const barHeightPx = 140;
+              const fillHeightPx = hasData ? (pct / 100) * barHeightPx : 0;
+              return (
+                <div key={monthKey} className={styles.mauOverviewBarWrap}>
+                  <div
+                    className={styles.mauOverviewBarTrack}
+                    role="img"
+                    aria-label={tooltipContent}
+                  >
+                    <TooltipHost
+                      content={tooltipContent}
+                      directionalHint={DirectionalHint.topCenter}
+                      delay={0}
+                      hostClassName={styles.mauOverviewBarTooltipHost}
+                      tooltipProps={{
+                        calloutProps: {
+                          gapSpace: 2,
+                          isBeakVisible: true,
+                        },
+                      }}
+                    >
+                      <div
+                        className={fillClass}
+                        style={{
+                          height: hasData ? `${fillHeightPx}px` : "0",
+                          minHeight: 0,
+                        }}
+                      />
+                    </TooltipHost>
+                  </div>
+                  <span className={styles.mauOverviewBarLabel}>{monthOnly}</span>
+                </div>
+              );
+            })}
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* SMS/WhatsApp Cost — Custom date range modal (like Audit Log) */}
+      {/* SMS/WhatsApp Cost — Custom date range modal */}
       <Modal
         isOpen={showSmsDateModal}
         onDismiss={() => {

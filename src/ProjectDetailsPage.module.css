@@ -44,11 +44,15 @@
 .breadcrumbLink {
   color: #605e5c;
   text-decoration: none;
-  transition: color 0.15s ease;
+  padding: 2px 8px;
+  margin: -2px -8px;
+  border-radius: 4px;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .breadcrumbLink:hover {
-  color: #201f1e;
+  background-color: #f3f2f1;
+  color: #605e5c;
   text-decoration: none;
 }
 

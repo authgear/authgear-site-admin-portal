@@ -67,43 +67,49 @@ function tokenizeJsonLine(
 }
 
 const AuditLogDetailPage: React.VFC = () => {
-  const { projectId, logKey } = useParams<"projectId" | "logKey">();
+  const { projectId, logNum } = useParams<"projectId" | "logNum">();
   const location = useLocation();
   const state = location.state as AuditLogDetailLocationState | undefined;
   let logEntry = state?.logEntry;
   const stateUserId = state?.userId;
 
-  if (!logEntry && logKey) {
-    try {
-      const raw = sessionStorage.getItem(`audit-log-logs-${projectId}`);
-      if (raw) {
-        const logs = JSON.parse(raw) as Array<{
-          key: string;
-          timestamp: string;
-          flowAction: string;
-          verdict: string;
-          userId?: string;
-        }>;
-        const found = logs.find((l) => l.key === logKey);
-        if (found) {
-          logEntry = {
-            key: found.key,
-            timestamp: found.timestamp,
-            activity: found.flowAction,
-            isError: found.verdict === "blocked",
-          };
+  if (!logEntry && logNum != null && projectId) {
+    const num = parseInt(logNum, 10);
+    if (Number.isFinite(num) && num >= 0) {
+      try {
+        const raw = sessionStorage.getItem(`audit-log-logs-${projectId}`);
+        if (raw) {
+          const logs = JSON.parse(raw) as Array<{
+            key: string;
+            timestamp: string;
+            flowAction: string;
+            verdict: string;
+            userId?: string;
+          }>;
+          const found = logs[num];
+          if (found) {
+            logEntry = {
+              key: found.key,
+              timestamp: found.timestamp,
+              activity: found.flowAction,
+              isError: found.verdict === "blocked",
+            };
+          }
         }
+      } catch {
+        // ignore
       }
-    } catch {
-      // ignore
     }
   }
 
   const [rawLogCopied, setRawLogCopied] = useState(false);
   const copyButtonRef = useRef<HTMLSpanElement>(null);
 
-  const backUrl = projectId ? `/${projectId}` : "/";
-  const backState = projectId ? { tab: "auditLog" as const } : undefined;
+  const backUrl = projectId ? `/${projectId}#audit-log` : "/";
+  const auditLogFilters = (state as { auditLogFilters?: unknown } | undefined)?.auditLogFilters;
+  const backState = projectId
+    ? { auditLogFilters: auditLogFilters ?? undefined }
+    : undefined;
 
   if (!logEntry) {
     return (
@@ -180,12 +186,19 @@ const AuditLogDetailPage: React.VFC = () => {
       <div className={auditStyles.titleRow}>
         <Text as="h1" variant="xxLarge" block className={auditStyles.breadcrumb}>
           <span className={auditStyles.breadcrumbInner}>
+            <Link to="/" className={auditStyles.breadcrumbLink}>
+              Teams
+            </Link>
+            <Icon
+              iconName="ChevronRight"
+              className={auditStyles.breadcrumbSepIcon}
+            />
             <Link
               to={backUrl}
               state={backState}
               className={auditStyles.breadcrumbLink}
             >
-              Audit Log
+              Project Details
             </Link>
             <Icon
               iconName="ChevronRight"
