@@ -1,7 +1,7 @@
 import React from "react";
 import { PrimaryButton, Text } from "@fluentui/react";
 import { useAuthgear } from "./AuthgearContext";
-import Logo from "./Logo";
+import Logo from "../components/Logo";
 
 const LoginPage: React.VFC = function LoginPage() {
   const { startLogin } = useAuthgear();
