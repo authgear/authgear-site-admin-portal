@@ -1,9 +1,9 @@
 {
-  "name": "authgear-admin-panel",
+  "name": "authgear-site-admin-portal",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Authgear Admin Portal",
+  "description": "Authgear Site Admin Portal",
   "scripts": {
     "dev": "vite",
     "start": "vite",
