@@ -51,6 +51,18 @@ Mock data lives in `src/data/` (TypeScript files). No API integration exists yet
 
 Strict mode enabled. Components use `React.VFC<Props>` pattern. Type definitions for domain objects are in `src/types/`.
 
+## Git Rules
+
+- Run `git pull` at the start of each session before making changes.
+- If `git pull` causes a merge conflict, explain it in plain language and walk through resolving it — never silently discard either side.
+- Commit messages should be plain English describing what changed and why, kept short.
+- Only commit and push when the user explicitly asks.
+- For small changes (typo fixes, minor tweaks), committing directly to `main` is fine. For larger changes (new features, restructuring), suggest a branch and pull request.
+- Never force-push (`git push --force`).
+- Never run `git reset --hard` or `git checkout .` without explicit user confirmation.
+- Never rewrite history on `main`.
+- Do not commit generated or temporary files (`node_modules/`, `.DS_Store`, build artifacts) — suggest `.gitignore` instead.
+
 ## Design Reference
 
 Figma: [Portal - 2025](https://www.figma.com/design/K38RiF42gekApCdtwRLF4W/Portal---2025?node-id=10128-109433)
