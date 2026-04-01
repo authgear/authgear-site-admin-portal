@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { initializeIcons, Spinner, SpinnerSize } from "@fluentui/react";
 import { AuthgearProvider, useAuthgear } from "./auth/AuthgearContext";
 import ScreenLayout from "./components/ScreenLayout";
-import TeamsScreen from "./pages/TeamsScreen";
+import ProjectsScreen from "./pages/ProjectsScreen";
 import ProjectDetailsPage from "./pages/ProjectDetailsPage";
 import AuditLogDetailPage from "./pages/AuditLogDetailPage";
 import AuthRedirectPage from "./auth/AuthRedirectPage";
@@ -31,7 +31,7 @@ const AuthenticatedApp: React.VFC = function AuthenticatedApp() {
   return (
     <ScreenLayout>
       <Routes>
-        <Route path="/" element={<TeamsScreen />} />
+        <Route path="/" element={<ProjectsScreen />} />
         <Route path="/api-test" element={<APITestPage />} />
         <Route path="/:projectId" element={<ProjectDetailsPage />} />
         <Route

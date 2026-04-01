@@ -187,7 +187,7 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
       <div className={styles.root}>
         <div className={styles.notFound}>Project not found.</div>
         <Link to="/" className={styles.breadcrumbLink}>
-          Back to Teams
+          Back to Projects
         </Link>
       </div>
     );
@@ -207,7 +207,7 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
       <div className={styles.breadcrumbRow}>
         <Text as="h1" variant="xxLarge" block className={styles.breadcrumb}>
           <Link to="/" className={styles.breadcrumbLink}>
-            Teams
+            Projects
           </Link>
           <Icon iconName="ChevronRight" className={styles.breadcrumbSepIcon} />
           <span className={styles.breadcrumbCurrent}>Project Details</span>

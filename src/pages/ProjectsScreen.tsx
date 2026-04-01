@@ -19,7 +19,7 @@ import {
 import ScreenTitle from "../components/ScreenTitle";
 import { MOCK_TEAMS, type TeamListItem } from "../data/teams";
 
-import styles from "./TeamsScreen.module.css";
+import styles from "./ProjectsScreen.module.css";
 
 function onShouldVirtualize(_: IListProps): boolean {
   return false;
@@ -55,7 +55,7 @@ const ProjectNameCell: React.VFC<ProjectNameCellProps> = ({ item }) => {
   );
 };
 
-const TeamsScreen: React.VFC = function TeamsScreen() {
+const ProjectsScreen: React.VFC = function ProjectsScreen() {
   const [loading] = useState(false);
   const [searchBy, setSearchBy] = useState<string>("projectId");
   const [searchText, setSearchText] = useState<string>("");
@@ -183,7 +183,7 @@ const TeamsScreen: React.VFC = function TeamsScreen() {
   return (
     <div className={styles.root}>
       <div className={styles.header}>
-        <ScreenTitle>Teams</ScreenTitle>
+        <ScreenTitle>Projects</ScreenTitle>
       </div>
       <div className={styles.content}>
           <div className={styles.toolbar}>
@@ -326,4 +326,4 @@ const TeamsScreen: React.VFC = function TeamsScreen() {
   );
 };
 
-export default TeamsScreen;
+export default ProjectsScreen;
