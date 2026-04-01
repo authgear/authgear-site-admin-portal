@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback, useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Nav, INavLinkGroup, INavLink, SearchBox } from "@fluentui/react";
-import { MOCK_TEAMS } from "./data/teams";
+import { MOCK_TEAMS } from "../data/teams";
 import styles from "./ScreenNav.module.css";
 
 const SIDEBAR_PAGE_SIZE = 5;

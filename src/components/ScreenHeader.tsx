@@ -10,7 +10,7 @@ import {
 import Logo from "./Logo";
 import ScreenNav from "./ScreenNav";
 import styles from "./ScreenHeader.module.css";
-import { useAuthgear } from "./AuthgearContext";
+import { useAuthgear } from "../auth/AuthgearContext";
 
 const commandButtonStyles = {
   label: {
