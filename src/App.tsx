@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { initializeIcons } from "@fluentui/react";
+import { initializeIcons, Spinner, SpinnerSize } from "@fluentui/react";
 import { AuthgearProvider, useAuthgear } from "./auth/AuthgearContext";
 import ScreenLayout from "./components/ScreenLayout";
 import TeamsScreen from "./pages/TeamsScreen";
@@ -14,10 +14,18 @@ import "./App.css";
 initializeIcons();
 
 const AuthenticatedApp: React.VFC = function AuthenticatedApp() {
-  const { sessionState } = useAuthgear();
+  const { sessionState, userInfoLoading } = useAuthgear();
 
   if (sessionState !== "AUTHENTICATED") {
     return <LoginPage />;
+  }
+
+  if (userInfoLoading) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh" }}>
+        <Spinner size={SpinnerSize.large} />
+      </div>
+    );
   }
 
   return (

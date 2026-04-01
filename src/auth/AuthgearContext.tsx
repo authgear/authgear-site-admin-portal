@@ -10,6 +10,7 @@ import authgear, { PromptOption, UserInfo } from "@authgear/web";
 interface AuthgearContextValue {
   sessionState: string;
   userInfo: UserInfo | null;
+  userInfoLoading: boolean;
   startLogin: () => void;
   logout: () => Promise<void>;
   refreshSessionState: () => void;
@@ -18,6 +19,7 @@ interface AuthgearContextValue {
 const AuthgearContext = createContext<AuthgearContextValue>({
   sessionState: authgear.sessionState,
   userInfo: null,
+  userInfoLoading: false,
   startLogin: () => {},
   logout: async () => {},
   refreshSessionState: () => {},
@@ -29,15 +31,26 @@ export const AuthgearProvider: React.FC<{ children: React.ReactNode }> =
       authgear.sessionState
     );
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+    const [userInfoLoading, setUserInfoLoading] = useState(
+      authgear.sessionState === "AUTHENTICATED"
+    );
 
     useEffect(() => {
       if (sessionState === "AUTHENTICATED") {
+        setUserInfoLoading(true);
         authgear.fetchUserInfo().then(
-          (info) => setUserInfo(info),
-          (err) => console.error("fetchUserInfo failed:", err)
+          (info) => {
+            setUserInfo(info);
+            setUserInfoLoading(false);
+          },
+          (err) => {
+            console.error("fetchUserInfo failed:", err);
+            setUserInfoLoading(false);
+          }
         );
       } else {
         setUserInfo(null);
+        setUserInfoLoading(false);
       }
     }, [sessionState]);
 
@@ -70,7 +83,7 @@ export const AuthgearProvider: React.FC<{ children: React.ReactNode }> =
 
     return (
       <AuthgearContext.Provider
-        value={{ sessionState, userInfo, startLogin, logout, refreshSessionState }}
+        value={{ sessionState, userInfo, userInfoLoading, startLogin, logout, refreshSessionState }}
       >
         {children}
       </AuthgearContext.Provider>
