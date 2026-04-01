@@ -24,8 +24,8 @@ import {
   MessageBarType,
   Spinner,
 } from "@fluentui/react";
-import type { AuditLogEntry } from "./types/auditLog";
-import { generateUserActivityLogs } from "./data/auditLog";
+import type { AuditLogEntry } from "../types/auditLog";
+import { generateUserActivityLogs } from "../data/auditLog";
 import styles from "./AuditLogContent.module.css";
 
 const FLOW_ACTION_OPTIONS: IDropdownOption[] = [

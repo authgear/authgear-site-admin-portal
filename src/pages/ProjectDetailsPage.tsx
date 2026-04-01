@@ -12,7 +12,7 @@ import {
   Dialog,
   DialogFooter,
 } from "@fluentui/react";
-import { getProjectByProjectId, updateProjectPlan } from "./data/teams";
+import { getProjectByProjectId, updateProjectPlan } from "../data/teams";
 import AuditLogContent, { type AuditLogFiltersSnapshot } from "./AuditLogContent";
 import UsageContent, { getMauDataForMonth, MAU_CAP } from "./UsageContent";
 import PlanContent from "./PlanContent";

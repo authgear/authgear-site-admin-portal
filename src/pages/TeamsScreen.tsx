@@ -16,8 +16,8 @@ import {
   IconButton,
   IListProps,
 } from "@fluentui/react";
-import ScreenTitle from "./ScreenTitle";
-import { MOCK_TEAMS, type TeamListItem } from "./data/teams";
+import ScreenTitle from "../components/ScreenTitle";
+import { MOCK_TEAMS, type TeamListItem } from "../data/teams";
 
 import styles from "./TeamsScreen.module.css";
 
