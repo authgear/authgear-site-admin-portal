@@ -1,13 +1,13 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { initializeIcons } from "@fluentui/react";
-import { AuthgearProvider, useAuthgear } from "./AuthgearContext";
-import ScreenLayout from "./ScreenLayout";
-import TeamsScreen from "./TeamsScreen";
-import ProjectDetailsPage from "./ProjectDetailsPage";
-import AuditLogDetailPage from "./AuditLogDetailPage";
-import AuthRedirectPage from "./AuthRedirectPage";
-import LoginPage from "./LoginPage";
+import { AuthgearProvider, useAuthgear } from "./auth/AuthgearContext";
+import ScreenLayout from "./components/ScreenLayout";
+import TeamsScreen from "./pages/TeamsScreen";
+import ProjectDetailsPage from "./pages/ProjectDetailsPage";
+import AuditLogDetailPage from "./pages/AuditLogDetailPage";
+import AuthRedirectPage from "./auth/AuthRedirectPage";
+import LoginPage from "./auth/LoginPage";
 import "./App.css";
 
 initializeIcons();
