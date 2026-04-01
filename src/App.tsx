@@ -8,6 +8,7 @@ import ProjectDetailsPage from "./pages/ProjectDetailsPage";
 import AuditLogDetailPage from "./pages/AuditLogDetailPage";
 import AuthRedirectPage from "./auth/AuthRedirectPage";
 import LoginPage from "./auth/LoginPage";
+import APITestPage from "./pages/APITestPage";
 import "./App.css";
 
 initializeIcons();
@@ -23,6 +24,7 @@ const AuthenticatedApp: React.VFC = function AuthenticatedApp() {
     <ScreenLayout>
       <Routes>
         <Route path="/" element={<TeamsScreen />} />
+        <Route path="/api-test" element={<APITestPage />} />
         <Route path="/:projectId" element={<ProjectDetailsPage />} />
         <Route
           path="/:projectId/audit-log/:logNum"

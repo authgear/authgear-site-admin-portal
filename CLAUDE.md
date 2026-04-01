@@ -23,6 +23,7 @@ Copy `.env.example` to `.env` and fill in values before running locally.
 | `VITE_AUTHGEAR_ENDPOINT` | Authgear endpoint URL |
 | `VITE_AUTHGEAR_REDIRECT_URL` | OAuth redirect URI (e.g. `http://localhost:3000/auth-redirect`) |
 | `VITE_PORTAL_URL` | Domain of the Authgear portal instance being managed (e.g. `portal.authgear-staging.com`) |
+| `VITE_SITEADMIN_API_URL` | Base URL of the Site Admin API (e.g. `https://siteadmin.authgear-staging.com`) |
 
 ## Architecture
 
@@ -51,7 +52,11 @@ src/
 │   ├── UsageContent.tsx
 │   ├── PlanContent.tsx
 │   └── PortalAdminContent.tsx
-├── data/                          # Mock data (teams.ts, auditLog.ts)
+├── api/                           # Site Admin API client
+│   ├── types.ts                   # TypeScript interfaces from OpenAPI spec
+│   ├── client.ts                  # Base fetch wrapper (uses authgear.fetch for auth)
+│   └── siteadmin.ts               # Typed function per API operation
+├── data/                          # Mock data (teams.ts, auditLog.ts) — being replaced by API
 └── types/                         # Shared TypeScript interfaces
 ```
 
@@ -77,7 +82,19 @@ CSS module classes use camelCase (configured in `vite.config.ts`).
 
 ### Data
 
-Mock data lives in `src/data/`. No API integration exists yet. Components consume data via `useMemo` and local `useState`.
+Mock data lives in `src/data/`. Components are being migrated to call the real Site Admin API.
+
+### API Client
+
+`src/api/` provides typed access to the Site Admin API:
+
+- `authgear.fetch()` is used as the underlying fetcher — it injects the Bearer access token automatically from the current Authgear session.
+- `apiRequest<T>(path, init?)` in `client.ts` is the base function; it throws `SiteAdminAPIError` on non-2xx responses.
+- `src/api/siteadmin.ts` exports one typed function per operation: `listApps`, `getApp`, `listAppCollaborators`, `addAppCollaborator`, `removeAppCollaborator`, `getAppMessagingUsage`, `getAppMonthlyActiveUsers`.
+
+API spec: `https://raw.githubusercontent.com/authgear/authgear-server/refs/heads/main/docs/api/siteadmin-api.yaml`
+
+Use `/connect-api` to get step-by-step guidance on wiring a page to the API.
 
 ### TypeScript
 

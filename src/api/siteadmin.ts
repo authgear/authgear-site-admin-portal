@@ -1,0 +1,102 @@
+/**
+ * Typed API functions for the Site Admin API.
+ * Each function maps 1-to-1 with an operation in the OpenAPI spec:
+ * https://raw.githubusercontent.com/authgear/authgear-server/refs/heads/main/docs/api/siteadmin-api.yaml
+ */
+import { apiRequest } from "./client";
+import type {
+  AppDetail,
+  AppsListResponse,
+  Collaborator,
+  CollaboratorsListResponse,
+  MessagingUsage,
+  MonthlyActiveUsersUsage,
+} from "./types";
+
+// ─── Apps ─────────────────────────────────────────────────────────────────────
+
+export interface ListAppsParams {
+  page?: number;
+  page_size?: number;
+  app_id?: string;
+  owner_email?: string;
+}
+
+export function listApps(params?: ListAppsParams): Promise<AppsListResponse> {
+  const qs = new URLSearchParams();
+  if (params?.page != null) qs.set("page", String(params.page));
+  if (params?.page_size != null) qs.set("page_size", String(params.page_size));
+  if (params?.app_id) qs.set("app_id", params.app_id);
+  if (params?.owner_email) qs.set("owner_email", params.owner_email);
+  const query = qs.toString();
+  return apiRequest(`/api/v1/apps${query ? `?${query}` : ""}`);
+}
+
+export function getApp(appId: string): Promise<AppDetail> {
+  return apiRequest(`/api/v1/apps/${encodeURIComponent(appId)}`);
+}
+
+// ─── Collaborators ────────────────────────────────────────────────────────────
+
+export function listAppCollaborators(
+  appId: string
+): Promise<CollaboratorsListResponse> {
+  return apiRequest(
+    `/api/v1/apps/${encodeURIComponent(appId)}/collaborators`
+  );
+}
+
+export function addAppCollaborator(
+  appId: string,
+  userEmail: string
+): Promise<Collaborator> {
+  return apiRequest(
+    `/api/v1/apps/${encodeURIComponent(appId)}/collaborators`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_email: userEmail }),
+    }
+  );
+}
+
+export function removeAppCollaborator(
+  appId: string,
+  collaboratorId: string
+): Promise<Record<string, never>> {
+  return apiRequest(
+    `/api/v1/apps/${encodeURIComponent(appId)}/collaborators/${encodeURIComponent(collaboratorId)}`,
+    { method: "DELETE" }
+  );
+}
+
+// ─── Usage ────────────────────────────────────────────────────────────────────
+
+export function getAppMessagingUsage(
+  appId: string,
+  startDate: string,
+  endDate: string
+): Promise<MessagingUsage> {
+  const qs = new URLSearchParams({ start_date: startDate, end_date: endDate });
+  return apiRequest(
+    `/api/v1/apps/${encodeURIComponent(appId)}/usage/messaging?${qs}`
+  );
+}
+
+export function getAppMonthlyActiveUsers(
+  appId: string,
+  startYear: number,
+  startMonth: number,
+  endYear: number,
+  endMonth: number
+): Promise<MonthlyActiveUsersUsage> {
+  const qs = new URLSearchParams({
+    start_year: String(startYear),
+    start_month: String(startMonth),
+    end_year: String(endYear),
+    end_month: String(endMonth),
+  });
+  return apiRequest(
+    `/api/v1/apps/${encodeURIComponent(appId)}/usage/monthly-active-users?${qs}`
+  );
+}

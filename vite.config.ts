@@ -10,7 +10,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    port: 8101,
     open: true,
   },
   // Exclude reference directory from processing
