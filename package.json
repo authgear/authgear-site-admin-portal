@@ -13,6 +13,7 @@
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "@authgear/web": "5.0.1",
     "@fluentui/react": "^8.119.0",
     "@fluentui/react-hooks": "^8.6.35",
     "classnames": "^2.5.1",

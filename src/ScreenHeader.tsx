@@ -10,6 +10,7 @@ import {
 import Logo from "./Logo";
 import ScreenNav from "./ScreenNav";
 import styles from "./ScreenHeader.module.css";
+import { useAuthgear } from "./AuthgearContext";
 
 const commandButtonStyles = {
   label: {
@@ -23,6 +24,7 @@ const commandButtonStyles = {
 };
 
 const ScreenHeader: React.VFC = function ScreenHeader() {
+  const { userInfo, logout } = useAuthgear();
   const [isMobilePanelOpen, setIsMobilePanelOpen] = useState(false);
 
   const onOpenMobilePanel = useCallback(() => {
@@ -52,22 +54,16 @@ const ScreenHeader: React.VFC = function ScreenHeader() {
     () => ({
       items: [
         {
-          key: "settings",
-          text: "Settings",
-          iconProps: {
-            iconName: "PlayerSettings",
-          },
-        },
-        {
           key: "logout",
           text: "Sign out",
-          iconProps: {
-            iconName: "SignOut",
+          iconProps: { iconName: "SignOut" },
+          onClick: () => {
+            logout().catch(() => {});
           },
         },
       ],
     }),
-    []
+    [logout]
   );
 
   return (
@@ -105,7 +101,7 @@ const ScreenHeader: React.VFC = function ScreenHeader() {
           menuProps={menuProps}
           styles={commandButtonStyles}
         >
-          johndoe@gmail.com
+          {userInfo?.email ?? ""}
         </CommandButton>
       </header>
 
