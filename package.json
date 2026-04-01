@@ -1,6 +1,7 @@
 {
   "name": "authgear-site-admin-portal",
   "version": "1.0.0",
+  "private": true,
   "license": "Apache-2.0",
   "type": "module",
   "description": "Authgear Site Admin Portal",
