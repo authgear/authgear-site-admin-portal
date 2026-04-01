@@ -72,8 +72,16 @@ const ScreenHeader: React.VFC = function ScreenHeader() {
         <div className={styles.desktopView}>
           <div className={styles.logoContainer}>
             <Logo />
-            <Text className={styles.appName}>admin</Text>
+            <Text className={styles.appName}>site admin</Text>
           </div>
+          <a
+            href={`https://${import.meta.env.VITE_PORTAL_URL}`}
+            target="_blank"
+            rel="noreferrer"
+            className={styles.portalUrl}
+          >
+            {import.meta.env.VITE_PORTAL_URL}
+          </a>
         </div>
 
         <IconButton

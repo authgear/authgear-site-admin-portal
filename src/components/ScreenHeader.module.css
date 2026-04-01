@@ -54,6 +54,19 @@
   font-weight: 400;
 }
 
+.portalUrl {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.3);
+  padding-left: 16px;
+}
+
+.portalUrl:hover {
+  color: white;
+  text-decoration: underline;
+}
+
 .userButton {
   color: white;
 }

@@ -19,6 +19,9 @@ const LoginPage: React.VFC = function LoginPage() {
     >
       <Logo />
       <Text variant="xLarge">Authgear Site Admin Portal</Text>
+      <Text variant="small" style={{ color: "#605e5c" }}>
+        {import.meta.env.VITE_PORTAL_URL}
+      </Text>
       <PrimaryButton text="Sign in" onClick={startLogin} />
     </div>
   );
