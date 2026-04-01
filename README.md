@@ -31,4 +31,4 @@ npm run lint     # ESLint
 
 ## License
 
-Private - All rights reserved
+Apache License 2.0
