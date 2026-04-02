@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Text,
   CommandButton,
@@ -70,10 +71,10 @@ const ScreenHeader: React.VFC = function ScreenHeader() {
     <>
       <header className={styles.header}>
         <div className={styles.desktopView}>
-          <div className={styles.logoContainer}>
+          <Link to="/" className={styles.logoContainer}>
             <Logo />
             <Text className={styles.appName}>site admin</Text>
-          </div>
+          </Link>
           <a
             href={`https://${import.meta.env.VITE_PORTAL_URL}`}
             target="_blank"
