@@ -95,7 +95,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
     {
       key: "ownerEmail",
       fieldName: "owner_email",
-      name: "Owner email",
+      name: "Owner Email",
       minWidth: COLUMN_WIDTHS.ownerEmail,
       maxWidth: COLUMN_WIDTHS.ownerEmail,
       columnActionsMode: ColumnActionsMode.disabled,
@@ -113,7 +113,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
     {
       key: "createdAt",
       fieldName: "created_at",
-      name: "Create at",
+      name: "Created at",
       minWidth: COLUMN_WIDTHS.createdAt,
       maxWidth: COLUMN_WIDTHS.createdAt,
       columnActionsMode: ColumnActionsMode.disabled,
@@ -223,7 +223,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
             />
             <CommandButton
               className={styles.clearButton}
-              text="Clean all filters"
+              text="Clear all filters"
               onClick={onClearFilters}
             />
           </div>
@@ -240,7 +240,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
                 className={styles.tableHeaderCell}
                 style={{ width: COLUMN_WIDTHS.ownerEmail }}
               >
-                Owner email
+                Owner Email
               </div>
               <div
                 className={styles.tableHeaderCell}
@@ -252,7 +252,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
                 className={styles.tableHeaderCell}
                 style={{ width: COLUMN_WIDTHS.createdAt }}
               >
-                Create at
+                Created at
               </div>
             </div>
             <ShimmeredDetailsList
