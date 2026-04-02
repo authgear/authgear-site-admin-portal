@@ -1,71 +1,104 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   PrimaryButton,
   DefaultButton,
   Modal,
   TextField,
+  Spinner,
+  SpinnerSize,
 } from "@fluentui/react";
+import { listAppCollaborators, addAppCollaborator, removeAppCollaborator } from "../api/siteadmin";
+import type { Collaborator } from "../api/types";
 import styles from "./PortalAdminContent.module.css";
 
-export interface PortalAdminEntry {
-  id: string;
-  email: string;
-  isOwner: boolean;
-  status: "Accepted" | "Pending";
+interface PortalAdminContentProps {
+  appId: string;
 }
 
-const SAMPLE_ADMINS: PortalAdminEntry[] = [
-  { id: "1", email: "alex.tsai@superapp.com", isOwner: true, status: "Accepted" },
-  { id: "2", email: "peter.chen@superapp.com", isOwner: false, status: "Accepted" },
-];
+const PortalAdminContent: React.VFC<PortalAdminContentProps> = ({ appId }) => {
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-const PortalAdminContent: React.VFC = () => {
-  const [admins, setAdmins] = useState<PortalAdminEntry[]>(() => [...SAMPLE_ADMINS]);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
-  const [removeTarget, setRemoveTarget] = useState<PortalAdminEntry | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<Collaborator | null>(null);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [inviting, setInviting] = useState(false);
+  const [removing, setRemoving] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
-  const openRemoveModal = (entry: PortalAdminEntry) => {
+  const reload = useCallback(() => {
+    setLoading(true);
+    setLoadError(null);
+    listAppCollaborators(appId)
+      .then((res) => setCollaborators(res.collaborators))
+      .catch((e: unknown) => {
+        const msg = e instanceof Error ? e.message : "Failed to load collaborators.";
+        setLoadError(msg);
+      })
+      .finally(() => setLoading(false));
+  }, [appId]);
+
+  useEffect(() => {
+    reload();
+  }, [reload]);
+
+  const openRemoveModal = (entry: Collaborator) => {
     setRemoveTarget(entry);
+    setActionError(null);
     setShowRemoveModal(true);
   };
 
   const closeRemoveModal = () => {
     setShowRemoveModal(false);
     setRemoveTarget(null);
+    setActionError(null);
   };
 
   const confirmRemove = () => {
-    if (removeTarget) {
-      setAdmins((prev) => prev.filter((a) => a.id !== removeTarget.id));
-      closeRemoveModal();
-    }
+    if (!removeTarget) return;
+    setRemoving(true);
+    setActionError(null);
+    removeAppCollaborator(appId, removeTarget.id)
+      .then(() => {
+        closeRemoveModal();
+        reload();
+      })
+      .catch((e: unknown) => {
+        const msg = e instanceof Error ? e.message : "Failed to remove collaborator.";
+        setActionError(msg);
+      })
+      .finally(() => setRemoving(false));
   };
 
   const openInviteModal = () => {
     setInviteEmail("");
+    setActionError(null);
     setShowInviteModal(true);
   };
 
   const closeInviteModal = () => {
     setShowInviteModal(false);
     setInviteEmail("");
+    setActionError(null);
   };
 
   const confirmInvite = () => {
     const trimmed = inviteEmail.trim();
     if (!trimmed) return;
-    setAdmins((prev) => [
-      ...prev,
-      {
-        id: String(Date.now()),
-        email: trimmed,
-        isOwner: false,
-        status: "Pending",
-      },
-    ]);
-    closeInviteModal();
+    setInviting(true);
+    setActionError(null);
+    addAppCollaborator(appId, trimmed)
+      .then(() => {
+        closeInviteModal();
+        reload();
+      })
+      .catch((e: unknown) => {
+        const msg = e instanceof Error ? e.message : "Failed to invite collaborator.";
+        setActionError(msg);
+      })
+      .finally(() => setInviting(false));
   };
 
   return (
@@ -86,43 +119,56 @@ const PortalAdminContent: React.VFC = () => {
         />
       </div>
 
-      <div className={styles.card}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Owner email</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {admins.map((entry) => (
-              <tr key={entry.id}>
-                <td className={styles.emailCell}>
-                  {entry.email}
-                  {entry.isOwner && (
-                    <span className={styles.ownerBadge}> (Owner)</span>
-                  )}
-                </td>
-                <td>
-                  <span className={styles.statusAccepted}>{entry.status}</span>
-                </td>
-                <td>
-                  <button
-                    type="button"
-                    className={styles.actionRemove}
-                    onClick={() => openRemoveModal(entry)}
-                  >
-                    Remove
-                  </button>
-                </td>
+      {loading ? (
+        <div style={{ padding: "24px 0", display: "flex", justifyContent: "center" }}>
+          <Spinner size={SpinnerSize.medium} />
+        </div>
+      ) : loadError ? (
+        <p style={{ color: "#a4262c", fontSize: 14 }}>{loadError}</p>
+      ) : (
+        <div className={styles.card}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {collaborators.map((entry) => (
+                <tr key={entry.id}>
+                  <td className={styles.emailCell}>{entry.user_email}</td>
+                  <td>
+                    <span className={styles.statusAccepted}>
+                      {entry.role === "owner" ? "Owner" : "Editor"}
+                    </span>
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      className={styles.actionRemove}
+                      onClick={() => openRemoveModal(entry)}
+                      disabled={entry.role === "owner"}
+                    >
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {collaborators.length === 0 && (
+                <tr>
+                  <td colSpan={3} style={{ textAlign: "center", color: "#797775", padding: "16px 0" }}>
+                    No collaborators yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-      {/* Invite modal — enter email */}
+      {/* Invite modal */}
       <Modal
         isOpen={showInviteModal}
         onDismiss={closeInviteModal}
@@ -156,6 +202,9 @@ const PortalAdminContent: React.VFC = () => {
               }}
             />
           </div>
+          {actionError && (
+            <p style={{ margin: "8px 0 0", fontSize: 13, color: "#a4262c" }}>{actionError}</p>
+          )}
           <div className={styles.inviteModalButtons}>
             <DefaultButton
               text="Cancel"
@@ -165,7 +214,7 @@ const PortalAdminContent: React.VFC = () => {
             <PrimaryButton
               text="Invite"
               onClick={confirmInvite}
-              disabled={!inviteEmail.trim()}
+              disabled={!inviteEmail.trim() || inviting}
               styles={{
                 root: { backgroundColor: "#176df3", borderColor: "#176df3" },
               }}
@@ -174,7 +223,7 @@ const PortalAdminContent: React.VFC = () => {
         </div>
       </Modal>
 
-      {/* Remove user confirmation modal */}
+      {/* Remove confirmation modal */}
       <Modal
         isOpen={showRemoveModal}
         onDismiss={closeRemoveModal}
@@ -195,11 +244,14 @@ const PortalAdminContent: React.VFC = () => {
           <p className={styles.removeModalMessage}>
             Are you sure you want to remove{" "}
             <span className={styles.removeModalEmail}>
-              {removeTarget?.email ?? ""}
+              {removeTarget?.user_email ?? ""}
             </span>{" "}
             from the portal admins? They will no longer be able to sign in or
             manage this project.
           </p>
+          {actionError && (
+            <p style={{ margin: "8px 0 0", fontSize: 13, color: "#a4262c" }}>{actionError}</p>
+          )}
           <div className={styles.removeModalButtons}>
             <DefaultButton
               text="Cancel"
@@ -209,6 +261,7 @@ const PortalAdminContent: React.VFC = () => {
             <DefaultButton
               text="Remove"
               onClick={confirmRemove}
+              disabled={removing}
               styles={{
                 root: {
                   backgroundColor: "#e23d3d",

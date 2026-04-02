@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import {
   Icon,
   Dropdown,
@@ -14,7 +14,11 @@ import {
   Text,
   DefaultButton,
   PrimaryButton,
+  Spinner,
+  SpinnerSize,
 } from "@fluentui/react";
+import { getAppMessagingUsage, getAppMonthlyActiveUsers } from "../api/siteadmin";
+import type { MessagingUsage, MonthlyActiveUsersCount } from "../api/types";
 import styles from "./UsageContent.module.css";
 
 const SMS_DATE_RANGE_OPTIONS: IDropdownOption[] = [
@@ -36,33 +40,21 @@ const SMS_RANGE_DAYS: Record<string, number> = {
   last180: 180,
 };
 
-/** Sample SMS/WhatsApp message counts for the selected date range */
-function getSmsCostData(
+/** Convert a range key + optional custom dates to YYYY-MM-DD start/end strings for the API */
+function getEffectiveDateRange(
   rangeKey: string,
   customStart?: Date | null,
   customEnd?: Date | null
-): { label: string; count: number }[] {
-  if (rangeKey === "last7") {
-    return [
-      { label: "SMS (US/Canada)", count: 23 },
-      { label: "SMS (Other)", count: 18 },
-      { label: "WhatsApp (US/Canada)", count: 71 },
-      { label: "WhatsApp (Other)", count: 123 },
-    ];
-  }
-  let seed = 2;
+): { start: string; end: string } {
+  const toDateStr = (d: Date) => d.toISOString().slice(0, 10);
+  const now = new Date();
   if (rangeKey === "custom" && customStart && customEnd) {
-    const days = Math.ceil((customEnd.getTime() - customStart.getTime()) / (24 * 60 * 60 * 1000)) + 1;
-    seed = Math.min(5, Math.max(2, Math.floor(days / 30)));
-  } else if (SMS_RANGE_DAYS[rangeKey]) {
-    seed = Math.min(5, Math.max(2, Math.floor(SMS_RANGE_DAYS[rangeKey] / 30)));
+    return { start: toDateStr(customStart), end: toDateStr(customEnd) };
   }
-  return [
-    { label: "SMS (US/Canada)", count: 20 + seed * 4 },
-    { label: "SMS (Other)", count: 15 + seed * 4 },
-    { label: "WhatsApp (US/Canada)", count: 65 + seed * 8 },
-    { label: "WhatsApp (Other)", count: 110 + seed * 15 },
-  ];
+  const days = SMS_RANGE_DAYS[rangeKey] ?? 7;
+  const start = new Date(now);
+  start.setDate(start.getDate() - (days - 1));
+  return { start: toDateStr(start), end: toDateStr(now) };
 }
 
 function getSmsDateRangeLabel(
@@ -91,34 +83,6 @@ function formatShortDate(d: Date): string {
 
 export const MAU_CAP = 25000;
 
-/** Stable numeric hash from projectId so each project gets different MAUs */
-function projectSeed(projectId: string | undefined): number {
-  if (!projectId) return 0;
-  let h = 0;
-  for (let i = 0; i < projectId.length; i++) {
-    h = (h * 31 + projectId.charCodeAt(i)) | 0;
-  }
-  return Math.abs(h);
-}
-
-/** MAU count for a single month (YYYY-MM) — deterministic by month key and projectId */
-function getMauCountForMonth(monthKey: string, projectId?: string): number {
-  const [y, m] = monthKey.split("-").map(Number);
-  if (!y || !m) return 23173;
-  const monthSeed = y * 12 + m;
-  const proj = projectSeed(projectId);
-  const combined = (monthSeed * 31 + proj) | 0;
-  return 18000 + (Math.abs(combined) % 8000);
-}
-
-/** Previous calendar month key (e.g. 2026-02 → 2026-01, 2026-01 → 2025-12) */
-function previousMonthKey(monthKey: string): string {
-  const [y, m] = monthKey.split("-").map(Number);
-  if (!y || !m) return monthKey;
-  if (m === 1) return `${y - 1}-12`;
-  return `${y}-${String(m - 1).padStart(2, "0")}`;
-}
-
 /** True if monthKey is after the current calendar month (no data for future months) */
 function isMonthKeyInFuture(monthKey: string): boolean {
   const now = new Date();
@@ -129,40 +93,6 @@ function isMonthKeyInFuture(monthKey: string): boolean {
   return y > currentYear || (y === currentYear && m > currentMonth);
 }
 
-/** MAU data for the selected month: current = that month, lastMonth = previous month's MAU. Future months return 0. */
-export function getMauDataForMonth(monthKey: string, projectId?: string): { current: number; lastMonth: number } {
-  const prevKey = previousMonthKey(monthKey);
-  const current = isMonthKeyInFuture(monthKey) ? 0 : getMauCountForMonth(monthKey, projectId);
-  const lastMonth = isMonthKeyInFuture(prevKey) ? 0 : getMauCountForMonth(prevKey, projectId);
-  return { current, lastMonth };
-}
-
-/** Last N calendar months ending at endMonthKey (e.g. endMonthKey 2026-02, n 12 → Mar 2025 … Feb 2026) */
-function getMonthKeysBack(endMonthKey: string, n: number): string[] {
-  const keys: string[] = [];
-  let [y, m] = endMonthKey.split("-").map(Number);
-  if (!y || !m) return keys;
-  for (let i = 0; i < n; i++) {
-    keys.unshift(`${y}-${String(m).padStart(2, "0")}`);
-    m -= 1;
-    if (m < 1) {
-      m = 12;
-      y -= 1;
-    }
-  }
-  return keys;
-}
-
-/** One row for MAU monthly overview chart; future months have mau 0 */
-function getMauMonthlyOverview(endMonthKey: string, months: number = 12, projectId?: string): { monthKey: string; label: string; mau: number }[] {
-  const keys = getMonthKeysBack(endMonthKey, months);
-  return keys.map((monthKey) => {
-    const [y, m] = monthKey.split("-").map(Number);
-    const label = y != null && m != null ? `${MONTH_NAMES[m - 1]} ${y}` : monthKey;
-    const mau = isMonthKeyInFuture(monthKey) ? 0 : getMauCountForMonth(monthKey, projectId);
-    return { monthKey, label, mau };
-  });
-}
 
 const PLAN_FEE_LABELS: Record<string, string> = {
   Free: "$0 /mo",
@@ -178,10 +108,10 @@ function getSubscriptionFeeLabel(plan?: string): string {
 
 interface UsageContentProps {
   currentPlan?: string;
-  projectId?: string;
+  appId: string;
 }
 
-const UsageContent: React.VFC<UsageContentProps> = ({ currentPlan, projectId }) => {
+const UsageContent: React.VFC<UsageContentProps> = ({ currentPlan, appId }) => {
   const [smsDateRangeKey, setSmsDateRangeKey] = useState<string>("last7");
   const [smsCustomStartDate, setSmsCustomStartDate] = useState<Date | null>(null);
   const [smsCustomEndDate, setSmsCustomEndDate] = useState<Date | null>(null);
@@ -207,6 +137,18 @@ const UsageContent: React.VFC<UsageContentProps> = ({ currentPlan, projectId }) 
   const mauOverviewYearTriggerRef = useRef<HTMLDivElement>(null);
   const [mauOverviewYearTargetRect, setMauOverviewYearTargetRect] = useState<DOMRect | null>(null);
 
+  // API state: messaging usage
+  const [messagingUsage, setMessagingUsage] = useState<MessagingUsage | null>(null);
+  const [messagingLoading, setMessagingLoading] = useState(false);
+
+  // API state: MAU single-month card
+  const [mauCardCount, setMauCardCount] = useState<number | null>(null);
+  const [mauCardLoading, setMauCardLoading] = useState(false);
+
+  // API state: MAU annual chart
+  const [mauChartCounts, setMauChartCounts] = useState<MonthlyActiveUsersCount[]>([]);
+  const [mauChartLoading, setMauChartLoading] = useState(false);
+
   useEffect(() => {
     if (showSmsDateModal) {
       setTempSmsStartDate(smsCustomStartDate);
@@ -214,14 +156,60 @@ const UsageContent: React.VFC<UsageContentProps> = ({ currentPlan, projectId }) 
     }
   }, [showSmsDateModal, smsCustomStartDate, smsCustomEndDate]);
 
+  // Fetch messaging usage whenever date range changes
+  const fetchMessaging = useCallback(() => {
+    if (smsDateRangeKey === "custom" && (!smsCustomStartDate || !smsCustomEndDate)) return;
+    const { start, end } = getEffectiveDateRange(smsDateRangeKey, smsCustomStartDate, smsCustomEndDate);
+    setMessagingLoading(true);
+    setMessagingUsage(null);
+    getAppMessagingUsage(appId, start, end)
+      .then(setMessagingUsage)
+      .catch(() => setMessagingUsage(null))
+      .finally(() => setMessagingLoading(false));
+  }, [appId, smsDateRangeKey, smsCustomStartDate, smsCustomEndDate]);
+
+  useEffect(() => {
+    fetchMessaging();
+  }, [fetchMessaging]);
+
+  // Fetch MAU for selected month
+  useEffect(() => {
+    const [y, m] = mauMonthKey.split("-").map(Number);
+    if (!y || !m) return;
+    setMauCardLoading(true);
+    setMauCardCount(null);
+    getAppMonthlyActiveUsers(appId, y, m, y, m)
+      .then((res) => setMauCardCount(res.counts[0]?.count ?? 0))
+      .catch(() => setMauCardCount(null))
+      .finally(() => setMauCardLoading(false));
+  }, [appId, mauMonthKey]);
+
+  // Fetch MAU chart for selected year
+  useEffect(() => {
+    setMauChartLoading(true);
+    setMauChartCounts([]);
+    getAppMonthlyActiveUsers(appId, mauOverviewYear, 1, mauOverviewYear, 12)
+      .then((res) => setMauChartCounts(res.counts))
+      .catch(() => setMauChartCounts([]))
+      .finally(() => setMauChartLoading(false));
+  }, [appId, mauOverviewYear]);
+
   const smsDateRangeText = useMemo(
     () => getSmsDateRangeLabel(smsDateRangeKey, smsCustomStartDate, smsCustomEndDate),
     [smsDateRangeKey, smsCustomStartDate, smsCustomEndDate]
   );
-  const smsCostRows = useMemo(
-    () => getSmsCostData(smsDateRangeKey, smsCustomStartDate, smsCustomEndDate),
-    [smsDateRangeKey, smsCustomStartDate, smsCustomEndDate]
-  );
+
+  // Derive SMS rows from API response
+  const smsCostRows = useMemo(() => {
+    if (!messagingUsage) return null;
+    return [
+      { label: "SMS (US/Canada)", count: messagingUsage.sms_north_america_count },
+      { label: "SMS (Other)", count: messagingUsage.sms_other_regions_count },
+      { label: "WhatsApp (US/Canada)", count: messagingUsage.whatsapp_north_america_count },
+      { label: "WhatsApp (Other)", count: messagingUsage.whatsapp_other_regions_count },
+    ];
+  }, [messagingUsage]);
+
   const mauMonthLabel = useMemo(() => {
     const [y, m] = mauMonthKey.split("-").map(Number);
     if (!y || !m) return "Nov 2025";
@@ -230,27 +218,27 @@ const UsageContent: React.VFC<UsageContentProps> = ({ currentPlan, projectId }) 
   const mauYear = useMemo(() => parseInt(mauMonthKey.split("-")[0] ?? "2025", 10), [mauMonthKey]);
   const mauMonthIndex = useMemo(() => parseInt(mauMonthKey.split("-")[1] ?? "1", 10) - 1, [mauMonthKey]);
 
-  const mauData = useMemo(() => getMauDataForMonth(mauMonthKey, projectId), [mauMonthKey, projectId]);
-
-  /** Selected month is after current real date → show empty MAU data */
   const isMauMonthFuture = useMemo(() => {
     const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth() + 1;
     const [y, m] = mauMonthKey.split("-").map(Number);
     if (!y || !m) return false;
-    return y > currentYear || (y === currentYear && m > currentMonth);
+    return y > now.getFullYear() || (y === now.getFullYear() && m > now.getMonth() + 1);
   }, [mauMonthKey]);
 
-  const mauPercent = isMauMonthFuture
-    ? 0
-    : Math.min(100, (mauData.current / MAU_CAP) * 100);
+  const mauCurrentCount = isMauMonthFuture ? 0 : (mauCardCount ?? 0);
+  const mauPercent = isMauMonthFuture ? 0 : Math.min(100, (mauCurrentCount / MAU_CAP) * 100);
 
-  const mauOverviewEndMonthKey = `${mauOverviewYear}-12`;
-  const mauMonthlyOverview = useMemo(
-    () => getMauMonthlyOverview(mauOverviewEndMonthKey, 12, projectId),
-    [mauOverviewEndMonthKey, projectId]
-  );
+  // Derive chart rows from API response
+  const mauMonthlyOverview = useMemo(() => {
+    return Array.from({ length: 12 }, (_, i) => {
+      const month = i + 1;
+      const monthKey = `${mauOverviewYear}-${String(month).padStart(2, "0")}`;
+      const found = mauChartCounts.find((c) => c.year === mauOverviewYear && c.month === month);
+      const mau = isMonthKeyInFuture(monthKey) ? 0 : (found?.count ?? 0);
+      return { monthKey, label: `${MONTH_NAMES[i]} ${mauOverviewYear}`, mau };
+    });
+  }, [mauChartCounts, mauOverviewYear]);
+
   const mauOverviewMax = useMemo(
     () => Math.max(1, ...mauMonthlyOverview.map((r) => r.mau)),
     [mauMonthlyOverview]
@@ -274,11 +262,26 @@ const UsageContent: React.VFC<UsageContentProps> = ({ currentPlan, projectId }) 
 
   return (
     <div className={styles.root}>
-      {/* Subscription Fee */}
+      {/* Subscription Fee — mock data (no API available) */}
       <div className={`${styles.card} ${styles.cardSubscription}`}>
         <div className={styles.subscriptionBlock}>
           <div className={styles.subscriptionColLeft}>
-            <span className={styles.subscriptionLabel}>Subscription Fee</span>
+            <span className={styles.subscriptionLabel}>
+              Subscription Fee
+              <span style={{
+                display: "inline-block",
+                marginLeft: 8,
+                padding: "1px 6px",
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#835b00",
+                backgroundColor: "#fce4b0",
+                borderRadius: 4,
+                verticalAlign: "middle",
+              }}>
+                Mock data
+              </span>
+            </span>
             <span className={styles.subscriptionPrice}>
               {getSubscriptionFeeLabel(currentPlan)}
             </span>
@@ -351,12 +354,20 @@ const UsageContent: React.VFC<UsageContentProps> = ({ currentPlan, projectId }) 
           </p>
         </div>
         <div className={styles.smsDivider} aria-hidden />
-        {smsCostRows.map((row) => (
-          <div key={row.label} className={styles.smsRow}>
-            <span className={styles.smsLabel}>{row.label}</span>
-            <span className={styles.smsValue}>{row.count} messages</span>
+        {messagingLoading ? (
+          <div style={{ padding: "8px 0" }}>
+            <Spinner size={SpinnerSize.small} />
           </div>
-        ))}
+        ) : smsCostRows ? (
+          smsCostRows.map((row) => (
+            <div key={row.label} className={styles.smsRow}>
+              <span className={styles.smsLabel}>{row.label}</span>
+              <span className={styles.smsValue}>{row.count.toLocaleString()} messages</span>
+            </div>
+          ))
+        ) : (
+          <p style={{ fontSize: 13, color: "#797775", margin: "8px 0" }}>No data available.</p>
+        )}
       </div>
 
       {/* Monthly Active Users — single month + chart */}
@@ -462,16 +473,18 @@ const UsageContent: React.VFC<UsageContentProps> = ({ currentPlan, projectId }) 
         )}
         <div className={styles.mauProgressValueRow}>
           <span className={styles.mauProgressValue}>
-            {isMauMonthFuture
+            {mauCardLoading
               ? "—"
-              : `${mauData.current.toLocaleString()} / ${MAU_CAP.toLocaleString()}`}
+              : isMauMonthFuture
+                ? "—"
+                : `${mauCurrentCount.toLocaleString()} / ${MAU_CAP.toLocaleString()}`}
           </span>
         </div>
         <TooltipHost
           content={
-            isMauMonthFuture
+            isMauMonthFuture || mauCardLoading
               ? "No data"
-              : `Monthly active users: ${mauData.current.toLocaleString()} of ${MAU_CAP.toLocaleString()}`
+              : `Monthly active users: ${mauCurrentCount.toLocaleString()} of ${MAU_CAP.toLocaleString()}`
           }
           directionalHint={DirectionalHint.topCenter}
           delay={0}
@@ -483,7 +496,7 @@ const UsageContent: React.VFC<UsageContentProps> = ({ currentPlan, projectId }) 
             },
           }}
         >
-          <div className={styles.mauProgressBar} role="progressbar" aria-valuenow={mauData.current} aria-valuemin={0} aria-valuemax={MAU_CAP} aria-label={`Monthly active users: ${mauData.current.toLocaleString()} of ${MAU_CAP.toLocaleString()}`}>
+          <div className={styles.mauProgressBar} role="progressbar" aria-valuenow={mauCurrentCount} aria-valuemin={0} aria-valuemax={MAU_CAP} aria-label={`Monthly active users: ${mauCurrentCount.toLocaleString()} of ${MAU_CAP.toLocaleString()}`}>
             <div className={styles.mauProgressTrack}>
               <div
                 className={styles.mauProgressFill}
@@ -576,6 +589,11 @@ const UsageContent: React.VFC<UsageContentProps> = ({ currentPlan, projectId }) 
               </div>
             </div>
           </Callout>
+        )}
+        {mauChartLoading && (
+          <div style={{ padding: "8px 0" }}>
+            <Spinner size={SpinnerSize.small} />
+          </div>
         )}
         <div className={styles.mauOverviewChart} role="img" aria-label={`Monthly Active Users for ${mauOverviewYear}`}>
           <div className={styles.mauOverviewChartArea}>

@@ -10,26 +10,14 @@ const PLAN_OPTIONS: IDropdownOption[] = PLAN_KEYS.map((key) => ({
 }));
 
 interface PlanContentProps {
-  /** Saved/committed plan shown as "Current Plan" */
   currentPlan?: string;
-  /** Value shown in the Switch Plan dropdown (may be pending) */
-  selectedPlan?: string;
-  onPlanChange?: (planKey: string) => void;
 }
 
-const PlanContent: React.VFC<PlanContentProps> = ({
-  currentPlan,
-  selectedPlan,
-  onPlanChange,
-}) => {
+const PlanContent: React.VFC<PlanContentProps> = ({ currentPlan }) => {
   const effectiveCurrent =
-    (currentPlan && (PLAN_KEYS as readonly string[]).includes(currentPlan))
+    currentPlan && (PLAN_KEYS as readonly string[]).includes(currentPlan)
       ? currentPlan
       : "Free";
-  const effectiveSelected =
-    (selectedPlan && (PLAN_KEYS as readonly string[]).includes(selectedPlan))
-      ? selectedPlan
-      : effectiveCurrent;
 
   return (
     <div className={styles.root}>
@@ -44,16 +32,17 @@ const PlanContent: React.VFC<PlanContentProps> = ({
         <Dropdown
           id="plan-selector"
           options={PLAN_OPTIONS}
-          selectedKey={effectiveSelected}
-          onChange={(_e, option) => {
-            if (option?.key != null) onPlanChange?.(String(option.key));
-          }}
+          selectedKey={effectiveCurrent}
+          disabled
           className={styles.planDropdown}
           styles={{
             title: { fontFamily: '"Segoe UI", sans-serif' },
             dropdown: { fontFamily: '"Segoe UI", sans-serif' },
           }}
         />
+        <p style={{ margin: "4px 0 0", fontSize: 12, color: "#797775" }}>
+          Switching plans is not yet available.
+        </p>
       </div>
     </div>
   );

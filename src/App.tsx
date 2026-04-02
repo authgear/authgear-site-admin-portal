@@ -23,7 +23,7 @@ const AuthenticatedApp: React.VFC = function AuthenticatedApp() {
 
   useEffect(() => {
     if (userInfoLoading) return;
-    listApps({ pageSize: 1 })
+    listApps({ page_size: 1 })
       .then(() => setAccessChecking(false))
       .catch((e) => {
         if (e instanceof SiteAdminAPIError && e.code === 403) {
