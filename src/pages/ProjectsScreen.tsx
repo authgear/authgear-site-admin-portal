@@ -87,7 +87,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
     {
       key: "projectName",
       fieldName: "id",
-      name: "Project name",
+      name: "Project ID",
       minWidth: COLUMN_WIDTHS.projectName,
       maxWidth: COLUMN_WIDTHS.projectName,
       columnActionsMode: ColumnActionsMode.disabled,
@@ -234,7 +234,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
                 className={styles.tableHeaderCell}
                 style={{ width: COLUMN_WIDTHS.projectName }}
               >
-                Project name
+                Project ID
               </div>
               <div
                 className={styles.tableHeaderCell}
