@@ -12,6 +12,7 @@ import Logo from "./Logo";
 import ScreenNav from "./ScreenNav";
 import styles from "./ScreenHeader.module.css";
 import { useAuthgear } from "../auth/AuthgearContext";
+import { PORTAL_URL } from "../config";
 
 const commandButtonStyles = {
   label: {
@@ -76,12 +77,12 @@ const ScreenHeader: React.VFC = function ScreenHeader() {
             <Text className={styles.appName}>site admin</Text>
           </Link>
           <a
-            href={`https://${import.meta.env.VITE_PORTAL_URL}`}
+            href={`https://${PORTAL_URL}`}
             target="_blank"
             rel="noreferrer"
             className={styles.portalUrl}
           >
-            {import.meta.env.VITE_PORTAL_URL}
+            {PORTAL_URL}
           </a>
         </div>
 

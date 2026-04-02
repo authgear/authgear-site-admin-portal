@@ -3,13 +3,12 @@
  *
  * Uses `authgear.fetch()` which automatically injects the Bearer access token
  * from the current Authgear session — no manual token handling required.
- *
- * Base URL is read from VITE_SITEADMIN_API_URL (e.g. https://siteadmin.authgear-staging.com).
  */
 import authgear from "@authgear/web";
 import type { ErrorEnvelope } from "./types";
+import { SITEADMIN_API_URL } from "../config";
 
-const BASE_URL: string = import.meta.env.VITE_SITEADMIN_API_URL;
+const BASE_URL: string = SITEADMIN_API_URL;
 
 export class SiteAdminAPIError extends Error {
   constructor(

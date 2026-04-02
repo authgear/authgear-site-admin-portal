@@ -6,6 +6,7 @@ import React, { useState } from "react";
 import { PrimaryButton, Text } from "@fluentui/react";
 import { listApps } from "../api/siteadmin";
 import { SiteAdminAPIError } from "../api/client";
+import { SITEADMIN_API_URL } from "../config";
 
 const APITestPage: React.VFC = function APITestPage() {
   const [result, setResult] = useState<string | null>(null);
@@ -47,7 +48,7 @@ const APITestPage: React.VFC = function APITestPage() {
       </Text>
       <Text variant="small" block style={{ color: "#605e5c", marginBottom: 24 }}>
         Calls{" "}
-        <code>GET {import.meta.env.VITE_SITEADMIN_API_URL}/api/v1/apps</code>{" "}
+        <code>GET {SITEADMIN_API_URL}/api/v1/apps</code>{" "}
         using the current Authgear session token.
       </Text>
 

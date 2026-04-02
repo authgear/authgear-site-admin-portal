@@ -6,6 +6,7 @@ import React, {
   useState,
 } from "react";
 import authgear, { PromptOption, UserInfo } from "@authgear/web";
+import { AUTHGEAR_REDIRECT_URL } from "../config";
 
 interface AuthgearContextValue {
   sessionState: string;
@@ -61,7 +62,7 @@ export const AuthgearProvider: React.FC<{ children: React.ReactNode }> =
     const startLogin = useCallback(() => {
       authgear
         .startAuthentication({
-          redirectURI: import.meta.env.VITE_AUTHGEAR_REDIRECT_URL,
+          redirectURI: AUTHGEAR_REDIRECT_URL,
           prompt: PromptOption.Login,
         })
         .catch((err) => console.error("startAuthentication failed:", err));

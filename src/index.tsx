@@ -2,12 +2,13 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import authgear from "@authgear/web";
 import App from "./App";
+import { AUTHGEAR_ENDPOINT, AUTHGEAR_CLIENT_ID } from "./config";
 
 async function init() {
   try {
     await authgear.configure({
-      endpoint: import.meta.env.VITE_AUTHGEAR_ENDPOINT,
-      clientID: import.meta.env.VITE_AUTHGEAR_CLIENT_ID,
+      endpoint: AUTHGEAR_ENDPOINT,
+      clientID: AUTHGEAR_CLIENT_ID,
       sessionType: "refresh_token",
     });
   } finally {

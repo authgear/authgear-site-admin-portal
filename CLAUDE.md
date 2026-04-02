@@ -19,11 +19,12 @@ Copy `.env.example` to `.env` and fill in values before running locally.
 
 | Variable | Purpose |
 |----------|---------|
-| `VITE_AUTHGEAR_CLIENT_ID` | Authgear app client ID |
-| `VITE_AUTHGEAR_ENDPOINT` | Authgear endpoint URL |
-| `VITE_AUTHGEAR_REDIRECT_URL` | OAuth redirect URI (e.g. `http://localhost:3000/auth-redirect`) |
-| `VITE_PORTAL_URL` | Domain of the Authgear portal instance being managed (e.g. `portal.authgear-staging.com`) |
-| `VITE_SITEADMIN_API_URL` | Base URL of the Site Admin API (e.g. `https://siteadmin.authgear-staging.com`) |
+| `VITE_BASE_DOMAIN` | **Required.** Deployment base domain (e.g. `authgear-staging.com`). All other vars are derived from this. |
+| `VITE_AUTHGEAR_CLIENT_ID` | *(optional)* Authgear app client ID (default: `siteadmin`) |
+| `VITE_AUTHGEAR_REDIRECT_URL` | *(optional)* OAuth redirect URI (default: `<current origin>/auth-redirect`) |
+| `VITE_AUTHGEAR_ENDPOINT` | *(optional)* Override Authgear endpoint (default: `https://accounts.portal.<base>`) |
+| `VITE_PORTAL_URL` | *(optional)* Override portal domain (default: `portal.<base>`) |
+| `VITE_SITEADMIN_API_URL` | *(optional)* Override Site Admin API base URL (default: `https://siteadmin.<base>`) |
 
 ## Architecture
 
