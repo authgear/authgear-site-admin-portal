@@ -8,6 +8,24 @@ Admin portal UI for managing all tenants/projects in a given Authgear deployment
 
 - Node.js 18+ and npm
 
+### Configuration
+
+Copy `.env.example` to `.env` and set your deployment's base domain:
+
+```env
+VITE_BASE_DOMAIN=your-deployment.example.com
+```
+
+The following URLs are derived automatically from `VITE_BASE_DOMAIN`:
+
+| Service | Derived URL |
+|---------|-------------|
+| Authgear endpoint | `https://accounts.portal.<base>` |
+| Portal URL | `portal.<base>` |
+| Site Admin API | `https://siteadmin.<base>` |
+
+Any of these can be overridden individually — see `.env.example` for the full list of optional vars.
+
 ### Development
 
 ```bash

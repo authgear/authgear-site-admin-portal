@@ -19,7 +19,7 @@ Copy `.env.example` to `.env` and fill in values before running locally.
 
 | Variable | Purpose |
 |----------|---------|
-| `VITE_BASE_DOMAIN` | **Required.** Deployment base domain (e.g. `authgear-staging.com`). All other vars are derived from this. |
+| `VITE_BASE_DOMAIN` | **Required.** Deployment base domain (e.g. `your-deployment.example.com`). All other vars are derived from this. |
 | `VITE_AUTHGEAR_CLIENT_ID` | *(optional)* Authgear app client ID (default: `siteadmin`) |
 | `VITE_AUTHGEAR_REDIRECT_URL` | *(optional)* OAuth redirect URI (default: `<current origin>/auth-redirect`) |
 | `VITE_AUTHGEAR_ENDPOINT` | *(optional)* Override Authgear endpoint (default: `https://accounts.portal.<base>`) |
