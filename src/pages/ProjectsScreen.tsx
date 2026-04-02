@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   ShimmeredDetailsList,
@@ -15,9 +15,13 @@ import {
   Text,
   IconButton,
   IListProps,
+  MessageBar,
+  MessageBarType,
 } from "@fluentui/react";
 import ScreenTitle from "../components/ScreenTitle";
-import { MOCK_TEAMS, type TeamListItem } from "../data/teams";
+import { listApps, type ListAppsParams } from "../api/siteadmin";
+import { SiteAdminAPIError } from "../api/client";
+import type { App } from "../api/types";
 
 import styles from "./ProjectsScreen.module.css";
 
@@ -38,33 +42,51 @@ const PAGE_SIZE = 10;
 
 const SEARCH_BY_OPTIONS: IDropdownOption[] = [
   { key: "projectId", text: "Project ID" },
-  { key: "projectName", text: "Project Name" },
   { key: "ownerEmail", text: "Owner Email" },
 ];
 
 interface ProjectNameCellProps {
-  item: TeamListItem;
+  item: App;
 }
 
 const ProjectNameCell: React.VFC<ProjectNameCellProps> = ({ item }) => {
   return (
     <div className={styles.projectNameCell}>
-      <Text className={styles.projectName}>{item.projectName}</Text>
-      <Text className={styles.projectId}>{item.projectId}</Text>
+      <Text className={styles.projectName}>{item.id}</Text>
     </div>
   );
 };
 
 const ProjectsScreen: React.VFC = function ProjectsScreen() {
-  const [loading] = useState(false);
+  const [apps, setApps] = useState<App[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<SiteAdminAPIError | null>(null);
   const [searchBy, setSearchBy] = useState<string>("projectId");
   const [searchText, setSearchText] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
 
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    const params: ListAppsParams = { page: currentPage, page_size: PAGE_SIZE };
+    if (searchText.trim()) {
+      if (searchBy === "projectId") params.app_id = searchText.trim();
+      else if (searchBy === "ownerEmail") params.owner_email = searchText.trim();
+    }
+    listApps(params)
+      .then((res) => {
+        setApps(res.apps);
+        setTotalCount(res.total_count);
+      })
+      .catch((err: SiteAdminAPIError) => setError(err))
+      .finally(() => setLoading(false));
+  }, [currentPage, searchBy, searchText]);
+
   const columns: IColumn[] = useMemo(() => [
     {
       key: "projectName",
-      fieldName: "projectName",
+      fieldName: "id",
       name: "Project name",
       minWidth: COLUMN_WIDTHS.projectName,
       maxWidth: COLUMN_WIDTHS.projectName,
@@ -72,7 +94,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
     },
     {
       key: "ownerEmail",
-      fieldName: "ownerEmail",
+      fieldName: "owner_email",
       name: "Owner email",
       minWidth: COLUMN_WIDTHS.ownerEmail,
       maxWidth: COLUMN_WIDTHS.ownerEmail,
@@ -90,7 +112,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
     },
     {
       key: "createdAt",
-      fieldName: "createdAt",
+      fieldName: "created_at",
       name: "Create at",
       minWidth: COLUMN_WIDTHS.createdAt,
       maxWidth: COLUMN_WIDTHS.createdAt,
@@ -98,21 +120,8 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
     },
   ], []);
 
-  const allItems: TeamListItem[] = useMemo(() => {
-    return MOCK_TEAMS;
-  }, []);
-
-  const totalItems = allItems.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const safePage = Math.min(Math.max(1, currentPage), totalPages);
-  const paginatedItems = useMemo(
-    () =>
-      allItems.slice(
-        (safePage - 1) * PAGE_SIZE,
-        safePage * PAGE_SIZE
-      ),
-    [allItems, safePage]
-  );
 
   const onFirstPage = useCallback(() => setCurrentPage(1), []);
   const onPrevPage = useCallback(() => {
@@ -126,23 +135,23 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
 
   const onRenderRow = useCallback((props?: IDetailsRowProps) => {
     if (props == null) return null;
-    const item = props.item as TeamListItem;
+    const item = props.item as App;
     return (
-      <Link to={`/${item.projectId}`} className={styles.rowLink}>
+      <Link to={`/${item.id}`} className={styles.rowLink}>
         <DetailsRow {...props} />
       </Link>
     );
   }, []);
 
   const onRenderItemColumn = useCallback(
-    (item: TeamListItem, _index?: number, column?: IColumn) => {
+    (item: App, _index?: number, column?: IColumn) => {
       switch (column?.key) {
         case "projectName":
           return <ProjectNameCell item={item} />;
         case "ownerEmail":
           return (
             <div className={styles.cellContentLeft}>
-              <Text className={styles.cellText}>{item.ownerEmail}</Text>
+              <Text className={styles.cellText}>{item.owner_email}</Text>
             </div>
           );
         case "plan":
@@ -152,7 +161,11 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
             </div>
           );
         case "createdAt":
-          return <Text className={styles.cellText}>{item.createdAt}</Text>;
+          return (
+            <Text className={styles.cellText}>
+              {new Date(item.created_at).toLocaleString()}
+            </Text>
+          );
         default:
           return null;
       }
@@ -164,6 +177,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
     (_event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption) => {
       if (option) {
         setSearchBy(option.key as string);
+        setCurrentPage(1);
       }
     },
     []
@@ -172,12 +186,14 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
   const onSearchChange = useCallback(
     (_event?: React.ChangeEvent<HTMLInputElement>, newValue?: string) => {
       setSearchText(newValue || "");
+      setCurrentPage(1);
     },
     []
   );
 
   const onClearFilters = useCallback(() => {
     setSearchText("");
+    setCurrentPage(1);
   }, []);
 
   return (
@@ -186,6 +202,11 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
         <ScreenTitle>Projects</ScreenTitle>
       </div>
       <div className={styles.content}>
+          {error && (
+            <MessageBar messageBarType={MessageBarType.error} isMultiline={false}>
+              {error.message}
+            </MessageBar>
+          )}
           <div className={styles.toolbar}>
             <Text className={styles.searchByLabel}>Search By</Text>
             <Dropdown
@@ -243,7 +264,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
               selectionMode={SelectionMode.none}
               layoutMode={DetailsListLayoutMode.fixedColumns}
               columns={columns}
-              items={paginatedItems}
+              items={apps}
               onShouldVirtualize={onShouldVirtualize}
             />
           </div>
