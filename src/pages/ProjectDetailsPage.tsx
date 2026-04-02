@@ -41,9 +41,6 @@ function tabKeyFromHash(hash: string): TabKey {
   return HASH_TO_TAB_KEY[segment] ?? "overview";
 }
 
-function getInitials(id: string): string {
-  return id.slice(0, 2).toUpperCase() || "PR";
-}
 
 interface OverviewUsageCardsProps {
   userCount: number;
@@ -95,6 +92,7 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
     tabKeyFromHash(location.hash)
   );
   const [copyFeedback, setCopyFeedback] = useState(false);
+  const [copyEmailFeedback, setCopyEmailFeedback] = useState(false);
 
   const [appDetail, setAppDetail] = useState<AppDetail | null>(null);
   const [appLoading, setAppLoading] = useState(true);
@@ -161,6 +159,13 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
     setTimeout(() => setCopyFeedback(false), 1500);
   }, [appDetail?.id]);
 
+  const copyEmail = useCallback(() => {
+    if (!appDetail?.owner_email) return;
+    void navigator.clipboard.writeText(appDetail.owner_email);
+    setCopyEmailFeedback(true);
+    setTimeout(() => setCopyEmailFeedback(false), 1500);
+  }, [appDetail?.owner_email]);
+
   if (appLoading) {
     return (
       <div className={styles.root} style={{ alignItems: "center", justifyContent: "center" }}>
@@ -200,8 +205,6 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
     );
   }
 
-  const initials = getInitials(appDetail.id);
-
   return (
     <div className={styles.root}>
       <div className={styles.breadcrumbRow}>
@@ -215,9 +218,6 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
       </div>
 
       <div className={styles.projectHeader}>
-        <div className={styles.projectIcon} aria-hidden>
-          {initials}
-        </div>
         <div className={styles.projectInfo}>
           <div className={styles.projectIdRow}>
             <span className={styles.projectIdText}>{appDetail.id}</span>
@@ -239,7 +239,15 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
             </button>
           </div>
           <div className={styles.projectMeta}>
-            <span className={styles.metaText}>{appDetail.owner_email}</span>
+            <button
+              type="button"
+              onClick={copyEmail}
+              aria-label="Copy owner email"
+              className={styles.copyEmailBtn}
+            >
+              <span className={styles.metaText}>{appDetail.owner_email}</span>
+              <Icon iconName={copyEmailFeedback ? "CheckMark" : "Copy"} className={styles.copyEmailIcon} />
+            </button>
             <span className={styles.metaText}>
               Created at{" "}
               {new Date(appDetail.created_at).toLocaleDateString("en-US", {

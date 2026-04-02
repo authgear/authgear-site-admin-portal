@@ -113,8 +113,9 @@
 
 .projectIdText {
   font-family: "Segoe UI", sans-serif;
-  font-size: 14px;
-  color: #605e5c;
+  font-size: 22px;
+  font-weight: 600;
+  color: #323130;
   margin: 0;
 }
 
@@ -129,6 +130,26 @@
   font-family: "Segoe UI", sans-serif;
   font-size: 12px;
   color: #605e5c;
+}
+
+.copyEmailBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #605e5c;
+}
+
+.copyEmailBtn:hover .metaText {
+  text-decoration: underline;
+}
+
+.copyEmailIcon {
+  font-size: 11px;
+  opacity: 0.6;
 }
 
 .tabsSection {
