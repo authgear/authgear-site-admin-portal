@@ -105,7 +105,7 @@ const AuditLogDetailPage: React.VFC = () => {
   const [rawLogCopied, setRawLogCopied] = useState(false);
   const copyButtonRef = useRef<HTMLSpanElement>(null);
 
-  const backUrl = projectId ? `/${projectId}#audit-log` : "/";
+  const backUrl = projectId ? `/project/${projectId}#audit-log` : "/";
   const auditLogFilters = (state as { auditLogFilters?: unknown } | undefined)?.auditLogFilters;
   const backState = projectId
     ? { auditLogFilters: auditLogFilters ?? undefined }

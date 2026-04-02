@@ -310,8 +310,8 @@ const AuditLogContent: React.VFC<AuditLogContentProps> = ({
           const index = logs.findIndex((l) => l.key === item.key);
           const detailUrl =
             index >= 0
-              ? `/${projectId}/audit-log/${index}`
-              : `/${projectId}/audit-log/0`;
+              ? `/project/${projectId}/audit-log/${index}`
+              : `/project/${projectId}/audit-log/0`;
           const auditLogFilters: AuditLogFiltersSnapshot = {
             searchQuery,
             flowActionFilter: effectiveFlowActionFilter,

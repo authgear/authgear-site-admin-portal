@@ -152,7 +152,7 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
 
   useEffect(() => {
     if (projectId && !location.hash) {
-      navigate(`/${projectId}#overview`, { replace: true });
+      navigate(`/project/${projectId}#overview`, { replace: true });
     }
   }, [projectId, location.hash, navigate]);
 
@@ -168,7 +168,7 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
       const key = item?.props.itemKey as TabKey | undefined;
       if (key && projectId) {
         const hash = TAB_KEY_TO_HASH[key];
-        navigate(`/${projectId}#${hash}`, { replace: true });
+        navigate(`/project/${projectId}#${hash}`, { replace: true });
         setSelectedTab(key);
       }
     },

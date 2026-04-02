@@ -137,7 +137,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
     if (props == null) return null;
     const item = props.item as App;
     return (
-      <Link to={`/${item.id}`} className={styles.rowLink}>
+      <Link to={`/project/${item.id}`} className={styles.rowLink}>
         <DetailsRow {...props} />
       </Link>
     );

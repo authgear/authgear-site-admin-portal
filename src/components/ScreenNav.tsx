@@ -54,8 +54,9 @@ const ScreenNav: React.VFC = function ScreenNav() {
   /* Derive selectedKey from URL (no "teams" item; only project keys) */
   const selectedKey = (() => {
     if (pathname === "/") return undefined;
-    const firstSegment = pathname.split("/")[1];
-    if (firstSegment) return `project-${firstSegment}`;
+    const segments = pathname.split("/");
+    // pathname is /project/:projectId/...
+    if (segments[1] === "project" && segments[2]) return `project-${segments[2]}`;
     return undefined;
   })();
 
@@ -70,7 +71,7 @@ const ScreenNav: React.VFC = function ScreenNav() {
         links: visibleTeams.map((project) => ({
           key: `project-${project.projectId}`,
           name: project.projectName,
-          url: `/${project.projectId}`,
+          url: `/project/${project.projectId}`,
           projectName: project.projectName,
           projectId: project.projectId,
         })),
