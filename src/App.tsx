@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { initializeIcons, Spinner, SpinnerSize } from "@fluentui/react";
 import { AuthgearProvider, useAuthgear } from "./auth/AuthgearContext";
@@ -9,18 +9,35 @@ import AuditLogDetailPage from "./pages/AuditLogDetailPage";
 import AuthRedirectPage from "./auth/AuthRedirectPage";
 import LoginPage from "./auth/LoginPage";
 import APITestPage from "./pages/APITestPage";
+import AccessDeniedPage from "./pages/AccessDeniedPage";
+import { listApps } from "./api/siteadmin";
+import { SiteAdminAPIError } from "./api/client";
 import "./App.css";
 
 initializeIcons();
 
 const AuthenticatedApp: React.VFC = function AuthenticatedApp() {
   const { sessionState, userInfoLoading } = useAuthgear();
+  const [accessChecking, setAccessChecking] = useState(true);
+  const [accessDenied, setAccessDenied] = useState(false);
+
+  useEffect(() => {
+    if (userInfoLoading) return;
+    listApps({ pageSize: 1 })
+      .then(() => setAccessChecking(false))
+      .catch((e) => {
+        if (e instanceof SiteAdminAPIError && e.code === 403) {
+          setAccessDenied(true);
+        }
+        setAccessChecking(false);
+      });
+  }, [userInfoLoading]);
 
   if (sessionState !== "AUTHENTICATED") {
     return <LoginPage />;
   }
 
-  if (userInfoLoading) {
+  if (userInfoLoading || accessChecking) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh" }}>
         <Spinner size={SpinnerSize.large} />
@@ -28,14 +45,18 @@ const AuthenticatedApp: React.VFC = function AuthenticatedApp() {
     );
   }
 
+  if (accessDenied) {
+    return <AccessDeniedPage />;
+  }
+
   return (
     <ScreenLayout>
       <Routes>
         <Route path="/" element={<ProjectsScreen />} />
         <Route path="/api-test" element={<APITestPage />} />
-        <Route path="/:projectId" element={<ProjectDetailsPage />} />
+        <Route path="/project/:projectId" element={<ProjectDetailsPage />} />
         <Route
-          path="/:projectId/audit-log/:logNum"
+          path="/project/:projectId/audit-log/:logNum"
           element={<AuditLogDetailPage />}
         />
       </Routes>
