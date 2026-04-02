@@ -29,8 +29,8 @@ const ScreenNav: React.VFC = function ScreenNav() {
     if (!query) return MOCK_TEAMS;
     return MOCK_TEAMS.filter(
       (p) =>
-        p.projectName.toLowerCase().includes(query) ||
-        p.projectId.toLowerCase().includes(query)
+        p.projectId.toLowerCase().includes(query) ||
+        p.ownerEmail.toLowerCase().includes(query)
     );
   }, [query]);
 
@@ -70,10 +70,10 @@ const ScreenNav: React.VFC = function ScreenNav() {
       {
         links: visibleTeams.map((project) => ({
           key: `project-${project.projectId}`,
-          name: project.projectName,
+          name: project.projectId,
           url: `/project/${project.projectId}`,
-          projectName: project.projectName,
           projectId: project.projectId,
+          ownerEmail: project.ownerEmail,
         })),
       },
     ];
@@ -89,16 +89,16 @@ const ScreenNav: React.VFC = function ScreenNav() {
     [navigate]
   );
 
-  const onRenderLink = useCallback((link?: INavLink & { projectId?: string; projectName?: string }, defaultRender?: (l?: INavLink) => React.ReactNode): React.ReactElement | null => {
+  const onRenderLink = useCallback((link?: INavLink & { projectId?: string; ownerEmail?: string }, defaultRender?: (l?: INavLink) => React.ReactNode): React.ReactElement | null => {
     if (!link) return null;
-    if (link.projectId != null && link.projectName != null) {
+    if (link.projectId != null) {
       const isSelected =
         link.key === selectedKey ||
         (link.url != null && (pathname === link.url || pathname.startsWith(link.url + "/")));
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: 2, textAlign: "left", width: "100%", margin: "6px 0" }}>
-          <span style={{ fontSize: 14, fontWeight: isSelected ? 600 : 400, lineHeight: 1.2 }}>{link.projectName}</span>
-          <span style={{ fontSize: 12, color: "#605e5c", lineHeight: 1.2 }}>{link.projectId}</span>
+          <span style={{ fontSize: 14, fontWeight: isSelected ? 600 : 400, lineHeight: 1.2 }}>{link.projectId}</span>
+          <span style={{ fontSize: 12, color: "#605e5c", lineHeight: 1.2 }}>{link.ownerEmail}</span>
         </div>
       );
     }
@@ -113,7 +113,7 @@ const ScreenNav: React.VFC = function ScreenNav() {
       <div className={styles.sidebarSearch}>
         <SearchBox
           className={styles.sidebarSearchBox}
-          placeholder="Search Projects Name"
+          placeholder="Search by project ID or email"
           value={searchQuery}
           onChange={(_, value) => setSearchQuery(value ?? "")}
           underlined
