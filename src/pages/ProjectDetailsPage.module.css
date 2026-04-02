@@ -352,11 +352,38 @@
   color: #a19f9d !important;
 }
 
-.notFound {
+.notFoundContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 64px 24px;
+  text-align: center;
+  gap: 12px;
+}
+
+.notFoundIcon {
+  font-size: 48px;
+  color: #c8c6c4;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.notFoundHeading {
   font-family: "Segoe UI", sans-serif;
-  padding: 24px;
-  font-size: 16px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #201f1e;
+  margin: 0;
+}
+
+.notFoundDescription {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
   color: #605e5c;
+  margin: 0 0 8px 0;
+  max-width: 320px;
 }
 
 .dialogMessage {

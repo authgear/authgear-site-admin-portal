@@ -185,10 +185,30 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
   if (!project) {
     return (
       <div className={styles.root}>
-        <div className={styles.notFound}>Project not found.</div>
-        <Link to="/" className={styles.breadcrumbLink}>
-          Back to Projects
-        </Link>
+        <div className={styles.breadcrumbRow}>
+          <Text as="h1" variant="xxLarge" block className={styles.breadcrumb}>
+            <Link to="/" className={styles.breadcrumbLink}>
+              Projects
+            </Link>
+            <Icon iconName="ChevronRight" className={styles.breadcrumbSepIcon} />
+            <span className={styles.breadcrumbCurrent}>Project Details</span>
+          </Text>
+        </div>
+        <div className={styles.notFoundContainer}>
+          <Icon iconName="SearchIssue" className={styles.notFoundIcon} />
+          <h2 className={styles.notFoundHeading}>Project not found</h2>
+          <p className={styles.notFoundDescription}>
+            The project you&apos;re looking for doesn&apos;t exist or may have been removed.
+          </p>
+          <PrimaryButton
+            text="Back to Projects"
+            onClick={() => navigate("/")}
+            styles={{
+              root: { backgroundColor: "#176df3", borderColor: "#176df3" },
+              rootHovered: { backgroundColor: "#1562db", borderColor: "#1562db" },
+            }}
+          />
+        </div>
       </div>
     );
   }
