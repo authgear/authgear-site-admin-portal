@@ -105,7 +105,7 @@ const PortalAdminContent: React.VFC<PortalAdminContentProps> = ({ appId }) => {
     <div className={styles.root}>
       <div className={styles.inviteRow}>
         <PrimaryButton
-          text="Invite"
+          text="Add Admin"
           iconProps={{ iconName: "Add" }}
           onClick={openInviteModal}
           styles={{

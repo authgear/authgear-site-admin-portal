@@ -10,7 +10,6 @@ import LoginPage from "./auth/LoginPage";
 import APITestPage from "./pages/APITestPage";
 import AccessDeniedPage from "./pages/AccessDeniedPage";
 import { listApps } from "./api/siteadmin";
-import { SiteAdminAPIError } from "./api/client";
 import "./App.css";
 
 initializeIcons();
@@ -24,10 +23,8 @@ const AuthenticatedApp: React.VFC = function AuthenticatedApp() {
     if (userInfoLoading) return;
     listApps({ page_size: 1 })
       .then(() => setAccessChecking(false))
-      .catch((e) => {
-        if (e instanceof SiteAdminAPIError && e.code === 403) {
-          setAccessDenied(true);
-        }
+      .catch(() => {
+        setAccessDenied(true);
         setAccessChecking(false);
       });
   }, [userInfoLoading]);
