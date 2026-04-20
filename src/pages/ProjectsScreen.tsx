@@ -40,6 +40,27 @@ const COLUMN_WIDTHS = {
 
 const PAGE_SIZE = 10;
 
+type PageItem = number | "ellipsis";
+
+/** Returns pagination items: first, last, current ± 2, with ellipses where there are gaps. */
+function getPageItems(current: number, total: number): PageItem[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  const delta = 2;
+  const keep = new Set<number>([1, total]);
+  for (let i = current - delta; i <= current + delta; i++) {
+    if (i >= 1 && i <= total) keep.add(i);
+  }
+  const sorted = Array.from(keep).sort((a, b) => a - b);
+  const result: PageItem[] = [];
+  for (let i = 0; i < sorted.length; i++) {
+    if (i > 0 && sorted[i] - sorted[i - 1] > 1) result.push("ellipsis");
+    result.push(sorted[i]);
+  }
+  return result;
+}
+
 const SEARCH_BY_OPTIONS: IDropdownOption[] = [
   { key: "projectId", text: "Project ID" },
   { key: "ownerEmail", text: "Owner Email" },
@@ -303,22 +324,32 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
                 }}
               />
               <div className={styles.paginationPages}>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    type="button"
-                    className={
-                      page === safePage
-                        ? `${styles.paginationPageBtn} ${styles.paginationCurrent}`
-                        : styles.paginationPageBtn
-                    }
-                    onClick={() => onPageClick(page)}
-                    aria-label={`Page ${page}`}
-                    aria-current={page === safePage ? "page" : undefined}
-                  >
-                    {page}
-                  </button>
-                ))}
+                {getPageItems(safePage, totalPages).map((item, idx) =>
+                  item === "ellipsis" ? (
+                    <span
+                      key={`ellipsis-${idx}`}
+                      className={styles.paginationEllipsis}
+                      aria-hidden
+                    >
+                      …
+                    </span>
+                  ) : (
+                    <button
+                      key={item}
+                      type="button"
+                      className={
+                        item === safePage
+                          ? `${styles.paginationPageBtn} ${styles.paginationCurrent}`
+                          : styles.paginationPageBtn
+                      }
+                      onClick={() => onPageClick(item)}
+                      aria-label={`Page ${item}`}
+                      aria-current={item === safePage ? "page" : undefined}
+                    >
+                      {item}
+                    </button>
+                  )
+                )}
               </div>
               <IconButton
                 iconProps={{ iconName: "ChevronRight" }}

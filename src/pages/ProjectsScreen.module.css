@@ -133,6 +133,20 @@
   cursor: not-allowed;
 }
 
+.paginationEllipsis {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  font-size: 14px;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #605e5c;
+  line-height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
 /* Custom table header - same widths as columns so content aligns */
 /* Header and row use same column widths (must match COLUMN_WIDTHS in TeamsScreen.tsx) */
 .tableHeader {
