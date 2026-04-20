@@ -17,13 +17,6 @@
   min-width: 0;
 }
 
-/* Subscription Fee card — more padding, content centered vertically */
-.cardSubscription {
-  display: flex;
-  align-items: center;
-  padding: 28px 32px;
-}
-
 .cardHeader {
   display: flex;
   align-items: flex-start;
@@ -57,51 +50,6 @@
   font-size: 14px;
   font-weight: 400;
   color: #323130;
-}
-
-/* Subscription Fee card — two columns: left (label + price), right (Include: + plan name) */
-.subscriptionBlock {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 256px;
-  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Noto Sans", "Helvetica", "Arial", sans-serif;
-}
-
-.subscriptionColLeft {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-}
-
-.subscriptionColRight {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  text-align: left;
-  min-width: 0;
-}
-
-.subscriptionLabel {
-  font-size: 14px;
-  font-weight: 400;
-  color: #323130;
-  margin: 0;
-}
-
-.subscriptionPrice {
-  font-size: 28px;
-  font-weight: 600;
-  color: #323130;
-  margin: 0;
-}
-
-.subscriptionPlanName {
-  font-size: 14px;
-  font-weight: 600;
-  color: #323130;
-  margin: 0;
 }
 
 /* SMS/WhatsApp Cost card */

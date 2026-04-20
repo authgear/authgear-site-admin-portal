@@ -94,24 +94,11 @@ function isMonthKeyInFuture(monthKey: string): boolean {
 }
 
 
-const PLAN_FEE_LABELS: Record<string, string> = {
-  Free: "$0 /mo",
-  Developers: "$50 /mo",
-  Business: "$500 /mo",
-  Enterprise: "Custom Pricing",
-};
-
-function getSubscriptionFeeLabel(plan?: string): string {
-  if (!plan) return "—";
-  return PLAN_FEE_LABELS[plan] ?? plan;
-}
-
 interface UsageContentProps {
-  currentPlan?: string;
   appId: string;
 }
 
-const UsageContent: React.VFC<UsageContentProps> = ({ currentPlan, appId }) => {
+const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
   const [smsDateRangeKey, setSmsDateRangeKey] = useState<string>("last7");
   const [smsCustomStartDate, setSmsCustomStartDate] = useState<Date | null>(null);
   const [smsCustomEndDate, setSmsCustomEndDate] = useState<Date | null>(null);
@@ -262,39 +249,6 @@ const UsageContent: React.VFC<UsageContentProps> = ({ currentPlan, appId }) => {
 
   return (
     <div className={styles.root}>
-      {/* Subscription Fee — mock data (no API available) */}
-      <div className={`${styles.card} ${styles.cardSubscription}`}>
-        <div className={styles.subscriptionBlock}>
-          <div className={styles.subscriptionColLeft}>
-            <span className={styles.subscriptionLabel}>
-              Subscription Fee
-              <span style={{
-                display: "inline-block",
-                marginLeft: 8,
-                padding: "1px 6px",
-                fontSize: 11,
-                fontWeight: 600,
-                color: "#835b00",
-                backgroundColor: "#fce4b0",
-                borderRadius: 4,
-                verticalAlign: "middle",
-              }}>
-                Mock data
-              </span>
-            </span>
-            <span className={styles.subscriptionPrice}>
-              {getSubscriptionFeeLabel(currentPlan)}
-            </span>
-          </div>
-          <div className={styles.subscriptionColRight}>
-            <span className={styles.subscriptionLabel}>Include:</span>
-            <span className={styles.subscriptionPlanName}>
-              {currentPlan ? `${currentPlan} Plan` : "—"}
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* SMS/WhatsApp Cost (Estimated) */}
       <div className={styles.card}>
         <div className={styles.cardHeader}>

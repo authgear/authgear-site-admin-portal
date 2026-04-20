@@ -331,7 +331,7 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
             </>
           )}
           {selectedTab === "usage" && (
-            <UsageContent currentPlan={appDetail.plan} appId={appDetail.id} />
+            <UsageContent appId={appDetail.id} />
           )}
           {selectedTab === "plan" && (
             <PlanContent currentPlan={appDetail.plan} />
