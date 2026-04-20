@@ -83,6 +83,37 @@ function formatShortDate(d: Date): string {
 
 export const MAU_CAP = 25000;
 
+/** Format a count with 3 significant figures and a suffix (k/M/B/T) for ≥1000. */
+function formatCompactNumber(n: number): string {
+  if (n === 0) return "0";
+  const abs = Math.abs(n);
+  if (abs < 1000) return n.toLocaleString();
+  const units: Array<{ value: number; suffix: string }> = [
+    { value: 1e12, suffix: "T" },
+    { value: 1e9, suffix: "B" },
+    { value: 1e6, suffix: "M" },
+    { value: 1e3, suffix: "k" },
+  ];
+  for (const { value, suffix } of units) {
+    if (abs >= value) {
+      const scaled = n / value;
+      const str = scaled.toPrecision(3).replace(/\.?0+$/, "");
+      return `${str}${suffix}`;
+    }
+  }
+  return n.toString();
+}
+
+/** Round max up to a visually clean axis ceiling (1, 2, 2.5, 3, 5, 7.5, 10 × 10ⁿ). */
+function niceAxisCeiling(max: number): number {
+  if (max <= 0) return 10;
+  const pow = Math.pow(10, Math.floor(Math.log10(max)));
+  const frac = max / pow;
+  const steps = [1, 1.5, 2, 2.5, 3, 4, 5, 7.5, 10];
+  const niceFrac = steps.find((s) => frac <= s) ?? 10;
+  return niceFrac * pow;
+}
+
 /** True if monthKey is after the current calendar month (no data for future months) */
 function isMonthKeyInFuture(monthKey: string): boolean {
   const now = new Date();
@@ -227,9 +258,14 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
   }, [mauChartCounts, mauOverviewYear]);
 
   const mauOverviewMax = useMemo(
-    () => Math.max(1, ...mauMonthlyOverview.map((r) => r.mau)),
+    () => niceAxisCeiling(Math.max(1, ...mauMonthlyOverview.map((r) => r.mau))),
     [mauMonthlyOverview]
   );
+
+  /** 5 tick values from max down to 0 for the Y-axis (top-to-bottom). */
+  const mauOverviewTicks = useMemo(() => {
+    return [1, 0.75, 0.5, 0.25, 0].map((p) => Math.round(p * mauOverviewMax));
+  }, [mauOverviewMax]);
 
   useEffect(() => {
     if (showMonthPicker) setPickerYear(mauYear);
@@ -550,6 +586,13 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
           </div>
         )}
         <div className={styles.mauOverviewChart} role="img" aria-label={`Monthly Active Users for ${mauOverviewYear}`}>
+          <div className={styles.mauOverviewYAxis} aria-hidden>
+            {mauOverviewTicks.map((tick, i) => (
+              <span key={i} className={styles.mauOverviewYTick}>
+                {formatCompactNumber(tick)}
+              </span>
+            ))}
+          </div>
           <div className={styles.mauOverviewChartArea}>
             <div className={styles.mauOverviewBars}>
             {mauMonthlyOverview.map(({ monthKey, label, mau }) => {
@@ -564,6 +607,9 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
               const fillHeightPx = hasData ? (pct / 100) * barHeightPx : 0;
               return (
                 <div key={monthKey} className={styles.mauOverviewBarWrap}>
+                  <span className={styles.mauOverviewBarValue}>
+                    {hasData ? formatCompactNumber(mau) : "\u00A0"}
+                  </span>
                   <div
                     className={styles.mauOverviewBarTrack}
                     role="img"

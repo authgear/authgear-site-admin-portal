@@ -314,10 +314,9 @@
 .mauOverviewChart {
   display: flex;
   flex-direction: row;
-  align-items: stretch;
+  align-items: flex-end;
   gap: 12px;
   min-width: 0;
-  min-height: 160px;
 }
 
 .mauOverviewYAxis {
@@ -325,6 +324,9 @@
   flex-direction: column;
   justify-content: space-between;
   height: 140px;
+  /* Offset so the axis aligns with the bar track, not the full bar wrap
+     (which also stacks a value label on top and a month label below). */
+  margin-bottom: 24px; /* label height (16px) + gap (8px) */
   flex-shrink: 0;
   padding-right: 8px;
   border-right: 1px solid #edebe9;
@@ -333,7 +335,7 @@
 
 .mauOverviewYTick {
   font-family: "Segoe UI", sans-serif;
-  font-size: 11px;
+  font-size: 10px;
   color: #605e5c;
   line-height: 1;
 }
@@ -366,7 +368,6 @@
   display: flex;
   align-items: flex-end;
   justify-content: space-evenly;
-  height: 160px;
   min-width: 0;
   position: relative;
   z-index: 1;
@@ -417,6 +418,16 @@
   font-family: "Segoe UI", sans-serif;
   font-size: 11px;
   color: #605e5c;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.mauOverviewBarValue {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #323130;
+  line-height: 16px;
   text-align: center;
   white-space: nowrap;
 }
