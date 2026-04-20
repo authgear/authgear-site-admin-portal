@@ -2,28 +2,28 @@ import React from "react";
 import { Dropdown, IDropdownOption } from "@fluentui/react";
 import styles from "./PlanContent.module.css";
 
-const PLAN_KEYS = ["Free", "Developers", "Business", "Enterprise"] as const;
-
-const PLAN_OPTIONS: IDropdownOption[] = PLAN_KEYS.map((key) => ({
-  key,
-  text: key,
-}));
+const BASE_PLAN_KEYS = ["Free", "Developers", "Business", "Enterprise"] as const;
 
 interface PlanContentProps {
   currentPlan?: string;
 }
 
 const PlanContent: React.VFC<PlanContentProps> = ({ currentPlan }) => {
-  const effectiveCurrent =
-    currentPlan && (PLAN_KEYS as readonly string[]).includes(currentPlan)
-      ? currentPlan
-      : "Free";
+  const displayPlan = currentPlan && currentPlan.length > 0 ? currentPlan : "—";
+
+  const dropdownOptions: IDropdownOption[] = React.useMemo(() => {
+    const keys: string[] = [...BASE_PLAN_KEYS];
+    if (currentPlan && !keys.includes(currentPlan)) {
+      keys.unshift(currentPlan);
+    }
+    return keys.map((key) => ({ key, text: key }));
+  }, [currentPlan]);
 
   return (
     <div className={styles.root}>
       <div className={styles.currentPlanRow}>
         <span className={styles.currentPlanLabel}>Current Plan</span>
-        <span className={styles.currentPlanValue}>{effectiveCurrent}</span>
+        <span className={styles.currentPlanValue}>{displayPlan}</span>
       </div>
       <div className={styles.selectorRow}>
         <label htmlFor="plan-selector" className={styles.selectorLabel}>
@@ -31,8 +31,8 @@ const PlanContent: React.VFC<PlanContentProps> = ({ currentPlan }) => {
         </label>
         <Dropdown
           id="plan-selector"
-          options={PLAN_OPTIONS}
-          selectedKey={effectiveCurrent}
+          options={dropdownOptions}
+          selectedKey={currentPlan}
           disabled
           className={styles.planDropdown}
           styles={{
