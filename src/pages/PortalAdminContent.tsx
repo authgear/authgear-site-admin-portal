@@ -6,6 +6,7 @@ import {
   TextField,
   Spinner,
   SpinnerSize,
+  TooltipHost,
 } from "@fluentui/react";
 import { listAppCollaborators, addAppCollaborator, removeAppCollaborator } from "../api/siteadmin";
 import type { Collaborator } from "../api/types";
@@ -145,14 +146,22 @@ const PortalAdminContent: React.VFC<PortalAdminContentProps> = ({ appId }) => {
                     </span>
                   </td>
                   <td>
-                    <button
-                      type="button"
-                      className={styles.actionRemove}
-                      onClick={() => openRemoveModal(entry)}
-                      disabled={entry.role === "owner"}
+                    <TooltipHost
+                      content={
+                        entry.role === "owner"
+                          ? "Owners cannot be removed"
+                          : undefined
+                      }
                     >
-                      Remove
-                    </button>
+                      <button
+                        type="button"
+                        className={styles.actionRemove}
+                        onClick={() => openRemoveModal(entry)}
+                        disabled={entry.role === "owner"}
+                      >
+                        Remove
+                      </button>
+                    </TooltipHost>
                   </td>
                 </tr>
               ))}

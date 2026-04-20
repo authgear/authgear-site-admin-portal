@@ -93,6 +93,17 @@
   color: #c93535;
 }
 
+.actionRemove:disabled {
+  color: #a19f9d;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.actionRemove:disabled:hover {
+  text-decoration: none;
+  color: #a19f9d;
+}
+
 /* Invite modal */
 .inviteModalBody {
   margin-bottom: 20px;
