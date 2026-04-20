@@ -239,15 +239,21 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
             </button>
           </div>
           <div className={styles.projectMeta}>
-            <button
-              type="button"
-              onClick={copyEmail}
-              aria-label="Copy owner email"
-              className={styles.copyEmailBtn}
-            >
-              <span className={styles.metaText}>{appDetail.owner_email}</span>
-              <Icon iconName={copyEmailFeedback ? "CheckMark" : "Copy"} className={styles.copyEmailIcon} />
-            </button>
+            {appDetail.owner_email ? (
+              <button
+                type="button"
+                onClick={copyEmail}
+                aria-label="Copy owner email"
+                className={styles.copyEmailBtn}
+              >
+                <span className={styles.metaText}>{appDetail.owner_email}</span>
+                <Icon iconName={copyEmailFeedback ? "CheckMark" : "Copy"} className={styles.copyEmailIcon} />
+              </button>
+            ) : (
+              <span className={styles.metaText} style={{ fontStyle: "italic" }}>
+                No owner
+              </span>
+            )}
             <span className={styles.metaText}>
               Created at{" "}
               {new Date(appDetail.created_at).toLocaleDateString("en-US", {

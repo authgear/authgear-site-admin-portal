@@ -151,7 +151,13 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
         case "ownerEmail":
           return (
             <div className={styles.cellContentLeft}>
-              <Text className={styles.cellText}>{item.owner_email}</Text>
+              {item.owner_email ? (
+                <Text className={styles.cellText}>{item.owner_email}</Text>
+              ) : (
+                <Text className={styles.cellText} style={{ fontStyle: "italic" }}>
+                  No owner
+                </Text>
+              )}
             </div>
           );
         case "plan":
