@@ -1,28 +1,57 @@
-/**
- * Resolved runtime configuration.
- *
- * Set VITE_BASE_DOMAIN (e.g. authgear-staging.com) and the three service URLs
- * are derived automatically:
- *   endpoint  → https://accounts.portal.<base>
- *   portalUrl → portal.<base>
- *   apiUrl    → https://siteadmin.<base>
- *
- * Any of the three can be overridden individually via their own VITE_* var.
- */
+type RuntimeConfig = {
+  baseDomain: string;
+  authgearEndpoint: string;
+  authgearClientID: string;
+  authgearRedirectURL: string;
+  portalURL: string;
+  siteadminAPIURL: string;
+};
 
-const base: string = import.meta.env.VITE_BASE_DOMAIN ?? "";
+const firstNonEmpty = (...values: Array<string | undefined>): string | undefined =>
+  values.find((value) => value != null && value !== "");
+
+const runtimeConfig: RuntimeConfig | null = import.meta.env.DEV
+  ? null
+  : window.__config;
+
+const baseDomain: string =
+  firstNonEmpty(
+    import.meta.env.DEV ? import.meta.env.VITE_BASE_DOMAIN : undefined,
+    runtimeConfig?.baseDomain
+  ) ?? "";
 
 export const AUTHGEAR_ENDPOINT: string =
-  import.meta.env.VITE_AUTHGEAR_ENDPOINT ?? `https://accounts.portal.${base}`;
+  firstNonEmpty(
+    import.meta.env.DEV ? import.meta.env.VITE_AUTHGEAR_ENDPOINT : undefined,
+    runtimeConfig?.authgearEndpoint
+  ) ?? `https://accounts.portal.${baseDomain}`;
 
 export const AUTHGEAR_CLIENT_ID: string =
-  import.meta.env.VITE_AUTHGEAR_CLIENT_ID ?? "siteadmin";
+  firstNonEmpty(
+    import.meta.env.DEV ? import.meta.env.VITE_AUTHGEAR_CLIENT_ID : undefined,
+    runtimeConfig?.authgearClientID
+  ) ?? "siteadmin";
 
 export const AUTHGEAR_REDIRECT_URL: string =
-  import.meta.env.VITE_AUTHGEAR_REDIRECT_URL ?? `${window.location.origin}/auth-redirect`;
+  firstNonEmpty(
+    import.meta.env.DEV ? import.meta.env.VITE_AUTHGEAR_REDIRECT_URL : undefined,
+    runtimeConfig?.authgearRedirectURL
+  ) ?? `${window.location.origin}/auth-redirect`;
 
 export const PORTAL_URL: string =
-  import.meta.env.VITE_PORTAL_URL ?? `portal.${base}`;
+  firstNonEmpty(
+    import.meta.env.DEV ? import.meta.env.VITE_PORTAL_URL : undefined,
+    runtimeConfig?.portalURL
+  ) ?? `portal.${baseDomain}`;
 
 export const SITEADMIN_API_URL: string =
-  import.meta.env.VITE_SITEADMIN_API_URL ?? `https://siteadmin.${base}`;
+  firstNonEmpty(
+    import.meta.env.DEV ? import.meta.env.VITE_SITEADMIN_API_URL : undefined,
+    runtimeConfig?.siteadminAPIURL
+  ) ?? `https://siteadmin.${baseDomain}`;
+
+declare global {
+  interface Window {
+    __config: RuntimeConfig;
+  }
+}

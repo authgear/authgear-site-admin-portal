@@ -35,6 +35,22 @@ npm run build    # Production build
 npm run lint     # ESLint
 ```
 
+### Docker Deployment
+
+```bash
+docker build -t authgear-site-admin-portal .
+```
+
+Run the same image in any environment by passing config at container startup:
+
+```bash
+docker run --rm -p 8080:80 \
+  -e VITE_BASE_DOMAIN=your-deployment.example.com \
+  authgear-site-admin-portal
+```
+
+Override individual `VITE_*` values if needed.
+
 ## Tech Stack
 
 - React 18, TypeScript 5, Vite 5
