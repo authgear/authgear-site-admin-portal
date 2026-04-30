@@ -3,7 +3,7 @@ name: Push image
 on:
   push:
     branches:
-      - deployment
+      - main
   workflow_dispatch:
 
 jobs:
