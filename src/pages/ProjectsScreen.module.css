@@ -63,7 +63,7 @@
 
 .listContainer {
   @apply flex flex-col relative;
-  min-width: 900px;
+  min-width: 960px;
   overflow-x: auto;
   overflow-y: visible;
 }
@@ -74,7 +74,7 @@
   flex-direction: row;
   align-items: center;
   justify-content: flex-end;
-  min-width: 900px;
+  min-width: 960px;
   margin: 12px 0 0 0;
   padding-top: 16px;
   padding-right: 12px;
@@ -151,7 +151,7 @@
 /* Header and row use same column widths (must match COLUMN_WIDTHS in TeamsScreen.tsx) */
 .tableHeader {
   display: flex;
-  min-width: 900px;
+  min-width: 960px;
   border-bottom: 1px solid #edebe9;
   background-color: #ffffff;
 }
@@ -171,7 +171,7 @@
 }
 
 .list {
-  min-width: 900px;
+  min-width: 960px;
   width: 100%;
 }
 
@@ -183,7 +183,7 @@
 /* Ensure Fluent UI DetailsList and its viewport don't clip the header */
 :global(.ms-DetailsList),
 :global(.ms-DetailsList .ms-Viewport) {
-  min-width: 900px;
+  min-width: 960px;
 }
 
 :global(.ms-DetailsList .ms-DetailsHeader-wrapper) {
@@ -261,8 +261,27 @@
 :global(.ms-DetailsRow-cell:nth-child(1)),
 :global(.ms-DetailsRow-cell:nth-child(2)),
 :global(.ms-DetailsRow-cell:nth-child(3)),
+:global(.ms-DetailsRow-cell:nth-child(5)) {
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
+}
+
 :global(.ms-DetailsRow-cell:nth-child(4)) {
-  width: 225px !important;
-  min-width: 225px !important;
-  max-width: 225px !important;
+  width: 160px !important;
+  min-width: 160px !important;
+  max-width: 160px !important;
+}
+
+.tableHeaderSortable {
+  background: none;
+  border: none;
+  padding: 12px;
+  cursor: pointer;
+  color: inherit;
+  text-align: left;
+}
+
+.tableHeaderSortable:hover {
+  background-color: #f3f2f1;
 }

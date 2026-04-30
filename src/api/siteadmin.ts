@@ -5,12 +5,14 @@
  */
 import { apiRequest } from "./client";
 import type {
+  App,
   AppDetail,
   AppsListResponse,
   Collaborator,
   CollaboratorsListResponse,
   MessagingUsage,
   MonthlyActiveUsersUsage,
+  PlansListResponse,
 } from "./types";
 
 // ─── Apps ─────────────────────────────────────────────────────────────────────
@@ -20,6 +22,9 @@ export interface ListAppsParams {
   page_size?: number;
   app_id?: string;
   owner_email?: string;
+  plan?: string;
+  sort?: "created_at" | "mau";
+  order?: "asc" | "desc";
 }
 
 export function listApps(params?: ListAppsParams): Promise<AppsListResponse> {
@@ -28,6 +33,9 @@ export function listApps(params?: ListAppsParams): Promise<AppsListResponse> {
   if (params?.page_size != null) qs.set("page_size", String(params.page_size));
   if (params?.app_id) qs.set("app_id", params.app_id);
   if (params?.owner_email) qs.set("owner_email", params.owner_email);
+  if (params?.plan) qs.set("plan", params.plan);
+  if (params?.sort) qs.set("sort", params.sort);
+  if (params?.order) qs.set("order", params.order);
   const query = qs.toString();
   return apiRequest(`/api/v1/apps${query ? `?${query}` : ""}`);
 }
@@ -99,4 +107,18 @@ export function getAppMonthlyActiveUsers(
   return apiRequest(
     `/api/v1/apps/${encodeURIComponent(appId)}/usage/monthly-active-users?${qs}`
   );
+}
+
+// ─── Plans ────────────────────────────────────────────────────────────────────
+
+export function listPlans(): Promise<PlansListResponse> {
+  return apiRequest(`/api/v1/plans`);
+}
+
+export function changeAppPlan(appId: string, planName: string): Promise<App> {
+  return apiRequest(`/api/v1/apps/${encodeURIComponent(appId)}/plan`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ plan_name: planName }),
+  });
 }

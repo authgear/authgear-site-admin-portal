@@ -13,13 +13,14 @@ import {
   SearchBox,
   CommandButton,
   Text,
+  Icon,
   IconButton,
   IListProps,
   MessageBar,
   MessageBarType,
 } from "@fluentui/react";
 import ScreenTitle from "../components/ScreenTitle";
-import { listApps, type ListAppsParams } from "../api/siteadmin";
+import { listApps, listPlans, type ListAppsParams } from "../api/siteadmin";
 import { SiteAdminAPIError } from "../api/client";
 import type { App } from "../api/types";
 
@@ -30,11 +31,12 @@ function onShouldVirtualize(_: IListProps): boolean {
 }
 
 /* Single source of truth for column widths - header and content must match (equal width) */
-const COLUMN_WIDTH = 225;
+const COLUMN_WIDTH = 200;
 const COLUMN_WIDTHS = {
   projectName: COLUMN_WIDTH,
   ownerEmail: COLUMN_WIDTH,
   plan: COLUMN_WIDTH,
+  lastMonthMau: 160,
   createdAt: COLUMN_WIDTH,
 } as const;
 
@@ -66,6 +68,11 @@ const SEARCH_BY_OPTIONS: IDropdownOption[] = [
   { key: "ownerEmail", text: "Owner Email" },
 ];
 
+const ALL_PLANS_KEY = "__all__";
+
+type SortKey = "created_at" | "mau";
+type SortOrder = "asc" | "desc";
+
 interface ProjectNameCellProps {
   item: App;
 }
@@ -85,15 +92,42 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
   const [error, setError] = useState<SiteAdminAPIError | null>(null);
   const [searchBy, setSearchBy] = useState<string>("projectId");
   const [searchText, setSearchText] = useState<string>("");
+  const [planFilter, setPlanFilter] = useState<string>(ALL_PLANS_KEY);
+  const [sortKey, setSortKey] = useState<SortKey>("created_at");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [currentPage, setCurrentPage] = useState(1);
+  const [planOptions, setPlanOptions] = useState<IDropdownOption[]>([
+    { key: ALL_PLANS_KEY, text: "All plans" },
+  ]);
+
+  useEffect(() => {
+    listPlans()
+      .then((res) => {
+        setPlanOptions([
+          { key: ALL_PLANS_KEY, text: "All plans" },
+          ...res.plans.map((p) => ({ key: p.name, text: p.name })),
+        ]);
+      })
+      .catch(() => {
+        // Keep default "All plans" option only.
+      });
+  }, []);
 
   useEffect(() => {
     setLoading(true);
     setError(null);
-    const params: ListAppsParams = { page: currentPage, page_size: PAGE_SIZE };
+    const params: ListAppsParams = {
+      page: currentPage,
+      page_size: PAGE_SIZE,
+      sort: sortKey,
+      order: sortOrder,
+    };
     if (searchText.trim()) {
       if (searchBy === "projectId") params.app_id = searchText.trim();
       else if (searchBy === "ownerEmail") params.owner_email = searchText.trim();
+    }
+    if (planFilter !== ALL_PLANS_KEY) {
+      params.plan = planFilter;
     }
     listApps(params)
       .then((res) => {
@@ -102,7 +136,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
       })
       .catch((err: SiteAdminAPIError) => setError(err))
       .finally(() => setLoading(false));
-  }, [currentPage, searchBy, searchText]);
+  }, [currentPage, searchBy, searchText, planFilter, sortKey, sortOrder]);
 
   const columns: IColumn[] = useMemo(() => [
     {
@@ -128,6 +162,15 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
       name: "Plan",
       minWidth: COLUMN_WIDTHS.plan,
       maxWidth: COLUMN_WIDTHS.plan,
+      columnActionsMode: ColumnActionsMode.disabled,
+      cellClassName: styles.cellAlignLeft,
+    },
+    {
+      key: "lastMonthMau",
+      fieldName: "last_month_mau",
+      name: "Last Month MAU",
+      minWidth: COLUMN_WIDTHS.lastMonthMau,
+      maxWidth: COLUMN_WIDTHS.lastMonthMau,
       columnActionsMode: ColumnActionsMode.disabled,
       cellClassName: styles.cellAlignLeft,
     },
@@ -187,6 +230,14 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
               <Text className={styles.cellText}>{item.plan}</Text>
             </div>
           );
+        case "lastMonthMau":
+          return (
+            <div className={styles.cellContentLeft}>
+              <Text className={styles.cellText}>
+                {item.last_month_mau.toLocaleString()}
+              </Text>
+            </div>
+          );
         case "createdAt":
           return (
             <Text className={styles.cellText}>
@@ -199,6 +250,28 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
     },
     []
   );
+
+  const onPlanFilterChange = useCallback(
+    (_event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption) => {
+      if (option) {
+        setPlanFilter(option.key as string);
+        setCurrentPage(1);
+      }
+    },
+    []
+  );
+
+  const onToggleSort = useCallback((key: SortKey) => {
+    setCurrentPage(1);
+    setSortKey((prevKey) => {
+      if (prevKey === key) return prevKey;
+      return key;
+    });
+    setSortOrder((prevOrder) => {
+      // If switching to a different key, reset to desc; otherwise toggle.
+      return sortKey === key ? (prevOrder === "asc" ? "desc" : "asc") : "desc";
+    });
+  }, [sortKey]);
 
   const onSearchByChange = useCallback(
     (_event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption) => {
@@ -220,6 +293,9 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
 
   const onClearFilters = useCallback(() => {
     setSearchText("");
+    setPlanFilter(ALL_PLANS_KEY);
+    setSortKey("created_at");
+    setSortOrder("desc");
     setCurrentPage(1);
   }, []);
 
@@ -248,6 +324,13 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
               value={searchText}
               onChange={onSearchChange}
             />
+            <Text className={styles.searchByLabel}>Plan</Text>
+            <Dropdown
+              className={styles.searchByDropdown}
+              options={planOptions}
+              selectedKey={planFilter}
+              onChange={onPlanFilterChange}
+            />
             <CommandButton
               className={styles.clearButton}
               text="Clear all filters"
@@ -275,12 +358,38 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
               >
                 Plan
               </div>
-              <div
-                className={styles.tableHeaderCell}
+              <button
+                type="button"
+                className={`${styles.tableHeaderCell} ${styles.tableHeaderSortable}`}
+                style={{ width: COLUMN_WIDTHS.lastMonthMau }}
+                onClick={() => onToggleSort("mau")}
+                aria-label="Sort by Last Month MAU"
+              >
+                Last Month MAU
+                {sortKey === "mau" && (
+                  <Icon
+                    iconName={sortOrder === "asc" ? "SortUp" : "SortDown"}
+                    className={styles.sortIcon}
+                    style={{ marginLeft: 4 }}
+                  />
+                )}
+              </button>
+              <button
+                type="button"
+                className={`${styles.tableHeaderCell} ${styles.tableHeaderSortable}`}
                 style={{ width: COLUMN_WIDTHS.createdAt }}
+                onClick={() => onToggleSort("created_at")}
+                aria-label="Sort by Created at"
               >
                 Created at
-              </div>
+                {sortKey === "created_at" && (
+                  <Icon
+                    iconName={sortOrder === "asc" ? "SortUp" : "SortDown"}
+                    className={styles.sortIcon}
+                    style={{ marginLeft: 4 }}
+                  />
+                )}
+              </button>
             </div>
             <ShimmeredDetailsList
               className={styles.list}

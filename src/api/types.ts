@@ -21,6 +21,7 @@ export interface App {
   owner_email: string;
   plan: string;
   created_at: string; // RFC 3339
+  last_month_mau: number;
 }
 
 export interface AppDetail extends App {
@@ -74,4 +75,18 @@ export interface MonthlyActiveUsersCount {
 
 export interface MonthlyActiveUsersUsage {
   counts: MonthlyActiveUsersCount[];
+}
+
+// ─── Plans ────────────────────────────────────────────────────────────────────
+
+export interface Plan {
+  name: string;
+}
+
+export interface PlansListResponse {
+  plans: Plan[];
+}
+
+export interface ChangeAppPlanRequest {
+  plan_name: string;
 }

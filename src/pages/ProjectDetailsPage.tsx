@@ -340,7 +340,13 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
             <UsageContent appId={appDetail.id} />
           )}
           {selectedTab === "plan" && (
-            <PlanContent currentPlan={appDetail.plan} />
+            <PlanContent
+              appId={appDetail.id}
+              currentPlan={appDetail.plan}
+              onPlanChanged={(planName) =>
+                setAppDetail((prev) => (prev ? { ...prev, plan: planName } : prev))
+              }
+            />
           )}
           {selectedTab === "portalAdmin" && (
             <PortalAdminContent appId={appDetail.id} />
