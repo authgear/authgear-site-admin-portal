@@ -1,0 +1,40 @@
+name: Push image
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  image:
+    if: ${{ github.repository == 'authgear/authgear-site-admin-portal' }}
+    runs-on: ubuntu-24.04
+    env:
+      IMAGE_NAME: quay.io/theauthgear/authgear-site-admin-portal
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        shell: bash
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          git_hash="git-${GITHUB_SHA::12}"
+          docker build --pull --tag "${IMAGE_NAME}:${git_hash}" .
+
+      - uses: docker/login-action@v3
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_ROBOT_TOKEN }}
+
+      - name: Push image
+        shell: bash
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          git_hash="git-${GITHUB_SHA::12}"
+          docker push "${IMAGE_NAME}:${git_hash}"

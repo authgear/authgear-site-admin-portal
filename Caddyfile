@@ -1,0 +1,21 @@
+:{$PORT:80} {
+	handle /assets/* {
+		encode gzip
+		root * {$ROOT_PATH:/srv}
+		file_server
+		header Cache-Control "public, max-age=604800"
+	}
+
+	handle {
+		encode gzip
+		root * {$ROOT_PATH:/srv}
+		try_files {path} /index.html
+		templates
+		file_server
+		header Cache-Control "no-cache"
+	}
+
+	handle_errors {
+		header Cache-Control "no-cache"
+	}
+}

@@ -10,6 +10,16 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+    <script>
+      window.__config = {
+        baseDomain: "{{ env `VITE_BASE_DOMAIN` }}",
+        authgearEndpoint: "{{ env `VITE_AUTHGEAR_ENDPOINT` }}",
+        authgearClientID: "{{ env `VITE_AUTHGEAR_CLIENT_ID` }}",
+        authgearRedirectURL: "{{ env `VITE_AUTHGEAR_REDIRECT_URL` }}",
+        portalURL: "{{ env `VITE_PORTAL_URL` }}",
+        siteadminAPIURL: "{{ env `VITE_SITEADMIN_API_URL` }}",
+      };
+    </script>
     <script type="module" src="/src/index.tsx"></script>
   </body>
 </html>
