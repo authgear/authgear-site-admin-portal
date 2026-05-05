@@ -6,9 +6,13 @@ import {
   TextField,
   Spinner,
   SpinnerSize,
-  TooltipHost,
 } from "@fluentui/react";
-import { listAppCollaborators, addAppCollaborator, removeAppCollaborator } from "../api/siteadmin";
+import {
+  listAppCollaborators,
+  addAppCollaborator,
+  removeAppCollaborator,
+  promoteAppCollaborator,
+} from "../api/siteadmin";
 import type { Collaborator } from "../api/types";
 import styles from "./PortalAdminContent.module.css";
 
@@ -24,10 +28,15 @@ const PortalAdminContent: React.VFC<PortalAdminContentProps> = ({ appId }) => {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<Collaborator | null>(null);
+  const [showPromoteModal, setShowPromoteModal] = useState(false);
+  const [promoteTarget, setPromoteTarget] = useState<Collaborator | null>(null);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviting, setInviting] = useState(false);
   const [removing, setRemoving] = useState(false);
+  const [promoting, setPromoting] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+
+  const currentOwner = collaborators.find((c) => c.role === "owner") ?? null;
 
   const reload = useCallback(() => {
     setLoading(true);
@@ -71,6 +80,34 @@ const PortalAdminContent: React.VFC<PortalAdminContentProps> = ({ appId }) => {
         setActionError(msg);
       })
       .finally(() => setRemoving(false));
+  };
+
+  const openPromoteModal = (entry: Collaborator) => {
+    setPromoteTarget(entry);
+    setActionError(null);
+    setShowPromoteModal(true);
+  };
+
+  const closePromoteModal = () => {
+    setShowPromoteModal(false);
+    setPromoteTarget(null);
+    setActionError(null);
+  };
+
+  const confirmPromote = () => {
+    if (!promoteTarget) return;
+    setPromoting(true);
+    setActionError(null);
+    promoteAppCollaborator(appId, promoteTarget.id)
+      .then(() => {
+        closePromoteModal();
+        reload();
+      })
+      .catch((e: unknown) => {
+        const msg = e instanceof Error ? e.message : "Failed to promote collaborator.";
+        setActionError(msg);
+      })
+      .finally(() => setPromoting(false));
   };
 
   const openInviteModal = () => {
@@ -146,22 +183,24 @@ const PortalAdminContent: React.VFC<PortalAdminContentProps> = ({ appId }) => {
                     </span>
                   </td>
                   <td>
-                    <TooltipHost
-                      content={
-                        entry.role === "owner"
-                          ? "Owners cannot be removed"
-                          : undefined
-                      }
-                    >
+                    <div className={styles.actionCell}>
+                      {entry.role !== "owner" && (
+                        <button
+                          type="button"
+                          className={styles.actionPromote}
+                          onClick={() => openPromoteModal(entry)}
+                        >
+                          Promote to Owner
+                        </button>
+                      )}
                       <button
                         type="button"
                         className={styles.actionRemove}
                         onClick={() => openRemoveModal(entry)}
-                        disabled={entry.role === "owner"}
                       >
                         Remove
                       </button>
-                    </TooltipHost>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -232,6 +271,61 @@ const PortalAdminContent: React.VFC<PortalAdminContentProps> = ({ appId }) => {
         </div>
       </Modal>
 
+      {/* Promote confirmation modal */}
+      <Modal
+        isOpen={showPromoteModal}
+        onDismiss={closePromoteModal}
+        isBlocking={false}
+        styles={{ main: { maxWidth: 440, width: "90%" } }}
+      >
+        <div style={{ padding: 24 }}>
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 600,
+              color: "#323130",
+              marginBottom: 12,
+            }}
+          >
+            Promote to Owner
+          </div>
+          <p className={styles.removeModalMessage}>
+            Are you sure you want to promote{" "}
+            <span className={styles.removeModalEmail}>
+              {promoteTarget?.user_email ?? ""}
+            </span>{" "}
+            to project owner?
+            {currentOwner ? (
+              <>
+                {" "}The current owner{" "}
+                <span className={styles.removeModalEmail}>
+                  {currentOwner.user_email}
+                </span>{" "}
+                will be demoted to editor.
+              </>
+            ) : null}
+          </p>
+          {actionError && (
+            <p style={{ margin: "8px 0 0", fontSize: 13, color: "#a4262c" }}>{actionError}</p>
+          )}
+          <div className={styles.removeModalButtons}>
+            <DefaultButton
+              text="Cancel"
+              onClick={closePromoteModal}
+              styles={{ root: { borderColor: "#edebe9", color: "#323130" } }}
+            />
+            <PrimaryButton
+              text="Promote"
+              onClick={confirmPromote}
+              disabled={promoting}
+              styles={{
+                root: { backgroundColor: "#176df3", borderColor: "#176df3" },
+              }}
+            />
+          </div>
+        </div>
+      </Modal>
+
       {/* Remove confirmation modal */}
       <Modal
         isOpen={showRemoveModal}
@@ -257,6 +351,12 @@ const PortalAdminContent: React.VFC<PortalAdminContentProps> = ({ appId }) => {
             </span>{" "}
             from the portal admins? They will no longer be able to sign in or
             manage this project.
+            {removeTarget?.role === "owner" ? (
+              <>
+                {" "}This will leave the project without an owner until another
+                collaborator is promoted.
+              </>
+            ) : null}
           </p>
           {actionError && (
             <p style={{ margin: "8px 0 0", fontSize: 13, color: "#a4262c" }}>{actionError}</p>

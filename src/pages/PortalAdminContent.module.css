@@ -77,6 +77,28 @@
   font-weight: 500;
 }
 
+.actionCell {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.actionPromote {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 12px;
+  color: #176df3;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+}
+
+.actionPromote:hover {
+  text-decoration: underline;
+  color: #1259cc;
+}
+
 .actionRemove {
   font-family: "Segoe UI", sans-serif;
   font-size: 12px;
