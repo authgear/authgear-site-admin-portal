@@ -278,6 +278,37 @@ describe("siteadmin API functions", () => {
     });
   });
 
+  describe("promoteAppCollaborator", () => {
+    it("should POST to the promote endpoint with the correct path", async () => {
+      const mockResponse = {
+        id: "collab1",
+        user_email: "new-owner@example.com",
+        role: "owner",
+        invited_at: "2024-01-01T00:00:00Z",
+      };
+      mockApiRequest.mockResolvedValue(mockResponse);
+
+      const result = await siteadmin.promoteAppCollaborator("app1", "collab1");
+
+      expect(mockApiRequest).toHaveBeenCalledWith(
+        "/api/v1/apps/app1/collaborators/collab1/promote",
+        { method: "POST" }
+      );
+      expect(result).toEqual(mockResponse);
+    });
+
+    it("should encode both app ID and collaborator ID", async () => {
+      mockApiRequest.mockResolvedValue({});
+
+      await siteadmin.promoteAppCollaborator("app/1", "collab/1");
+
+      expect(mockApiRequest).toHaveBeenCalledWith(
+        "/api/v1/apps/app%2F1/collaborators/collab%2F1/promote",
+        { method: "POST" }
+      );
+    });
+  });
+
   describe("getAppMessagingUsage", () => {
     it("should call apiRequest with date range parameters", async () => {
       mockApiRequest.mockResolvedValue({
