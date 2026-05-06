@@ -18,8 +18,7 @@ import PlanContent from "./PlanContent";
 import PortalAdminContent from "./PortalAdminContent";
 import styles from "./ProjectDetailsPage.module.css";
 
-const TAB_KEYS = ["overview", "usage", "plan", "portalAdmin"] as const;
-type TabKey = (typeof TAB_KEYS)[number];
+type TabKey = "overview" | "usage" | "plan" | "portalAdmin";
 
 /** URL hash segment for each tab */
 const TAB_KEY_TO_HASH: Record<TabKey, string> = {

@@ -98,6 +98,7 @@ export const AuthgearProvider: React.FC<{ children: React.ReactNode }> =
     );
   };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuthgear(): AuthgearContextValue {
   return useContext(AuthgearContext);
 }
