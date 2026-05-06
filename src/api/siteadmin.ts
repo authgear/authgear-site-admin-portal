@@ -73,6 +73,16 @@ export function removeAppCollaborator(
   );
 }
 
+export function promoteAppCollaborator(
+  appId: string,
+  collaboratorId: string
+): Promise<Collaborator> {
+  return apiRequest(
+    `/api/v1/apps/${encodeURIComponent(appId)}/collaborators/${encodeURIComponent(collaboratorId)}/promote`,
+    { method: "POST" }
+  );
+}
+
 // ─── Usage ────────────────────────────────────────────────────────────────────
 
 export function getAppMessagingUsage(
