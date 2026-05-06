@@ -276,3 +276,78 @@
   color: #323130;
   margin: 0;
 }
+
+.smsTrendDivider {
+  height: 1px;
+  background-color: #edebe9;
+  margin: 24px 0;
+  width: 100%;
+}
+
+.smsTrendHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.smsTrendTitle {
+  font-family: var(--font-family-base);
+  font-size: 14px;
+  font-weight: 400;
+  color: #323130;
+  margin: 0;
+}
+
+.smsTrendYearPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 16px;
+  min-width: 220px;
+  background-color: #ffffff;
+}
+
+.smsTrendYearRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.smsTrendYearText {
+  font-family: var(--font-family-base);
+  font-size: 18px;
+  font-weight: 600;
+  color: #323130;
+}
+
+.smsTrendYearArrows {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.smsTrendGoToCurrentWrap {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.smsTrendGoToCurrent {
+  font-family: var(--font-family-base);
+  font-size: 14px;
+  color: #176df3;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  text-decoration: none;
+}
+
+.smsTrendGoToCurrent:hover {
+  text-decoration: underline;
+  color: #1562db;
+}

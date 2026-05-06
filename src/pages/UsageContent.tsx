@@ -80,6 +80,28 @@ function getEffectiveDateRange(
   return { start: toDateStr(start), end: toDateStr(now) };
 }
 
+/** Returns 12 { start, end } YYYY-MM-DD ranges for each month of the given year. */
+function getMonthRangesForYear(year: number): Array<{
+  start: string;
+  end: string;
+  monthKey: string;
+  monthIndex: number;
+}> {
+  const toDateStr = (d: Date) => d.toISOString().slice(0, 10);
+  return Array.from({ length: 12 }, (_, i) => {
+    const month = i + 1;
+    const start = new Date(Date.UTC(year, i, 1));
+    // Day 0 of next month = last day of current month.
+    const end = new Date(Date.UTC(year, i + 1, 0));
+    return {
+      start: toDateStr(start),
+      end: toDateStr(end),
+      monthKey: `${year}-${String(month).padStart(2, "0")}`,
+      monthIndex: i,
+    };
+  });
+}
+
 function getSmsDateRangeLabel(
   rangeKey: string,
   customStart?: Date | null,
@@ -141,6 +163,17 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
   const mauOverviewYearTriggerRef = useRef<HTMLDivElement>(null);
   const [mauOverviewYearTargetRect, setMauOverviewYearTargetRect] =
     useState<DOMRect | null>(null);
+
+  const [smsTrendYear, setSmsTrendYear] = useState(() =>
+    new Date().getFullYear()
+  );
+  const [showSmsTrendYearPicker, setShowSmsTrendYearPicker] = useState(false);
+  const smsTrendYearTriggerRef = useRef<HTMLDivElement>(null);
+  const [smsTrendYearTargetRect, setSmsTrendYearTargetRect] =
+    useState<DOMRect | null>(null);
+
+  const [smsTrendCounts, setSmsTrendCounts] = useState<number[]>([]);
+  const [smsTrendLoading, setSmsTrendLoading] = useState(false);
 
   // API state: messaging usage
   const [messagingUsage, setMessagingUsage] = useState<MessagingUsage | null>(
@@ -211,6 +244,36 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
       .finally(() => setMauChartLoading(false));
   }, [appId, mauOverviewYear]);
 
+  // Fetch SMS trend for selected year
+  useEffect(() => {
+    setSmsTrendLoading(true);
+    setSmsTrendCounts([]);
+    const ranges = getMonthRangesForYear(smsTrendYear);
+    const now = new Date();
+    // Only fetch up to and including the current month; future months get 0.
+    const fetchable = ranges.filter(
+      (r) =>
+        smsTrendYear < now.getFullYear() ||
+        (smsTrendYear === now.getFullYear() && r.monthIndex <= now.getMonth())
+    );
+    Promise.all(
+      fetchable.map((r) =>
+        getAppMessagingUsage(appId, r.start, r.end)
+          .then((u) => ({
+            monthIndex: r.monthIndex,
+            count: u.sms_north_america_count + u.sms_other_regions_count,
+          }))
+          .catch(() => ({ monthIndex: r.monthIndex, count: 0 }))
+      )
+    )
+      .then((results) => {
+        const arr = new Array(12).fill(0);
+        for (const { monthIndex, count } of results) arr[monthIndex] = count;
+        setSmsTrendCounts(arr);
+      })
+      .finally(() => setSmsTrendLoading(false));
+  }, [appId, smsTrendYear]);
+
   const smsDateRangeText = useMemo(
     () =>
       getSmsDateRangeLabel(
@@ -249,6 +312,13 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
 
   const mauCurrentCount = mauCardCount ?? 0;
   const mauPercent = Math.min(100, (mauCurrentCount / MAU_CAP) * 100);
+
+  const smsTrendData = useMemo(() => {
+    return Array.from({ length: 12 }, (_, i) => {
+      const monthKey = `${smsTrendYear}-${String(i + 1).padStart(2, "0")}`;
+      return { monthKey, value: smsTrendCounts[i] ?? 0 };
+    });
+  }, [smsTrendCounts, smsTrendYear]);
 
   // Derive chart rows from API response
   const mauMonthlyOverview = useMemo(() => {
@@ -352,6 +422,109 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
           <p style={{ fontSize: 13, color: "#797775", margin: "8px 0" }}>
             No data available.
           </p>
+        )}
+
+        <div className={styles.smsTrendDivider} aria-hidden />
+
+        <div className={styles.smsTrendHeader}>
+          <h3 className={styles.smsTrendTitle}>SMS trend</h3>
+          <div
+            ref={smsTrendYearTriggerRef}
+            className={styles.mauMonthWrap}
+            role="button"
+            tabIndex={0}
+            aria-haspopup="dialog"
+            aria-expanded={showSmsTrendYearPicker}
+            aria-label={`SMS trend year: ${smsTrendYear}. Click to choose year.`}
+            onClick={() => {
+              if (!showSmsTrendYearPicker && smsTrendYearTriggerRef.current) {
+                setSmsTrendYearTargetRect(
+                  smsTrendYearTriggerRef.current.getBoundingClientRect()
+                );
+              }
+              setShowSmsTrendYearPicker((v) => !v);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                if (!showSmsTrendYearPicker && smsTrendYearTriggerRef.current) {
+                  setSmsTrendYearTargetRect(
+                    smsTrendYearTriggerRef.current.getBoundingClientRect()
+                  );
+                }
+                setShowSmsTrendYearPicker((v) => !v);
+              }
+            }}
+          >
+            <span className={styles.mauMonthTriggerText}>{smsTrendYear}</span>
+            <Icon iconName="Calendar" className={styles.mauMonthTriggerIcon} />
+          </div>
+        </div>
+        {showSmsTrendYearPicker &&
+          (smsTrendYearTargetRect ?? smsTrendYearTriggerRef.current) && (
+            <Callout
+              target={smsTrendYearTargetRect ?? smsTrendYearTriggerRef.current!}
+              onDismiss={() => {
+                setShowSmsTrendYearPicker(false);
+                setSmsTrendYearTargetRect(null);
+              }}
+              directionalHint={DirectionalHint.bottomRightEdge}
+              directionalHintFixed
+              isBeakVisible={false}
+              gapSpace={4}
+            >
+              <div className={styles.smsTrendYearPanel}>
+                <div className={styles.smsTrendYearRow}>
+                  <span className={styles.smsTrendYearText}>
+                    {smsTrendYear}
+                  </span>
+                  <div className={styles.smsTrendYearArrows}>
+                    <IconButton
+                      iconProps={{ iconName: "ChevronUp" }}
+                      ariaLabel="Previous year"
+                      onClick={() => setSmsTrendYear((y) => y - 1)}
+                      styles={{
+                        root: { width: 24, height: 24 },
+                        icon: { fontSize: 12, color: "#323130" },
+                      }}
+                    />
+                    <IconButton
+                      iconProps={{ iconName: "ChevronDown" }}
+                      ariaLabel="Next year"
+                      onClick={() => setSmsTrendYear((y) => y + 1)}
+                      styles={{
+                        root: { width: 24, height: 24 },
+                        icon: { fontSize: 12, color: "#323130" },
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className={styles.smsTrendGoToCurrentWrap}>
+                  <button
+                    type="button"
+                    className={styles.smsTrendGoToCurrent}
+                    onClick={() => {
+                      setSmsTrendYear(new Date().getFullYear());
+                      setShowSmsTrendYearPicker(false);
+                    }}
+                  >
+                    Go to current year
+                  </button>
+                </div>
+              </div>
+            </Callout>
+          )}
+        {smsTrendLoading ? (
+          <div style={{ padding: "8px 0" }}>
+            <Spinner size={SpinnerSize.small} />
+          </div>
+        ) : (
+          <MonthlyBarChart
+            year={smsTrendYear}
+            data={smsTrendData}
+            unit="SMS messages"
+            ariaLabel={`SMS messages by month for ${smsTrendYear}`}
+          />
         )}
       </div>
 
