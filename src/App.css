@@ -1,9 +1,17 @@
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   --screen-header-height: 48px;
+  --font-family-base:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", sans-serif;
 }
 
 * {
@@ -17,9 +25,7 @@ body,
   padding: 0;
   width: 100%;
   height: 100%;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", "Helvetica",
-    "Arial", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: var(--font-family-base);
 }
 
 body {

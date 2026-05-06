@@ -20,6 +20,7 @@
     "@authgear/web": "5.0.1",
     "@fluentui/react": "^8.119.0",
     "@fluentui/react-hooks": "^8.6.35",
+    "@fontsource/inter": "^5.2.8",
     "classnames": "^2.5.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
