@@ -26,7 +26,7 @@
 }
 
 .cardTitle {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 18px;
   font-weight: 400;
   color: #323130;
@@ -46,7 +46,7 @@
 }
 
 .mauCurrentMonthLabel {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 14px;
   font-weight: 400;
   color: #323130;
@@ -65,7 +65,7 @@
 }
 
 .smsDateRangeText {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 12px;
   color: #605e5c;
   margin: 0 0 12px 0;
@@ -99,14 +99,14 @@
 }
 
 .smsLabel {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 14px;
   color: #323130;
   margin: 0;
 }
 
 .smsValue {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 14px;
   color: #605e5c;
   margin: 0;
@@ -125,7 +125,7 @@
   border-radius: 2px;
   background-color: #ffffff;
   cursor: pointer;
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 14px;
   color: #323130;
 }
@@ -173,7 +173,7 @@
 }
 
 .mauMonthPanelYear {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 18px;
   font-weight: 600;
   color: #323130;
@@ -193,7 +193,7 @@
 }
 
 .mauMonthCell {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 14px;
   color: #323130;
   background: none;
@@ -226,7 +226,7 @@
 }
 
 .mauMonthGoToToday {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 14px;
   color: #176df3;
   background: none;
@@ -288,7 +288,7 @@
 }
 
 .mauProgressValue {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 14px;
   font-weight: 600;
   color: #323130;
@@ -304,7 +304,7 @@
 }
 
 .mauOverviewTitle {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 14px;
   font-weight: 400;
   color: #323130;
@@ -334,7 +334,7 @@
 }
 
 .mauOverviewYTick {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 10px;
   color: #605e5c;
   line-height: 1;
@@ -415,7 +415,7 @@
 }
 
 .mauOverviewBarLabel {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 11px;
   color: #605e5c;
   text-align: center;
@@ -423,7 +423,7 @@
 }
 
 .mauOverviewBarValue {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 12px;
   font-weight: 600;
   color: #323130;

@@ -74,7 +74,7 @@
 }
 
 .sidebarPageLabel {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 12px;
   color: #605e5c;
   min-width: 48px;

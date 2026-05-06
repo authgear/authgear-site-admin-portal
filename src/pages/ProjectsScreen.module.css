@@ -21,7 +21,7 @@
 
 .searchByLabel {
   @apply shrink-0;
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-weight: 600;
   font-size: 14px;
   line-height: 20px;
@@ -41,7 +41,7 @@
 .clearButton {
   @apply shrink-0;
   color: #a19f9d;
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-weight: 400;
   font-size: 14px;
 }
@@ -78,11 +78,7 @@
   margin: 12px 0 0 0;
   padding-top: 16px;
   padding-right: 12px;
-  font-family:
-    "Segoe UI",
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
+  font-family: var(--font-family-base);
   font-weight: 600;
 }
 
@@ -107,11 +103,7 @@
   padding: 0 6px;
   font-size: 14px;
   font-weight: 600;
-  font-family:
-    "Segoe UI",
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
+  font-family: var(--font-family-base);
   color: #201f1e;
   line-height: 20px;
   border: none;
@@ -146,11 +138,7 @@
   height: 28px;
   padding: 0 6px;
   font-size: 14px;
-  font-family:
-    "Segoe UI",
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
+  font-family: var(--font-family-base);
   color: #605e5c;
   line-height: 20px;
   display: inline-flex;
@@ -174,7 +162,7 @@
   min-height: 42px;
   display: flex;
   align-items: center;
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-weight: 600;
   font-size: 14px;
   line-height: 20px;
@@ -213,7 +201,7 @@
 }
 
 .projectName {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-weight: 600;
   font-size: 12px;
   line-height: 16px;
@@ -221,7 +209,7 @@
 }
 
 .projectId {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-weight: 400;
   font-size: 12px;
   line-height: 14px;
@@ -229,7 +217,7 @@
 }
 
 .cellText {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-weight: 400;
   font-size: 12px;
   line-height: 14px;
