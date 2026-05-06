@@ -124,7 +124,8 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
     };
     if (searchText.trim()) {
       if (searchBy === "projectId") params.app_id = searchText.trim();
-      else if (searchBy === "ownerEmail") params.owner_email = searchText.trim();
+      else if (searchBy === "ownerEmail")
+        params.owner_email = searchText.trim();
     }
     if (planFilter !== ALL_PLANS_KEY) {
       params.plan = planFilter;
@@ -138,51 +139,54 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
       .finally(() => setLoading(false));
   }, [currentPage, searchBy, searchText, planFilter, sortKey, sortOrder]);
 
-  const columns: IColumn[] = useMemo(() => [
-    {
-      key: "projectName",
-      fieldName: "id",
-      name: "Project ID",
-      minWidth: COLUMN_WIDTHS.projectName,
-      maxWidth: COLUMN_WIDTHS.projectName,
-      columnActionsMode: ColumnActionsMode.disabled,
-    },
-    {
-      key: "ownerEmail",
-      fieldName: "owner_email",
-      name: "Owner Email",
-      minWidth: COLUMN_WIDTHS.ownerEmail,
-      maxWidth: COLUMN_WIDTHS.ownerEmail,
-      columnActionsMode: ColumnActionsMode.disabled,
-      cellClassName: styles.cellAlignLeft,
-    },
-    {
-      key: "plan",
-      fieldName: "plan",
-      name: "Plan",
-      minWidth: COLUMN_WIDTHS.plan,
-      maxWidth: COLUMN_WIDTHS.plan,
-      columnActionsMode: ColumnActionsMode.disabled,
-      cellClassName: styles.cellAlignLeft,
-    },
-    {
-      key: "lastMonthMau",
-      fieldName: "last_month_mau",
-      name: "Last Month MAU",
-      minWidth: COLUMN_WIDTHS.lastMonthMau,
-      maxWidth: COLUMN_WIDTHS.lastMonthMau,
-      columnActionsMode: ColumnActionsMode.disabled,
-      cellClassName: styles.cellAlignLeft,
-    },
-    {
-      key: "createdAt",
-      fieldName: "created_at",
-      name: "Created at",
-      minWidth: COLUMN_WIDTHS.createdAt,
-      maxWidth: COLUMN_WIDTHS.createdAt,
-      columnActionsMode: ColumnActionsMode.disabled,
-    },
-  ], []);
+  const columns: IColumn[] = useMemo(
+    () => [
+      {
+        key: "projectName",
+        fieldName: "id",
+        name: "Project ID",
+        minWidth: COLUMN_WIDTHS.projectName,
+        maxWidth: COLUMN_WIDTHS.projectName,
+        columnActionsMode: ColumnActionsMode.disabled,
+      },
+      {
+        key: "ownerEmail",
+        fieldName: "owner_email",
+        name: "Owner Email",
+        minWidth: COLUMN_WIDTHS.ownerEmail,
+        maxWidth: COLUMN_WIDTHS.ownerEmail,
+        columnActionsMode: ColumnActionsMode.disabled,
+        cellClassName: styles.cellAlignLeft,
+      },
+      {
+        key: "plan",
+        fieldName: "plan",
+        name: "Plan",
+        minWidth: COLUMN_WIDTHS.plan,
+        maxWidth: COLUMN_WIDTHS.plan,
+        columnActionsMode: ColumnActionsMode.disabled,
+        cellClassName: styles.cellAlignLeft,
+      },
+      {
+        key: "lastMonthMau",
+        fieldName: "last_month_mau",
+        name: "Last Month MAU",
+        minWidth: COLUMN_WIDTHS.lastMonthMau,
+        maxWidth: COLUMN_WIDTHS.lastMonthMau,
+        columnActionsMode: ColumnActionsMode.disabled,
+        cellClassName: styles.cellAlignLeft,
+      },
+      {
+        key: "createdAt",
+        fieldName: "created_at",
+        name: "Created at",
+        minWidth: COLUMN_WIDTHS.createdAt,
+        maxWidth: COLUMN_WIDTHS.createdAt,
+        columnActionsMode: ColumnActionsMode.disabled,
+      },
+    ],
+    []
+  );
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const safePage = Math.min(Math.max(1, currentPage), totalPages);
@@ -194,7 +198,10 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
   const onNextPage = useCallback(() => {
     setCurrentPage((p) => Math.min(totalPages, p + 1));
   }, [totalPages]);
-  const onLastPage = useCallback(() => setCurrentPage(totalPages), [totalPages]);
+  const onLastPage = useCallback(
+    () => setCurrentPage(totalPages),
+    [totalPages]
+  );
   const onPageClick = useCallback((page: number) => setCurrentPage(page), []);
 
   const onRenderRow = useCallback((props?: IDetailsRowProps) => {
@@ -218,7 +225,10 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
               {item.owner_email ? (
                 <Text className={styles.cellText}>{item.owner_email}</Text>
               ) : (
-                <Text className={styles.cellText} style={{ fontStyle: "italic" }}>
+                <Text
+                  className={styles.cellText}
+                  style={{ fontStyle: "italic" }}
+                >
                   No owner
                 </Text>
               )}
@@ -261,17 +271,24 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
     []
   );
 
-  const onToggleSort = useCallback((key: SortKey) => {
-    setCurrentPage(1);
-    setSortKey((prevKey) => {
-      if (prevKey === key) return prevKey;
-      return key;
-    });
-    setSortOrder((prevOrder) => {
-      // If switching to a different key, reset to desc; otherwise toggle.
-      return sortKey === key ? (prevOrder === "asc" ? "desc" : "asc") : "desc";
-    });
-  }, [sortKey]);
+  const onToggleSort = useCallback(
+    (key: SortKey) => {
+      setCurrentPage(1);
+      setSortKey((prevKey) => {
+        if (prevKey === key) return prevKey;
+        return key;
+      });
+      setSortOrder((prevOrder) => {
+        // If switching to a different key, reset to desc; otherwise toggle.
+        return sortKey === key
+          ? prevOrder === "asc"
+            ? "desc"
+            : "asc"
+          : "desc";
+      });
+    },
+    [sortKey]
+  );
 
   const onSearchByChange = useCallback(
     (_event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption) => {
@@ -305,191 +322,203 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
         <ScreenTitle>Projects</ScreenTitle>
       </div>
       <div className={styles.content}>
-          {error && (
-            <MessageBar messageBarType={MessageBarType.error} isMultiline={false}>
-              {error.message}
-            </MessageBar>
-          )}
-          <div className={styles.toolbar}>
-            <Text className={styles.searchByLabel}>Search By</Text>
-            <Dropdown
-              className={styles.searchByDropdown}
-              options={SEARCH_BY_OPTIONS}
-              selectedKey={searchBy}
-              onChange={onSearchByChange}
-            />
-            <SearchBox
-              className={styles.searchBox}
-              placeholder="Search"
-              value={searchText}
-              onChange={onSearchChange}
-            />
-            <Text className={styles.searchByLabel}>Plan</Text>
-            <Dropdown
-              className={styles.searchByDropdown}
-              options={planOptions}
-              selectedKey={planFilter}
-              onChange={onPlanFilterChange}
-            />
-            <CommandButton
-              className={styles.clearButton}
-              text="Clear all filters"
-              onClick={onClearFilters}
-            />
-          </div>
-          <div className={styles.listContainer}>
-            {/* Custom header - widths from COLUMN_WIDTHS so they match content columns */}
-            <div className={styles.tableHeader}>
-              <div
-                className={styles.tableHeaderCell}
-                style={{ width: COLUMN_WIDTHS.projectName }}
-              >
-                Project ID
-              </div>
-              <div
-                className={styles.tableHeaderCell}
-                style={{ width: COLUMN_WIDTHS.ownerEmail }}
-              >
-                Owner Email
-              </div>
-              <div
-                className={styles.tableHeaderCell}
-                style={{ width: COLUMN_WIDTHS.plan }}
-              >
-                Plan
-              </div>
-              <button
-                type="button"
-                className={`${styles.tableHeaderCell} ${styles.tableHeaderSortable}`}
-                style={{ width: COLUMN_WIDTHS.lastMonthMau }}
-                onClick={() => onToggleSort("mau")}
-                aria-label="Sort by Last Month MAU"
-              >
-                Last Month MAU
-                {sortKey === "mau" && (
-                  <Icon
-                    iconName={sortOrder === "asc" ? "SortUp" : "SortDown"}
-                    className={styles.sortIcon}
-                    style={{ marginLeft: 4 }}
-                  />
-                )}
-              </button>
-              <button
-                type="button"
-                className={`${styles.tableHeaderCell} ${styles.tableHeaderSortable}`}
-                style={{ width: COLUMN_WIDTHS.createdAt }}
-                onClick={() => onToggleSort("created_at")}
-                aria-label="Sort by Created at"
-              >
-                Created at
-                {sortKey === "created_at" && (
-                  <Icon
-                    iconName={sortOrder === "asc" ? "SortUp" : "SortDown"}
-                    className={styles.sortIcon}
-                    style={{ marginLeft: 4 }}
-                  />
-                )}
-              </button>
-            </div>
-            <ShimmeredDetailsList
-              className={styles.list}
-              enableShimmer={loading}
-              enableUpdateAnimations={false}
-              onRenderRow={onRenderRow}
-              onRenderItemColumn={onRenderItemColumn}
-              selectionMode={SelectionMode.none}
-              layoutMode={DetailsListLayoutMode.fixedColumns}
-              columns={columns}
-              items={apps}
-              onShouldVirtualize={onShouldVirtualize}
-            />
-          </div>
-          {totalPages > 1 && (
-            <div className={styles.pagination}>
-              <IconButton
-                iconProps={{ iconName: "DoubleChevronLeft" }}
-                title="First page"
-                ariaLabel="First page"
-                disabled={safePage === 1}
-                onClick={onFirstPage}
-                styles={{
-                  root: { width: 24, height: 24, color: "#176df3" },
-                  rootDisabled: { backgroundColor: "transparent", color: "#C8C6C4" },
-                  icon: { fontSize: 14, fontWeight: 600, color: "#176df3" },
-                  iconDisabled: { color: "#C8C6C4" },
-                }}
-              />
-              <IconButton
-                iconProps={{ iconName: "ChevronLeft" }}
-                title="Previous page"
-                ariaLabel="Previous page"
-                disabled={safePage === 1}
-                onClick={onPrevPage}
-                styles={{
-                  root: { width: 24, height: 24, color: "#176df3" },
-                  rootDisabled: { backgroundColor: "transparent", color: "#C8C6C4" },
-                  icon: { fontSize: 14, fontWeight: 600, color: "#176df3" },
-                  iconDisabled: { color: "#C8C6C4" },
-                }}
-              />
-              <div className={styles.paginationPages}>
-                {getPageItems(safePage, totalPages).map((item, idx) =>
-                  item === "ellipsis" ? (
-                    <span
-                      key={`ellipsis-${idx}`}
-                      className={styles.paginationEllipsis}
-                      aria-hidden
-                    >
-                      …
-                    </span>
-                  ) : (
-                    <button
-                      key={item}
-                      type="button"
-                      className={
-                        item === safePage
-                          ? `${styles.paginationPageBtn} ${styles.paginationCurrent}`
-                          : styles.paginationPageBtn
-                      }
-                      onClick={() => onPageClick(item)}
-                      aria-label={`Page ${item}`}
-                      aria-current={item === safePage ? "page" : undefined}
-                    >
-                      {item}
-                    </button>
-                  )
-                )}
-              </div>
-              <IconButton
-                iconProps={{ iconName: "ChevronRight" }}
-                title="Next page"
-                ariaLabel="Next page"
-                disabled={safePage === totalPages}
-                onClick={onNextPage}
-                styles={{
-                  root: { width: 24, height: 24, color: "#176df3" },
-                  rootDisabled: { backgroundColor: "transparent", color: "#C8C6C4" },
-                  icon: { fontSize: 14, fontWeight: 600, color: "#176df3" },
-                  iconDisabled: { color: "#C8C6C4" },
-                }}
-              />
-              <IconButton
-                iconProps={{ iconName: "DoubleChevronRight" }}
-                title="Last page"
-                ariaLabel="Last page"
-                disabled={safePage === totalPages}
-                onClick={onLastPage}
-                styles={{
-                  root: { width: 24, height: 24, color: "#176df3" },
-                  rootDisabled: { backgroundColor: "transparent", color: "#C8C6C4" },
-                  icon: { fontSize: 14, fontWeight: 600, color: "#176df3" },
-                  iconDisabled: { color: "#C8C6C4" },
-                }}
-              />
-            </div>
-          )}
+        {error && (
+          <MessageBar messageBarType={MessageBarType.error} isMultiline={false}>
+            {error.message}
+          </MessageBar>
+        )}
+        <div className={styles.toolbar}>
+          <Text className={styles.searchByLabel}>Search By</Text>
+          <Dropdown
+            className={styles.searchByDropdown}
+            options={SEARCH_BY_OPTIONS}
+            selectedKey={searchBy}
+            onChange={onSearchByChange}
+          />
+          <SearchBox
+            className={styles.searchBox}
+            placeholder="Search"
+            value={searchText}
+            onChange={onSearchChange}
+          />
+          <Text className={styles.searchByLabel}>Plan</Text>
+          <Dropdown
+            className={styles.searchByDropdown}
+            options={planOptions}
+            selectedKey={planFilter}
+            onChange={onPlanFilterChange}
+          />
+          <CommandButton
+            className={styles.clearButton}
+            text="Clear all filters"
+            onClick={onClearFilters}
+          />
         </div>
+        <div className={styles.listContainer}>
+          {/* Custom header - widths from COLUMN_WIDTHS so they match content columns */}
+          <div className={styles.tableHeader}>
+            <div
+              className={styles.tableHeaderCell}
+              style={{ width: COLUMN_WIDTHS.projectName }}
+            >
+              Project ID
+            </div>
+            <div
+              className={styles.tableHeaderCell}
+              style={{ width: COLUMN_WIDTHS.ownerEmail }}
+            >
+              Owner Email
+            </div>
+            <div
+              className={styles.tableHeaderCell}
+              style={{ width: COLUMN_WIDTHS.plan }}
+            >
+              Plan
+            </div>
+            <button
+              type="button"
+              className={`${styles.tableHeaderCell} ${styles.tableHeaderSortable}`}
+              style={{ width: COLUMN_WIDTHS.lastMonthMau }}
+              onClick={() => onToggleSort("mau")}
+              aria-label="Sort by Last Month MAU"
+            >
+              Last Month MAU
+              {sortKey === "mau" && (
+                <Icon
+                  iconName={sortOrder === "asc" ? "SortUp" : "SortDown"}
+                  className={styles.sortIcon}
+                  style={{ marginLeft: 4 }}
+                />
+              )}
+            </button>
+            <button
+              type="button"
+              className={`${styles.tableHeaderCell} ${styles.tableHeaderSortable}`}
+              style={{ width: COLUMN_WIDTHS.createdAt }}
+              onClick={() => onToggleSort("created_at")}
+              aria-label="Sort by Created at"
+            >
+              Created at
+              {sortKey === "created_at" && (
+                <Icon
+                  iconName={sortOrder === "asc" ? "SortUp" : "SortDown"}
+                  className={styles.sortIcon}
+                  style={{ marginLeft: 4 }}
+                />
+              )}
+            </button>
+          </div>
+          <ShimmeredDetailsList
+            className={styles.list}
+            enableShimmer={loading}
+            enableUpdateAnimations={false}
+            onRenderRow={onRenderRow}
+            onRenderItemColumn={onRenderItemColumn}
+            selectionMode={SelectionMode.none}
+            layoutMode={DetailsListLayoutMode.fixedColumns}
+            columns={columns}
+            items={apps}
+            onShouldVirtualize={onShouldVirtualize}
+          />
+        </div>
+        {totalPages > 1 && (
+          <div className={styles.pagination}>
+            <IconButton
+              iconProps={{ iconName: "DoubleChevronLeft" }}
+              title="First page"
+              ariaLabel="First page"
+              disabled={safePage === 1}
+              onClick={onFirstPage}
+              styles={{
+                root: { width: 24, height: 24, color: "#176df3" },
+                rootDisabled: {
+                  backgroundColor: "transparent",
+                  color: "#C8C6C4",
+                },
+                icon: { fontSize: 14, fontWeight: 600, color: "#176df3" },
+                iconDisabled: { color: "#C8C6C4" },
+              }}
+            />
+            <IconButton
+              iconProps={{ iconName: "ChevronLeft" }}
+              title="Previous page"
+              ariaLabel="Previous page"
+              disabled={safePage === 1}
+              onClick={onPrevPage}
+              styles={{
+                root: { width: 24, height: 24, color: "#176df3" },
+                rootDisabled: {
+                  backgroundColor: "transparent",
+                  color: "#C8C6C4",
+                },
+                icon: { fontSize: 14, fontWeight: 600, color: "#176df3" },
+                iconDisabled: { color: "#C8C6C4" },
+              }}
+            />
+            <div className={styles.paginationPages}>
+              {getPageItems(safePage, totalPages).map((item, idx) =>
+                item === "ellipsis" ? (
+                  <span
+                    key={`ellipsis-${idx}`}
+                    className={styles.paginationEllipsis}
+                    aria-hidden
+                  >
+                    …
+                  </span>
+                ) : (
+                  <button
+                    key={item}
+                    type="button"
+                    className={
+                      item === safePage
+                        ? `${styles.paginationPageBtn} ${styles.paginationCurrent}`
+                        : styles.paginationPageBtn
+                    }
+                    onClick={() => onPageClick(item)}
+                    aria-label={`Page ${item}`}
+                    aria-current={item === safePage ? "page" : undefined}
+                  >
+                    {item}
+                  </button>
+                )
+              )}
+            </div>
+            <IconButton
+              iconProps={{ iconName: "ChevronRight" }}
+              title="Next page"
+              ariaLabel="Next page"
+              disabled={safePage === totalPages}
+              onClick={onNextPage}
+              styles={{
+                root: { width: 24, height: 24, color: "#176df3" },
+                rootDisabled: {
+                  backgroundColor: "transparent",
+                  color: "#C8C6C4",
+                },
+                icon: { fontSize: 14, fontWeight: 600, color: "#176df3" },
+                iconDisabled: { color: "#C8C6C4" },
+              }}
+            />
+            <IconButton
+              iconProps={{ iconName: "DoubleChevronRight" }}
+              title="Last page"
+              ariaLabel="Last page"
+              disabled={safePage === totalPages}
+              onClick={onLastPage}
+              styles={{
+                root: { width: 24, height: 24, color: "#176df3" },
+                rootDisabled: {
+                  backgroundColor: "transparent",
+                  color: "#C8C6C4",
+                },
+                icon: { fontSize: 14, fontWeight: 600, color: "#176df3" },
+                iconDisabled: { color: "#C8C6C4" },
+              }}
+            />
+          </div>
+        )}
       </div>
+    </div>
   );
 };
 

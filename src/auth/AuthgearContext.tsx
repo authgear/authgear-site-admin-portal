@@ -84,13 +84,21 @@ export const AuthgearProvider: React.FC<{ children: React.ReactNode }> =
 
     return (
       <AuthgearContext.Provider
-        value={{ sessionState, userInfo, userInfoLoading, startLogin, logout, refreshSessionState }}
+        value={{
+          sessionState,
+          userInfo,
+          userInfoLoading,
+          startLogin,
+          logout,
+          refreshSessionState,
+        }}
       >
         {children}
       </AuthgearContext.Provider>
     );
   };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuthgear(): AuthgearContextValue {
   return useContext(AuthgearContext);
 }

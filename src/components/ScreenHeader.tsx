@@ -166,7 +166,10 @@ const ScreenHeader: React.VFC = function ScreenHeader() {
                   onClick={onDismissMobilePanel}
                   aria-label="Close menu"
                 >
-                  <Icon iconName="WaffleOffice365" className={styles.mobileSidebarGridIcon} />
+                  <Icon
+                    iconName="WaffleOffice365"
+                    className={styles.mobileSidebarGridIcon}
+                  />
                 </button>
                 <Logo />
                 <Text className={styles.mobileSidebarAppName}>admin</Text>

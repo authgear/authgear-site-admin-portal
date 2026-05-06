@@ -26,7 +26,9 @@ const PlanContent: React.VFC<PlanContentProps> = ({
 
   const [plans, setPlans] = useState<string[] | null>(null);
   const [plansError, setPlansError] = useState<string | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<string | undefined>(currentPlan);
+  const [selectedPlan, setSelectedPlan] = useState<string | undefined>(
+    currentPlan
+  );
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -137,7 +139,10 @@ const PlanContent: React.VFC<PlanContentProps> = ({
             disabled={!canSubmit}
             styles={{
               root: { backgroundColor: "#176df3", borderColor: "#176df3" },
-              rootHovered: { backgroundColor: "#1562db", borderColor: "#1562db" },
+              rootHovered: {
+                backgroundColor: "#1562db",
+                borderColor: "#1562db",
+              },
             }}
           />
         </div>

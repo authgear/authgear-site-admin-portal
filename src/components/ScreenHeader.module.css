@@ -31,7 +31,9 @@
   margin-left: 16px;
   margin-right: auto;
   border-radius: 4px;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 @media (max-width: 640px) {

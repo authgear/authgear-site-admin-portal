@@ -7,8 +7,9 @@ type RuntimeConfig = {
   siteadminAPIURL: string;
 };
 
-const firstNonEmpty = (...values: Array<string | undefined>): string | undefined =>
-  values.find((value) => value != null && value !== "");
+const firstNonEmpty = (
+  ...values: Array<string | undefined>
+): string | undefined => values.find((value) => value != null && value !== "");
 
 const runtimeConfig: RuntimeConfig | null = import.meta.env.DEV
   ? null
@@ -34,7 +35,9 @@ export const AUTHGEAR_CLIENT_ID: string =
 
 export const AUTHGEAR_REDIRECT_URL: string =
   firstNonEmpty(
-    import.meta.env.DEV ? import.meta.env.VITE_AUTHGEAR_REDIRECT_URL : undefined,
+    import.meta.env.DEV
+      ? import.meta.env.VITE_AUTHGEAR_REDIRECT_URL
+      : undefined,
     runtimeConfig?.authgearRedirectURL
   ) ?? `${window.location.origin}/auth-redirect`;
 

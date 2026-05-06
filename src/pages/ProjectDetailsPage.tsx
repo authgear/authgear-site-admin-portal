@@ -18,8 +18,7 @@ import PlanContent from "./PlanContent";
 import PortalAdminContent from "./PortalAdminContent";
 import styles from "./ProjectDetailsPage.module.css";
 
-const TAB_KEYS = ["overview", "usage", "plan", "portalAdmin"] as const;
-type TabKey = (typeof TAB_KEYS)[number];
+type TabKey = "overview" | "usage" | "plan" | "portalAdmin";
 
 /** URL hash segment for each tab */
 const TAB_KEY_TO_HASH: Record<TabKey, string> = {
@@ -41,15 +40,19 @@ function tabKeyFromHash(hash: string): TabKey {
   return HASH_TO_TAB_KEY[segment] ?? "overview";
 }
 
-
 interface OverviewUsageCardsProps {
   userCount: number;
   mauCurrent: number | null;
   mauLoading: boolean;
 }
 
-function OverviewUsageCards({ userCount, mauCurrent, mauLoading }: OverviewUsageCardsProps) {
-  const mauPercent = mauCurrent != null ? Math.min(100, (mauCurrent / MAU_CAP) * 100) : 0;
+function OverviewUsageCards({
+  userCount,
+  mauCurrent,
+  mauLoading,
+}: OverviewUsageCardsProps) {
+  const mauPercent =
+    mauCurrent != null ? Math.min(100, (mauCurrent / MAU_CAP) * 100) : 0;
   const mauDisplay = mauLoading
     ? "—"
     : mauCurrent != null && mauCurrent > 0
@@ -67,7 +70,9 @@ function OverviewUsageCards({ userCount, mauCurrent, mauLoading }: OverviewUsage
         <div className={styles.usageCardProgressRow}>
           <div className={styles.usageCardProgressBar}>
             <ProgressIndicator
-              percentComplete={!mauLoading && mauCurrent != null ? mauPercent / 100 : 0}
+              percentComplete={
+                !mauLoading && mauCurrent != null ? mauPercent / 100 : 0
+              }
               barHeight={4}
               styles={{
                 root: { margin: 0 },
@@ -120,7 +125,8 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
     getApp(projectId)
       .then(setAppDetail)
       .catch((e: unknown) => {
-        const msg = e instanceof Error ? e.message : "Failed to load project details.";
+        const msg =
+          e instanceof Error ? e.message : "Failed to load project details.";
         setAppErrorMessage(msg);
       })
       .finally(() => setAppLoading(false));
@@ -132,8 +138,10 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
     const now = new Date();
     getAppMonthlyActiveUsers(
       projectId,
-      now.getFullYear(), now.getMonth() + 1,
-      now.getFullYear(), now.getMonth() + 1
+      now.getFullYear(),
+      now.getMonth() + 1,
+      now.getFullYear(),
+      now.getMonth() + 1
     )
       .then((res) => setMauCurrent(res.counts[0]?.count ?? 0))
       .catch(() => setMauCurrent(null))
@@ -168,7 +176,10 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
 
   if (appLoading) {
     return (
-      <div className={styles.root} style={{ alignItems: "center", justifyContent: "center" }}>
+      <div
+        className={styles.root}
+        style={{ alignItems: "center", justifyContent: "center" }}
+      >
         <Spinner size={SpinnerSize.large} />
       </div>
     );
@@ -182,7 +193,10 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
             <Link to="/" className={styles.breadcrumbLink}>
               Projects
             </Link>
-            <Icon iconName="ChevronRight" className={styles.breadcrumbSepIcon} />
+            <Icon
+              iconName="ChevronRight"
+              className={styles.breadcrumbSepIcon}
+            />
             <span className={styles.breadcrumbCurrent}>Project Details</span>
           </Text>
         </div>
@@ -190,14 +204,18 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
           <Icon iconName="SearchIssue" className={styles.notFoundIcon} />
           <h2 className={styles.notFoundHeading}>Project not found</h2>
           <p className={styles.notFoundDescription}>
-            {appErrorMessage ?? "The project you\u2019re looking for doesn\u2019t exist or may have been removed."}
+            {appErrorMessage ??
+              "The project you\u2019re looking for doesn\u2019t exist or may have been removed."}
           </p>
           <PrimaryButton
             text="Back to Projects"
             onClick={() => navigate("/")}
             styles={{
               root: { backgroundColor: "#176df3", borderColor: "#176df3" },
-              rootHovered: { backgroundColor: "#1562db", borderColor: "#1562db" },
+              rootHovered: {
+                backgroundColor: "#1562db",
+                borderColor: "#1562db",
+              },
             }}
           />
         </div>
@@ -247,7 +265,10 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
                 className={styles.copyEmailBtn}
               >
                 <span className={styles.metaText}>{appDetail.owner_email}</span>
-                <Icon iconName={copyEmailFeedback ? "CheckMark" : "Copy"} className={styles.copyEmailIcon} />
+                <Icon
+                  iconName={copyEmailFeedback ? "CheckMark" : "Copy"}
+                  className={styles.copyEmailIcon}
+                />
               </button>
             ) : (
               <span className={styles.metaText} style={{ fontStyle: "italic" }}>
@@ -296,10 +317,13 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
               <div className={styles.projectStatusSection}>
                 <div className={styles.projectStatusRow}>
                   <div className={styles.projectStatusContent}>
-                    <h4 className={styles.projectStatusHeading}>Disable Project</h4>
+                    <h4 className={styles.projectStatusHeading}>
+                      Disable Project
+                    </h4>
                     <p className={styles.projectStatusDescription}>
-                      Temporarily disables this project. Authgear services will stop functioning for
-                      this project until it is re-enabled. No data will be removed.
+                      Temporarily disables this project. Authgear services will
+                      stop functioning for this project until it is re-enabled.
+                      No data will be removed.
                     </p>
                   </div>
                   <div className={styles.projectStatusAction}>
@@ -308,7 +332,13 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
                       iconProps={{ iconName: "Blocked" }}
                       disabled
                     />
-                    <p style={{ margin: "4px 0 0", fontSize: 12, color: "#797775" }}>
+                    <p
+                      style={{
+                        margin: "4px 0 0",
+                        fontSize: 12,
+                        color: "#797775",
+                      }}
+                    >
                       This feature is not yet available.
                     </p>
                   </div>
@@ -316,10 +346,12 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
                 <div className={styles.projectStatusDivider} />
                 <div className={styles.projectStatusRow}>
                   <div className={styles.projectStatusContent}>
-                    <h4 className={styles.projectStatusHeading}>Delete Project</h4>
+                    <h4 className={styles.projectStatusHeading}>
+                      Delete Project
+                    </h4>
                     <p className={styles.projectStatusDescription}>
-                      Permanently deletes this project and all associated data. This action cannot
-                      be undone.
+                      Permanently deletes this project and all associated data.
+                      This action cannot be undone.
                     </p>
                   </div>
                   <div className={styles.projectStatusAction}>
@@ -328,7 +360,13 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
                       iconProps={{ iconName: "Delete" }}
                       disabled
                     />
-                    <p style={{ margin: "4px 0 0", fontSize: 12, color: "#797775" }}>
+                    <p
+                      style={{
+                        margin: "4px 0 0",
+                        fontSize: 12,
+                        color: "#797775",
+                      }}
+                    >
                       This feature is not yet available.
                     </p>
                   </div>
@@ -336,15 +374,15 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
               </div>
             </>
           )}
-          {selectedTab === "usage" && (
-            <UsageContent appId={appDetail.id} />
-          )}
+          {selectedTab === "usage" && <UsageContent appId={appDetail.id} />}
           {selectedTab === "plan" && (
             <PlanContent
               appId={appDetail.id}
               currentPlan={appDetail.plan}
               onPlanChanged={(planName) =>
-                setAppDetail((prev) => (prev ? { ...prev, plan: planName } : prev))
+                setAppDetail((prev) =>
+                  prev ? { ...prev, plan: planName } : prev
+                )
               }
             />
           )}

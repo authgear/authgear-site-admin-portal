@@ -78,7 +78,11 @@
   margin: 12px 0 0 0;
   padding-top: 16px;
   padding-right: 12px;
-  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    "Segoe UI",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   font-weight: 600;
 }
 
@@ -103,7 +107,11 @@
   padding: 0 6px;
   font-size: 14px;
   font-weight: 600;
-  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    "Segoe UI",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   color: #201f1e;
   line-height: 20px;
   border: none;
@@ -138,7 +146,11 @@
   height: 28px;
   padding: 0 6px;
   font-size: 14px;
-  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    "Segoe UI",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   color: #605e5c;
   line-height: 20px;
   display: inline-flex;
