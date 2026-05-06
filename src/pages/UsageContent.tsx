@@ -28,6 +28,7 @@ import {
   getAppMonthlyActiveUsers,
 } from "../api/siteadmin";
 import type { MessagingUsage, MonthlyActiveUsersCount } from "../api/types";
+import MonthlyBarChart from "../components/MonthlyBarChart";
 import styles from "./UsageContent.module.css";
 
 const SMS_DATE_RANGE_OPTIONS: IDropdownOption[] = [
@@ -109,47 +110,6 @@ function formatShortDate(d: Date): string {
 }
 
 export const MAU_CAP = 25000;
-
-/** Format a count with 3 significant figures and a suffix (k/M/B/T) for ≥1000. */
-function formatCompactNumber(n: number): string {
-  if (n === 0) return "0";
-  const abs = Math.abs(n);
-  if (abs < 1000) return n.toLocaleString();
-  const units: Array<{ value: number; suffix: string }> = [
-    { value: 1e12, suffix: "T" },
-    { value: 1e9, suffix: "B" },
-    { value: 1e6, suffix: "M" },
-    { value: 1e3, suffix: "k" },
-  ];
-  for (const { value, suffix } of units) {
-    if (abs >= value) {
-      const scaled = n / value;
-      const str = scaled.toPrecision(3).replace(/\.?0+$/, "");
-      return `${str}${suffix}`;
-    }
-  }
-  return n.toString();
-}
-
-/** Round max up to a visually clean axis ceiling (1, 2, 2.5, 3, 5, 7.5, 10 × 10ⁿ). */
-function niceAxisCeiling(max: number): number {
-  if (max <= 0) return 10;
-  const pow = Math.pow(10, Math.floor(Math.log10(max)));
-  const frac = max / pow;
-  const steps = [1, 1.5, 2, 2.5, 3, 4, 5, 7.5, 10];
-  const niceFrac = steps.find((s) => frac <= s) ?? 10;
-  return niceFrac * pow;
-}
-
-/** True if monthKey is after the current calendar month (no data for future months) */
-function isMonthKeyInFuture(monthKey: string): boolean {
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth() + 1; // 1–12
-  const [y, m] = monthKey.split("-").map(Number);
-  if (!y || !m) return false;
-  return y > currentYear || (y === currentYear && m > currentMonth);
-}
 
 interface UsageContentProps {
   appId: string;
@@ -298,20 +258,17 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
       const found = mauChartCounts.find(
         (c) => c.year === mauOverviewYear && c.month === month
       );
-      const mau = isMonthKeyInFuture(monthKey) ? 0 : (found?.count ?? 0);
-      return { monthKey, label: `${MONTH_NAMES[i]} ${mauOverviewYear}`, mau };
+      const isFuture = (() => {
+        const now = new Date();
+        return (
+          mauOverviewYear > now.getFullYear() ||
+          (mauOverviewYear === now.getFullYear() && month > now.getMonth() + 1)
+        );
+      })();
+      const mau = isFuture ? 0 : (found?.count ?? 0);
+      return { monthKey, mau };
     });
   }, [mauChartCounts, mauOverviewYear]);
-
-  const mauOverviewMax = useMemo(
-    () => niceAxisCeiling(Math.max(1, ...mauMonthlyOverview.map((r) => r.mau))),
-    [mauMonthlyOverview]
-  );
-
-  /** 5 tick values from max down to 0 for the Y-axis (top-to-bottom). */
-  const mauOverviewTicks = useMemo(() => {
-    return [1, 0.75, 0.5, 0.25, 0].map((p) => Math.round(p * mauOverviewMax));
-  }, [mauOverviewMax]);
 
   return (
     <div className={styles.root}>
@@ -553,73 +510,15 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
             <Spinner size={SpinnerSize.small} />
           </div>
         )}
-        <div
-          className={styles.mauOverviewChart}
-          role="img"
-          aria-label={`Monthly Active Users for ${mauOverviewYear}`}
-        >
-          <div className={styles.mauOverviewYAxis} aria-hidden>
-            {mauOverviewTicks.map((tick, i) => (
-              <span key={i} className={styles.mauOverviewYTick}>
-                {formatCompactNumber(tick)}
-              </span>
-            ))}
-          </div>
-          <div className={styles.mauOverviewChartArea}>
-            <div className={styles.mauOverviewBars}>
-              {mauMonthlyOverview.map(({ monthKey, label, mau }) => {
-                const pct =
-                  mauOverviewMax > 0 ? (mau / mauOverviewMax) * 100 : 0;
-                const hasData = mau > 0;
-                const monthOnly = label.split(" ")[0] ?? label;
-                const tooltipContent = isMonthKeyInFuture(monthKey)
-                  ? `${label}: No data`
-                  : `${label}: ${mau.toLocaleString()} MAUs`;
-                const fillClass = !hasData
-                  ? styles.mauOverviewBarFillEmpty
-                  : styles.mauOverviewBarFill;
-                const barHeightPx = 140;
-                const fillHeightPx = hasData ? (pct / 100) * barHeightPx : 0;
-                return (
-                  <div key={monthKey} className={styles.mauOverviewBarWrap}>
-                    <span className={styles.mauOverviewBarValue}>
-                      {hasData ? formatCompactNumber(mau) : "\u00A0"}
-                    </span>
-                    <div
-                      className={styles.mauOverviewBarTrack}
-                      role="img"
-                      aria-label={tooltipContent}
-                    >
-                      <TooltipHost
-                        content={tooltipContent}
-                        directionalHint={DirectionalHint.topCenter}
-                        delay={0}
-                        hostClassName={styles.mauOverviewBarTooltipHost}
-                        tooltipProps={{
-                          calloutProps: {
-                            gapSpace: 2,
-                            isBeakVisible: true,
-                          },
-                        }}
-                      >
-                        <div
-                          className={fillClass}
-                          style={{
-                            height: hasData ? `${fillHeightPx}px` : "0",
-                            minHeight: 0,
-                          }}
-                        />
-                      </TooltipHost>
-                    </div>
-                    <span className={styles.mauOverviewBarLabel}>
-                      {monthOnly}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+        <MonthlyBarChart
+          year={mauOverviewYear}
+          data={mauMonthlyOverview.map(({ monthKey, mau }) => ({
+            monthKey,
+            value: mau,
+          }))}
+          unit="MAUs"
+          ariaLabel={`Monthly Active Users for ${mauOverviewYear}`}
+        />
       </div>
 
       {/* SMS/WhatsApp Cost — Custom date range modal */}
