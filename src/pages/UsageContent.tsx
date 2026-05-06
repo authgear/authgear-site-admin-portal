@@ -246,6 +246,7 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
 
   // Fetch SMS trend for selected year
   useEffect(() => {
+    let ignore = false;
     setSmsTrendLoading(true);
     setSmsTrendCounts([]);
     const ranges = getMonthRangesForYear(smsTrendYear);
@@ -267,11 +268,17 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
       )
     )
       .then((results) => {
+        if (ignore) return;
         const arr = new Array(12).fill(0);
         for (const { monthIndex, count } of results) arr[monthIndex] = count;
         setSmsTrendCounts(arr);
       })
-      .finally(() => setSmsTrendLoading(false));
+      .finally(() => {
+        if (!ignore) setSmsTrendLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
   }, [appId, smsTrendYear]);
 
   const smsDateRangeText = useMemo(
