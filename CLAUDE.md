@@ -8,10 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm start          # Dev server at http://localhost:3000
 npm run build      # TypeScript check + production build (tsc && vite build)
 npm run lint       # ESLint with zero warnings tolerance
+npm run test       # Run Jest tests
 npm run preview    # Preview production build locally
 ```
-
-No test runner is configured in this project.
 
 ## Environment Variables
 
