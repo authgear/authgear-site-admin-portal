@@ -18,7 +18,9 @@ const ScreenLayout: React.VFC<ScreenLayoutProps> = function ScreenLayout(
     <div className={styles.root}>
       <ScreenHeader />
       <div className={styles.body}>
-        <div className={showNav ? styles.nav : `${styles.nav} ${styles.navHidden}`}>
+        <div
+          className={showNav ? styles.nav : `${styles.nav} ${styles.navHidden}`}
+        >
           <ScreenNav />
         </div>
         <div className={styles.content}>{props.children}</div>

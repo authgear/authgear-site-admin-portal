@@ -32,7 +32,9 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  transition: width 200ms ease, border-right-color 200ms ease;
+  transition:
+    width 200ms ease,
+    border-right-color 200ms ease;
 }
 
 .navHidden {

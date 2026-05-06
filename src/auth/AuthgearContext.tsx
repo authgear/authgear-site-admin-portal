@@ -84,7 +84,14 @@ export const AuthgearProvider: React.FC<{ children: React.ReactNode }> =
 
     return (
       <AuthgearContext.Provider
-        value={{ sessionState, userInfo, userInfoLoading, startLogin, logout, refreshSessionState }}
+        value={{
+          sessionState,
+          userInfo,
+          userInfoLoading,
+          startLogin,
+          logout,
+          refreshSessionState,
+        }}
       >
         {children}
       </AuthgearContext.Provider>

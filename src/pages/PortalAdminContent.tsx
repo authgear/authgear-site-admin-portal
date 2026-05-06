@@ -8,7 +8,11 @@ import {
   SpinnerSize,
   TooltipHost,
 } from "@fluentui/react";
-import { listAppCollaborators, addAppCollaborator, removeAppCollaborator } from "../api/siteadmin";
+import {
+  listAppCollaborators,
+  addAppCollaborator,
+  removeAppCollaborator,
+} from "../api/siteadmin";
 import type { Collaborator } from "../api/types";
 import styles from "./PortalAdminContent.module.css";
 
@@ -35,7 +39,8 @@ const PortalAdminContent: React.VFC<PortalAdminContentProps> = ({ appId }) => {
     listAppCollaborators(appId)
       .then((res) => setCollaborators(res.collaborators))
       .catch((e: unknown) => {
-        const msg = e instanceof Error ? e.message : "Failed to load collaborators.";
+        const msg =
+          e instanceof Error ? e.message : "Failed to load collaborators.";
         setLoadError(msg);
       })
       .finally(() => setLoading(false));
@@ -67,7 +72,8 @@ const PortalAdminContent: React.VFC<PortalAdminContentProps> = ({ appId }) => {
         reload();
       })
       .catch((e: unknown) => {
-        const msg = e instanceof Error ? e.message : "Failed to remove collaborator.";
+        const msg =
+          e instanceof Error ? e.message : "Failed to remove collaborator.";
         setActionError(msg);
       })
       .finally(() => setRemoving(false));
@@ -96,7 +102,8 @@ const PortalAdminContent: React.VFC<PortalAdminContentProps> = ({ appId }) => {
         reload();
       })
       .catch((e: unknown) => {
-        const msg = e instanceof Error ? e.message : "Failed to invite collaborator.";
+        const msg =
+          e instanceof Error ? e.message : "Failed to invite collaborator.";
         setActionError(msg);
       })
       .finally(() => setInviting(false));
@@ -121,7 +128,13 @@ const PortalAdminContent: React.VFC<PortalAdminContentProps> = ({ appId }) => {
       </div>
 
       {loading ? (
-        <div style={{ padding: "24px 0", display: "flex", justifyContent: "center" }}>
+        <div
+          style={{
+            padding: "24px 0",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
           <Spinner size={SpinnerSize.medium} />
         </div>
       ) : loadError ? (
@@ -167,7 +180,14 @@ const PortalAdminContent: React.VFC<PortalAdminContentProps> = ({ appId }) => {
               ))}
               {collaborators.length === 0 && (
                 <tr>
-                  <td colSpan={3} style={{ textAlign: "center", color: "#797775", padding: "16px 0" }}>
+                  <td
+                    colSpan={3}
+                    style={{
+                      textAlign: "center",
+                      color: "#797775",
+                      padding: "16px 0",
+                    }}
+                  >
                     No collaborators yet.
                   </td>
                 </tr>
@@ -196,7 +216,10 @@ const PortalAdminContent: React.VFC<PortalAdminContentProps> = ({ appId }) => {
             Invite Portal Admin
           </div>
           <div className={styles.inviteModalBody}>
-            <label className={styles.inviteModalLabel} htmlFor="portal-admin-invite-email">
+            <label
+              className={styles.inviteModalLabel}
+              htmlFor="portal-admin-invite-email"
+            >
               Email
             </label>
             <TextField
@@ -212,7 +235,9 @@ const PortalAdminContent: React.VFC<PortalAdminContentProps> = ({ appId }) => {
             />
           </div>
           {actionError && (
-            <p style={{ margin: "8px 0 0", fontSize: 13, color: "#a4262c" }}>{actionError}</p>
+            <p style={{ margin: "8px 0 0", fontSize: 13, color: "#a4262c" }}>
+              {actionError}
+            </p>
           )}
           <div className={styles.inviteModalButtons}>
             <DefaultButton
@@ -259,7 +284,9 @@ const PortalAdminContent: React.VFC<PortalAdminContentProps> = ({ appId }) => {
             manage this project.
           </p>
           {actionError && (
-            <p style={{ margin: "8px 0 0", fontSize: 13, color: "#a4262c" }}>{actionError}</p>
+            <p style={{ margin: "8px 0 0", fontSize: 13, color: "#a4262c" }}>
+              {actionError}
+            </p>
           )}
           <div className={styles.removeModalButtons}>
             <DefaultButton

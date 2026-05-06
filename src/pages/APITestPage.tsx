@@ -35,21 +35,20 @@ const APITestPage: React.VFC = function APITestPage() {
   };
 
   const statusColor =
-    status === "ok"
-      ? "#107c10"
-      : status === "error"
-      ? "#d13438"
-      : "#605e5c";
+    status === "ok" ? "#107c10" : status === "error" ? "#d13438" : "#605e5c";
 
   return (
     <div style={{ padding: 32, maxWidth: 800 }}>
       <Text variant="xLarge" block style={{ marginBottom: 8 }}>
         API Connection Test
       </Text>
-      <Text variant="small" block style={{ color: "#605e5c", marginBottom: 24 }}>
-        Calls{" "}
-        <code>GET {SITEADMIN_API_URL}/api/v1/apps</code>{" "}
-        using the current Authgear session token.
+      <Text
+        variant="small"
+        block
+        style={{ color: "#605e5c", marginBottom: 24 }}
+      >
+        Calls <code>GET {SITEADMIN_API_URL}/api/v1/apps</code> using the current
+        Authgear session token.
       </Text>
 
       <PrimaryButton

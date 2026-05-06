@@ -35,7 +35,14 @@ const AuthenticatedApp: React.VFC = function AuthenticatedApp() {
 
   if (userInfoLoading || accessChecking) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100vh",
+        }}
+      >
         <Spinner size={SpinnerSize.large} />
       </div>
     );

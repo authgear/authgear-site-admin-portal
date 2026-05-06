@@ -49,23 +49,18 @@ export function getApp(appId: string): Promise<AppDetail> {
 export function listAppCollaborators(
   appId: string
 ): Promise<CollaboratorsListResponse> {
-  return apiRequest(
-    `/api/v1/apps/${encodeURIComponent(appId)}/collaborators`
-  );
+  return apiRequest(`/api/v1/apps/${encodeURIComponent(appId)}/collaborators`);
 }
 
 export function addAppCollaborator(
   appId: string,
   userEmail: string
 ): Promise<Collaborator> {
-  return apiRequest(
-    `/api/v1/apps/${encodeURIComponent(appId)}/collaborators`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_email: userEmail }),
-    }
-  );
+  return apiRequest(`/api/v1/apps/${encodeURIComponent(appId)}/collaborators`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_email: userEmail }),
+  });
 }
 
 export function removeAppCollaborator(
