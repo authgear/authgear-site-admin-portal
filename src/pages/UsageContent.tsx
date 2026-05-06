@@ -479,6 +479,7 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
               directionalHintFixed
               isBeakVisible={false}
               gapSpace={4}
+              className={styles.mauMonthCallout}
             >
               <div className={styles.smsTrendYearPanel}>
                 <div className={styles.smsTrendYearRow}>
