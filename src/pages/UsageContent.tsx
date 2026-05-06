@@ -352,7 +352,7 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
       {/* SMS/WhatsApp Cost (Estimated) */}
       <div className={styles.card}>
         <div className={styles.cardHeader}>
-          <h3 className={styles.cardTitle}>SMS/WhatsApp Cost (Estimated)</h3>
+          <h3 className={styles.cardTitle}>SMS/WhatsApp</h3>
           <div className={styles.cardHeaderControl}>
             <Dropdown
               options={SMS_DATE_RANGE_OPTIONS}
@@ -542,7 +542,7 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
           <h3 className={styles.cardTitle}>Monthly Active Users</h3>
         </div>
         <div className={styles.mauCurrentMonthRow}>
-          <span className={styles.mauCurrentMonthLabel}>Month</span>
+          <span className={styles.mauCurrentMonthLabel}>This month</span>
           <span className={styles.mauCurrentMonthValue}>{mauMonthLabel}</span>
         </div>
         <div className={styles.mauProgressValueRow}>
