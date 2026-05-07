@@ -28,6 +28,7 @@ import {
   getAppMonthlyActiveUsers,
 } from "../api/siteadmin";
 import type { MessagingUsage, MonthlyActiveUsersCount } from "../api/types";
+import MonthlyBarChart from "../components/MonthlyBarChart";
 import styles from "./UsageContent.module.css";
 
 const SMS_DATE_RANGE_OPTIONS: IDropdownOption[] = [
@@ -79,6 +80,28 @@ function getEffectiveDateRange(
   return { start: toDateStr(start), end: toDateStr(now) };
 }
 
+/** Returns 12 { start, end } YYYY-MM-DD ranges for each month of the given year. */
+function getMonthRangesForYear(year: number): Array<{
+  start: string;
+  end: string;
+  monthKey: string;
+  monthIndex: number;
+}> {
+  const toDateStr = (d: Date) => d.toISOString().slice(0, 10);
+  return Array.from({ length: 12 }, (_, i) => {
+    const month = i + 1;
+    const start = new Date(Date.UTC(year, i, 1));
+    // Day 0 of next month = last day of current month.
+    const end = new Date(Date.UTC(year, i + 1, 0));
+    return {
+      start: toDateStr(start),
+      end: toDateStr(end),
+      monthKey: `${year}-${String(month).padStart(2, "0")}`,
+      monthIndex: i,
+    };
+  });
+}
+
 function getSmsDateRangeLabel(
   rangeKey: string,
   customStart?: Date | null,
@@ -110,47 +133,6 @@ function formatShortDate(d: Date): string {
 
 export const MAU_CAP = 25000;
 
-/** Format a count with 3 significant figures and a suffix (k/M/B/T) for ≥1000. */
-function formatCompactNumber(n: number): string {
-  if (n === 0) return "0";
-  const abs = Math.abs(n);
-  if (abs < 1000) return n.toLocaleString();
-  const units: Array<{ value: number; suffix: string }> = [
-    { value: 1e12, suffix: "T" },
-    { value: 1e9, suffix: "B" },
-    { value: 1e6, suffix: "M" },
-    { value: 1e3, suffix: "k" },
-  ];
-  for (const { value, suffix } of units) {
-    if (abs >= value) {
-      const scaled = n / value;
-      const str = scaled.toPrecision(3).replace(/\.?0+$/, "");
-      return `${str}${suffix}`;
-    }
-  }
-  return n.toString();
-}
-
-/** Round max up to a visually clean axis ceiling (1, 2, 2.5, 3, 5, 7.5, 10 × 10ⁿ). */
-function niceAxisCeiling(max: number): number {
-  if (max <= 0) return 10;
-  const pow = Math.pow(10, Math.floor(Math.log10(max)));
-  const frac = max / pow;
-  const steps = [1, 1.5, 2, 2.5, 3, 4, 5, 7.5, 10];
-  const niceFrac = steps.find((s) => frac <= s) ?? 10;
-  return niceFrac * pow;
-}
-
-/** True if monthKey is after the current calendar month (no data for future months) */
-function isMonthKeyInFuture(monthKey: string): boolean {
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth() + 1; // 1–12
-  const [y, m] = monthKey.split("-").map(Number);
-  if (!y || !m) return false;
-  return y > currentYear || (y === currentYear && m > currentMonth);
-}
-
 interface UsageContentProps {
   appId: string;
 }
@@ -169,16 +151,10 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
   const smsStartDateInputRef = useRef<HTMLDivElement>(null);
   const smsEndDateInputRef = useRef<HTMLDivElement>(null);
 
-  const [mauMonthKey, setMauMonthKey] = useState<string>(() => {
+  const mauMonthKey = useMemo(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  });
-  const [showMonthPicker, setShowMonthPicker] = useState(false);
-  const [pickerYear, setPickerYear] = useState(() => new Date().getFullYear());
-  const mauMonthTriggerRef = useRef<HTMLDivElement>(null);
-  const [mauMonthTargetRect, setMauMonthTargetRect] = useState<DOMRect | null>(
-    null
-  );
+  }, []);
 
   const [mauOverviewYear, setMauOverviewYear] = useState(() =>
     new Date().getFullYear()
@@ -187,6 +163,17 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
   const mauOverviewYearTriggerRef = useRef<HTMLDivElement>(null);
   const [mauOverviewYearTargetRect, setMauOverviewYearTargetRect] =
     useState<DOMRect | null>(null);
+
+  const [smsTrendYear, setSmsTrendYear] = useState(() =>
+    new Date().getFullYear()
+  );
+  const [showSmsTrendYearPicker, setShowSmsTrendYearPicker] = useState(false);
+  const smsTrendYearTriggerRef = useRef<HTMLDivElement>(null);
+  const [smsTrendYearTargetRect, setSmsTrendYearTargetRect] =
+    useState<DOMRect | null>(null);
+
+  const [smsTrendCounts, setSmsTrendCounts] = useState<number[]>([]);
+  const [smsTrendLoading, setSmsTrendLoading] = useState(false);
 
   // API state: messaging usage
   const [messagingUsage, setMessagingUsage] = useState<MessagingUsage | null>(
@@ -257,6 +244,43 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
       .finally(() => setMauChartLoading(false));
   }, [appId, mauOverviewYear]);
 
+  // Fetch SMS trend for selected year
+  useEffect(() => {
+    let ignore = false;
+    setSmsTrendLoading(true);
+    setSmsTrendCounts([]);
+    const ranges = getMonthRangesForYear(smsTrendYear);
+    const now = new Date();
+    // Only fetch up to and including the current month; future months get 0.
+    const fetchable = ranges.filter(
+      (r) =>
+        smsTrendYear < now.getFullYear() ||
+        (smsTrendYear === now.getFullYear() && r.monthIndex <= now.getMonth())
+    );
+    Promise.all(
+      fetchable.map((r) =>
+        getAppMessagingUsage(appId, r.start, r.end)
+          .then((u) => ({
+            monthIndex: r.monthIndex,
+            count: u.sms_north_america_count + u.sms_other_regions_count,
+          }))
+          .catch(() => ({ monthIndex: r.monthIndex, count: 0 }))
+      )
+    )
+      .then((results) => {
+        if (ignore) return;
+        const arr = new Array(12).fill(0);
+        for (const { monthIndex, count } of results) arr[monthIndex] = count;
+        setSmsTrendCounts(arr);
+      })
+      .finally(() => {
+        if (!ignore) setSmsTrendLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [appId, smsTrendYear]);
+
   const smsDateRangeText = useMemo(
     () =>
       getSmsDateRangeLabel(
@@ -292,29 +316,16 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
     if (!y || !m) return "Nov 2025";
     return `${MONTH_NAMES[m - 1]} ${y}`;
   }, [mauMonthKey]);
-  const mauYear = useMemo(
-    () => parseInt(mauMonthKey.split("-")[0] ?? "2025", 10),
-    [mauMonthKey]
-  );
-  const mauMonthIndex = useMemo(
-    () => parseInt(mauMonthKey.split("-")[1] ?? "1", 10) - 1,
-    [mauMonthKey]
-  );
 
-  const isMauMonthFuture = useMemo(() => {
-    const now = new Date();
-    const [y, m] = mauMonthKey.split("-").map(Number);
-    if (!y || !m) return false;
-    return (
-      y > now.getFullYear() ||
-      (y === now.getFullYear() && m > now.getMonth() + 1)
-    );
-  }, [mauMonthKey]);
+  const mauCurrentCount = mauCardCount ?? 0;
+  const mauPercent = Math.min(100, (mauCurrentCount / MAU_CAP) * 100);
 
-  const mauCurrentCount = isMauMonthFuture ? 0 : (mauCardCount ?? 0);
-  const mauPercent = isMauMonthFuture
-    ? 0
-    : Math.min(100, (mauCurrentCount / MAU_CAP) * 100);
+  const smsTrendData = useMemo(() => {
+    return Array.from({ length: 12 }, (_, i) => {
+      const monthKey = `${smsTrendYear}-${String(i + 1).padStart(2, "0")}`;
+      return { monthKey, value: smsTrendCounts[i] ?? 0 };
+    });
+  }, [smsTrendCounts, smsTrendYear]);
 
   // Derive chart rows from API response
   const mauMonthlyOverview = useMemo(() => {
@@ -324,45 +335,24 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
       const found = mauChartCounts.find(
         (c) => c.year === mauOverviewYear && c.month === month
       );
-      const mau = isMonthKeyInFuture(monthKey) ? 0 : (found?.count ?? 0);
-      return { monthKey, label: `${MONTH_NAMES[i]} ${mauOverviewYear}`, mau };
+      const isFuture = (() => {
+        const now = new Date();
+        return (
+          mauOverviewYear > now.getFullYear() ||
+          (mauOverviewYear === now.getFullYear() && month > now.getMonth() + 1)
+        );
+      })();
+      const mau = isFuture ? 0 : (found?.count ?? 0);
+      return { monthKey, mau };
     });
   }, [mauChartCounts, mauOverviewYear]);
-
-  const mauOverviewMax = useMemo(
-    () => niceAxisCeiling(Math.max(1, ...mauMonthlyOverview.map((r) => r.mau))),
-    [mauMonthlyOverview]
-  );
-
-  /** 5 tick values from max down to 0 for the Y-axis (top-to-bottom). */
-  const mauOverviewTicks = useMemo(() => {
-    return [1, 0.75, 0.5, 0.25, 0].map((p) => Math.round(p * mauOverviewMax));
-  }, [mauOverviewMax]);
-
-  useEffect(() => {
-    if (showMonthPicker) setPickerYear(mauYear);
-  }, [showMonthPicker, mauYear]);
-
-  const goToToday = () => {
-    const now = new Date();
-    setMauMonthKey(
-      `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
-    );
-    setPickerYear(now.getFullYear());
-    setShowMonthPicker(false);
-  };
-
-  const selectMonth = (monthIndex: number) => {
-    setMauMonthKey(`${pickerYear}-${String(monthIndex + 1).padStart(2, "0")}`);
-    setShowMonthPicker(false);
-  };
 
   return (
     <div className={styles.root}>
       {/* SMS/WhatsApp Cost (Estimated) */}
       <div className={styles.card}>
         <div className={styles.cardHeader}>
-          <h3 className={styles.cardTitle}>SMS/WhatsApp Cost (Estimated)</h3>
+          <h3 className={styles.cardTitle}>SMS/WhatsApp</h3>
           <div className={styles.cardHeaderControl}>
             <Dropdown
               options={SMS_DATE_RANGE_OPTIONS}
@@ -440,54 +430,50 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
             No data available.
           </p>
         )}
-      </div>
 
-      {/* Monthly Active Users — single month + chart */}
-      <div className={styles.card}>
-        <div className={styles.cardHeader}>
-          <h3 className={styles.cardTitle}>Monthly Active Users</h3>
-        </div>
-        <div className={styles.mauCurrentMonthRow}>
-          <span className={styles.mauCurrentMonthLabel}>Month</span>
+        <div className={styles.smsTrendDivider} aria-hidden />
+
+        <div className={styles.smsTrendHeader}>
+          <h3 className={styles.smsTrendTitle}>SMS trend</h3>
           <div
-            ref={mauMonthTriggerRef}
+            ref={smsTrendYearTriggerRef}
             className={styles.mauMonthWrap}
             role="button"
             tabIndex={0}
             aria-haspopup="dialog"
-            aria-expanded={showMonthPicker}
-            aria-label={`Month: ${mauMonthLabel}. Click to choose month.`}
+            aria-expanded={showSmsTrendYearPicker}
+            aria-label={`SMS trend year: ${smsTrendYear}. Click to choose year.`}
             onClick={() => {
-              if (!showMonthPicker && mauMonthTriggerRef.current) {
-                setMauMonthTargetRect(
-                  mauMonthTriggerRef.current.getBoundingClientRect()
+              if (!showSmsTrendYearPicker && smsTrendYearTriggerRef.current) {
+                setSmsTrendYearTargetRect(
+                  smsTrendYearTriggerRef.current.getBoundingClientRect()
                 );
               }
-              setShowMonthPicker((v) => !v);
+              setShowSmsTrendYearPicker((v) => !v);
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                if (!showMonthPicker && mauMonthTriggerRef.current) {
-                  setMauMonthTargetRect(
-                    mauMonthTriggerRef.current.getBoundingClientRect()
+                if (!showSmsTrendYearPicker && smsTrendYearTriggerRef.current) {
+                  setSmsTrendYearTargetRect(
+                    smsTrendYearTriggerRef.current.getBoundingClientRect()
                   );
                 }
-                setShowMonthPicker((v) => !v);
+                setShowSmsTrendYearPicker((v) => !v);
               }
             }}
           >
-            <span className={styles.mauMonthTriggerText}>{mauMonthLabel}</span>
+            <span className={styles.mauMonthTriggerText}>{smsTrendYear}</span>
             <Icon iconName="Calendar" className={styles.mauMonthTriggerIcon} />
           </div>
         </div>
-        {showMonthPicker &&
-          (mauMonthTargetRect ?? mauMonthTriggerRef.current) && (
+        {showSmsTrendYearPicker &&
+          (smsTrendYearTargetRect ?? smsTrendYearTriggerRef.current) && (
             <Callout
-              target={mauMonthTargetRect ?? mauMonthTriggerRef.current!}
+              target={smsTrendYearTargetRect ?? smsTrendYearTriggerRef.current!}
               onDismiss={() => {
-                setShowMonthPicker(false);
-                setMauMonthTargetRect(null);
+                setShowSmsTrendYearPicker(false);
+                setSmsTrendYearTargetRect(null);
               }}
               directionalHint={DirectionalHint.bottomRightEdge}
               directionalHintFixed
@@ -495,14 +481,16 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
               gapSpace={4}
               className={styles.mauMonthCallout}
             >
-              <div className={styles.mauMonthPanel}>
-                <div className={styles.mauMonthPanelYearRow}>
-                  <span className={styles.mauMonthPanelYear}>{pickerYear}</span>
-                  <div className={styles.mauMonthPanelYearArrows}>
+              <div className={styles.smsTrendYearPanel}>
+                <div className={styles.smsTrendYearRow}>
+                  <span className={styles.smsTrendYearText}>
+                    {smsTrendYear}
+                  </span>
+                  <div className={styles.smsTrendYearArrows}>
                     <IconButton
                       iconProps={{ iconName: "ChevronUp" }}
                       ariaLabel="Previous year"
-                      onClick={() => setPickerYear((y) => y - 1)}
+                      onClick={() => setSmsTrendYear((y) => y - 1)}
                       styles={{
                         root: { width: 24, height: 24 },
                         icon: { fontSize: 12, color: "#323130" },
@@ -511,7 +499,7 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
                     <IconButton
                       iconProps={{ iconName: "ChevronDown" }}
                       ariaLabel="Next year"
-                      onClick={() => setPickerYear((y) => y + 1)}
+                      onClick={() => setSmsTrendYear((y) => y + 1)}
                       styles={{
                         root: { width: 24, height: 24 },
                         icon: { fontSize: 12, color: "#323130" },
@@ -519,51 +507,54 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
                     />
                   </div>
                 </div>
-                <div
-                  className={styles.mauMonthGrid}
-                  role="grid"
-                  aria-label="Months"
-                >
-                  {MONTH_NAMES.map((name, idx) => (
-                    <button
-                      key={name}
-                      type="button"
-                      role="gridcell"
-                      className={
-                        pickerYear === mauYear && idx === mauMonthIndex
-                          ? `${styles.mauMonthCell} ${styles.mauMonthCellSelected}`
-                          : styles.mauMonthCell
-                      }
-                      onClick={() => selectMonth(idx)}
-                    >
-                      {name}
-                    </button>
-                  ))}
-                </div>
-                <div className={styles.mauMonthGoToTodayWrap}>
+                <div className={styles.smsTrendGoToCurrentWrap}>
                   <button
                     type="button"
-                    className={styles.mauMonthGoToToday}
-                    onClick={goToToday}
+                    className={styles.smsTrendGoToCurrent}
+                    onClick={() => {
+                      setSmsTrendYear(new Date().getFullYear());
+                      setShowSmsTrendYearPicker(false);
+                    }}
                   >
-                    Go to today
+                    Go to current year
                   </button>
                 </div>
               </div>
             </Callout>
           )}
+        {smsTrendLoading ? (
+          <div style={{ padding: "8px 0" }}>
+            <Spinner size={SpinnerSize.small} />
+          </div>
+        ) : (
+          <MonthlyBarChart
+            year={smsTrendYear}
+            data={smsTrendData}
+            unit="SMS messages"
+            ariaLabel={`SMS messages by month for ${smsTrendYear}`}
+          />
+        )}
+      </div>
+
+      {/* Monthly Active Users — single month + chart */}
+      <div className={styles.card}>
+        <div className={styles.cardHeader}>
+          <h3 className={styles.cardTitle}>Monthly Active Users</h3>
+        </div>
+        <div className={styles.mauCurrentMonthRow}>
+          <span className={styles.mauCurrentMonthLabel}>This month</span>
+          <span className={styles.mauCurrentMonthValue}>{mauMonthLabel}</span>
+        </div>
         <div className={styles.mauProgressValueRow}>
           <span className={styles.mauProgressValue}>
             {mauCardLoading
               ? "—"
-              : isMauMonthFuture
-                ? "—"
-                : `${mauCurrentCount.toLocaleString()} / ${MAU_CAP.toLocaleString()}`}
+              : `${mauCurrentCount.toLocaleString()} / ${MAU_CAP.toLocaleString()}`}
           </span>
         </div>
         <TooltipHost
           content={
-            isMauMonthFuture || mauCardLoading
+            mauCardLoading
               ? "No data"
               : `Monthly active users: ${mauCurrentCount.toLocaleString()} of ${MAU_CAP.toLocaleString()}`
           }
@@ -700,73 +691,15 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
             <Spinner size={SpinnerSize.small} />
           </div>
         )}
-        <div
-          className={styles.mauOverviewChart}
-          role="img"
-          aria-label={`Monthly Active Users for ${mauOverviewYear}`}
-        >
-          <div className={styles.mauOverviewYAxis} aria-hidden>
-            {mauOverviewTicks.map((tick, i) => (
-              <span key={i} className={styles.mauOverviewYTick}>
-                {formatCompactNumber(tick)}
-              </span>
-            ))}
-          </div>
-          <div className={styles.mauOverviewChartArea}>
-            <div className={styles.mauOverviewBars}>
-              {mauMonthlyOverview.map(({ monthKey, label, mau }) => {
-                const pct =
-                  mauOverviewMax > 0 ? (mau / mauOverviewMax) * 100 : 0;
-                const hasData = mau > 0;
-                const monthOnly = label.split(" ")[0] ?? label;
-                const tooltipContent = isMonthKeyInFuture(monthKey)
-                  ? `${label}: No data`
-                  : `${label}: ${mau.toLocaleString()} MAUs`;
-                const fillClass = !hasData
-                  ? styles.mauOverviewBarFillEmpty
-                  : styles.mauOverviewBarFill;
-                const barHeightPx = 140;
-                const fillHeightPx = hasData ? (pct / 100) * barHeightPx : 0;
-                return (
-                  <div key={monthKey} className={styles.mauOverviewBarWrap}>
-                    <span className={styles.mauOverviewBarValue}>
-                      {hasData ? formatCompactNumber(mau) : "\u00A0"}
-                    </span>
-                    <div
-                      className={styles.mauOverviewBarTrack}
-                      role="img"
-                      aria-label={tooltipContent}
-                    >
-                      <TooltipHost
-                        content={tooltipContent}
-                        directionalHint={DirectionalHint.topCenter}
-                        delay={0}
-                        hostClassName={styles.mauOverviewBarTooltipHost}
-                        tooltipProps={{
-                          calloutProps: {
-                            gapSpace: 2,
-                            isBeakVisible: true,
-                          },
-                        }}
-                      >
-                        <div
-                          className={fillClass}
-                          style={{
-                            height: hasData ? `${fillHeightPx}px` : "0",
-                            minHeight: 0,
-                          }}
-                        />
-                      </TooltipHost>
-                    </div>
-                    <span className={styles.mauOverviewBarLabel}>
-                      {monthOnly}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+        <MonthlyBarChart
+          year={mauOverviewYear}
+          data={mauMonthlyOverview.map(({ monthKey, mau }) => ({
+            monthKey,
+            value: mau,
+          }))}
+          unit="MAUs"
+          ariaLabel={`Monthly Active Users for ${mauOverviewYear}`}
+        />
       </div>
 
       {/* SMS/WhatsApp Cost — Custom date range modal */}

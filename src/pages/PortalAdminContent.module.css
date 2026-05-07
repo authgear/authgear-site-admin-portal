@@ -6,14 +6,7 @@
   min-width: 0;
   width: 100%;
   padding-bottom: 48px;
-  font-family:
-    "Segoe UI",
-    -apple-system,
-    BlinkMacSystemFont,
-    "Noto Sans",
-    "Helvetica",
-    "Arial",
-    sans-serif;
+  font-family: var(--font-family-base);
 }
 
 .inviteRow {
@@ -34,7 +27,7 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
 }
 
 .table th {
@@ -107,7 +100,7 @@
 }
 
 .actionRemove {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 12px;
   color: #e23d3d;
   background: none;
@@ -139,7 +132,7 @@
 }
 
 .inviteModalLabel {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 14px;
   font-weight: 600;
   color: #323130;
@@ -156,7 +149,7 @@
 
 /* Remove modal */
 .removeModalMessage {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 14px;
   color: #323130;
   line-height: 1.5;

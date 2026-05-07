@@ -1,6 +1,6 @@
 .title {
   margin: 0;
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-weight: 600;
   font-size: 28px;
   line-height: 36px;

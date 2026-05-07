@@ -26,7 +26,7 @@
 }
 
 .cardTitle {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 18px;
   font-weight: 400;
   color: #323130;
@@ -46,9 +46,16 @@
 }
 
 .mauCurrentMonthLabel {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 14px;
   font-weight: 400;
+  color: #323130;
+}
+
+.mauCurrentMonthValue {
+  font-family: var(--font-family-base);
+  font-size: 14px;
+  font-weight: 600;
   color: #323130;
 }
 
@@ -65,7 +72,7 @@
 }
 
 .smsDateRangeText {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 12px;
   color: #605e5c;
   margin: 0 0 12px 0;
@@ -99,14 +106,14 @@
 }
 
 .smsLabel {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 14px;
   color: #323130;
   margin: 0;
 }
 
 .smsValue {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 14px;
   color: #605e5c;
   margin: 0;
@@ -125,7 +132,7 @@
   border-radius: 2px;
   background-color: #ffffff;
   cursor: pointer;
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 14px;
   color: #323130;
 }
@@ -146,7 +153,7 @@
   flex-shrink: 0;
 }
 
-/* Month picker callout panel */
+/* Month/Year picker callout panel — used by the year picker for the MAU chart */
 .mauMonthCallout :global(.ms-Callout-main) {
   padding: 0;
   border-radius: 4px;
@@ -173,7 +180,7 @@
 }
 
 .mauMonthPanelYear {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 18px;
   font-weight: 600;
   color: #323130;
@@ -185,40 +192,6 @@
   gap: 0;
 }
 
-.mauMonthGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-  margin-bottom: 12px;
-}
-
-.mauMonthCell {
-  font-family: "Segoe UI", sans-serif;
-  font-size: 14px;
-  color: #323130;
-  background: none;
-  border: none;
-  border-radius: 2px;
-  padding: 8px;
-  cursor: pointer;
-  min-height: 32px;
-}
-
-.mauMonthCell:hover {
-  background-color: #f3f2f1;
-  color: #323130;
-}
-
-.mauMonthCellSelected {
-  background-color: #176df3;
-  color: #ffffff;
-}
-
-.mauMonthCellSelected:hover {
-  background-color: #1562db;
-  color: #ffffff;
-}
-
 .mauMonthGoToTodayWrap {
   display: flex;
   justify-content: flex-end;
@@ -226,7 +199,7 @@
 }
 
 .mauMonthGoToToday {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 14px;
   color: #176df3;
   background: none;
@@ -239,13 +212,6 @@
 .mauMonthGoToToday:hover {
   text-decoration: underline;
   color: #1562db;
-}
-
-.mauDivider {
-  height: 1px;
-  background-color: #edebe9;
-  margin: 16px 0;
-  width: 100%;
 }
 
 .mauCardDivider {
@@ -288,7 +254,7 @@
 }
 
 .mauProgressValue {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 14px;
   font-weight: 600;
   color: #323130;
@@ -304,130 +270,84 @@
 }
 
 .mauOverviewTitle {
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--font-family-base);
   font-size: 14px;
   font-weight: 400;
   color: #323130;
   margin: 0;
 }
 
-.mauOverviewChart {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-end;
-  gap: 12px;
-  min-width: 0;
-}
-
-.mauOverviewYAxis {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 140px;
-  /* Offset so the axis aligns with the bar track, not the full bar wrap
-     (which also stacks a value label on top and a month label below). */
-  margin-bottom: 24px; /* label height (16px) + gap (8px) */
-  flex-shrink: 0;
-  padding-right: 8px;
-  border-right: 1px solid #edebe9;
-  text-align: right;
-}
-
-.mauOverviewYTick {
-  font-family: "Segoe UI", sans-serif;
-  font-size: 10px;
-  color: #605e5c;
-  line-height: 1;
-}
-
-.mauOverviewChartArea {
-  flex: 1 1 0;
-  min-width: 0;
-  position: relative;
-}
-
-.mauOverviewGridLines {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 140px;
-  pointer-events: none;
-}
-
-.mauOverviewGridLine {
-  position: absolute;
-  left: 0;
-  right: 0;
+.smsTrendDivider {
   height: 1px;
   background-color: #edebe9;
-  transform: translateY(50%);
+  margin: 24px 0;
+  width: 100%;
 }
 
-.mauOverviewBars {
+.smsTrendHeader {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-evenly;
-  min-width: 0;
-  position: relative;
-  z-index: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
-.mauOverviewBarWrap {
-  flex: 0 0 auto;
-  min-width: 32px;
+.smsTrendTitle {
+  font-family: var(--font-family-base);
+  font-size: 14px;
+  font-weight: 400;
+  color: #323130;
+  margin: 0;
+}
+
+.smsTrendYearPanel {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.mauOverviewBarTooltipHost {
-  width: 100%;
-  display: block;
-}
-
-.mauOverviewBarTrack {
-  width: 20px;
-  max-width: 100%;
-  height: 140px;
-  background-color: transparent;
-  display: flex;
   align-items: flex-end;
-  justify-content: center;
-  overflow: hidden;
-  cursor: default;
+  padding: 16px;
+  min-width: 220px;
+  background-color: #ffffff;
 }
 
-.mauOverviewBarFill {
+.smsTrendYearRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
   width: 100%;
-  min-height: 4px;
-  background-color: #176df3;
-  transition: height 0.2s ease-out;
 }
 
-/* No data (future months) — no visible fill */
-.mauOverviewBarFillEmpty {
-  width: 100%;
-  min-height: 0;
-  background-color: transparent;
-  transition: height 0.2s ease-out;
-}
-
-.mauOverviewBarLabel {
-  font-family: "Segoe UI", sans-serif;
-  font-size: 11px;
-  color: #605e5c;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.mauOverviewBarValue {
-  font-family: "Segoe UI", sans-serif;
-  font-size: 12px;
+.smsTrendYearText {
+  font-family: var(--font-family-base);
+  font-size: 18px;
   font-weight: 600;
   color: #323130;
-  line-height: 16px;
-  text-align: center;
-  white-space: nowrap;
+}
+
+.smsTrendYearArrows {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.smsTrendGoToCurrentWrap {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.smsTrendGoToCurrent {
+  font-family: var(--font-family-base);
+  font-size: 14px;
+  color: #176df3;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  text-decoration: none;
+}
+
+.smsTrendGoToCurrent:hover {
+  text-decoration: underline;
+  color: #1562db;
 }

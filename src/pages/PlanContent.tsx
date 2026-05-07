@@ -109,8 +109,8 @@ const PlanContent: React.VFC<PlanContentProps> = ({
             disabled={submitting}
             className={styles.planDropdown}
             styles={{
-              title: { fontFamily: '"Segoe UI", sans-serif' },
-              dropdown: { fontFamily: '"Segoe UI", sans-serif' },
+              title: { fontFamily: "var(--font-family-base)" },
+              dropdown: { fontFamily: "var(--font-family-base)" },
             }}
           />
         )}
