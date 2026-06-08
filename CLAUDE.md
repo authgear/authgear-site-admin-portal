@@ -96,6 +96,10 @@ API spec: `https://raw.githubusercontent.com/authgear/authgear-server/refs/heads
 
 Use `/connect-api` to get step-by-step guidance on wiring a page to the API.
 
+### Date Handling
+
+The server stores all data in UTC. Always use UTC methods (`getUTCFullYear`, `getUTCMonth`, `Date.UTC`, etc.) — never local date methods. Use `/date-handling` for detailed rules and examples.
+
 ### TypeScript
 
 Strict mode enabled. Components use `React.VFC<Props>` pattern. Type definitions for domain objects are in `src/types/`.
