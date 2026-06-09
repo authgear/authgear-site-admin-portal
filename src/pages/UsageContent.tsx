@@ -35,8 +35,10 @@ const SMS_DATE_RANGE_OPTIONS: IDropdownOption[] = [
   { key: "last7", text: "Last 7 days" },
   { key: "last30", text: "Last 30 days" },
   { key: "last60", text: "Last 60 days" },
-  { key: "last90", text: "Last 90 days" },
-  { key: "last180", text: "Last 180 days" },
+  { key: "mtd", text: "Month-to-date" },
+  { key: "lastMonth", text: "Last month" },
+  { key: "ytd", text: "Year-to-date" },
+  { key: "last12months", text: "Last 12 months" },
   { key: "custom", text: "Custom date range" },
 ];
 
@@ -59,9 +61,45 @@ const SMS_RANGE_DAYS: Record<string, number> = {
   last7: 7,
   last30: 30,
   last60: 60,
-  last90: 90,
-  last180: 180,
 };
+
+/** Compute start/end Date bounds for a preset range key (null for custom). */
+function getSmsRangeBounds(
+  rangeKey: string,
+  now: Date
+): { start: Date; end: Date } | null {
+  const days = SMS_RANGE_DAYS[rangeKey];
+  if (days) {
+    const start = new Date(now);
+    start.setDate(start.getDate() - (days - 1));
+    return { start, end: new Date(now) };
+  }
+  switch (rangeKey) {
+    case "mtd":
+      return {
+        start: new Date(now.getFullYear(), now.getMonth(), 1),
+        end: new Date(now),
+      };
+    case "lastMonth":
+      return {
+        start: new Date(now.getFullYear(), now.getMonth() - 1, 1),
+        end: new Date(now.getFullYear(), now.getMonth(), 0),
+      };
+    case "ytd":
+      return {
+        start: new Date(now.getFullYear(), 0, 1),
+        end: new Date(now),
+      };
+    case "last12months": {
+      const start = new Date(now);
+      start.setFullYear(start.getFullYear() - 1);
+      start.setDate(start.getDate() + 1);
+      return { start, end: new Date(now) };
+    }
+    default:
+      return null;
+  }
+}
 
 /** Convert a range key + optional custom dates to YYYY-MM-DD start/end strings for the API */
 function getEffectiveDateRange(
@@ -74,10 +112,11 @@ function getEffectiveDateRange(
   if (rangeKey === "custom" && customStart && customEnd) {
     return { start: toDateStr(customStart), end: toDateStr(customEnd) };
   }
-  const days = SMS_RANGE_DAYS[rangeKey] ?? 7;
-  const start = new Date(now);
-  start.setDate(start.getDate() - (days - 1));
-  return { start: toDateStr(start), end: toDateStr(now) };
+  const bounds = getSmsRangeBounds(rangeKey, now) ?? {
+    start: new Date(now),
+    end: new Date(now),
+  };
+  return { start: toDateStr(bounds.start), end: toDateStr(bounds.end) };
 }
 
 /** Returns 12 { start, end } YYYY-MM-DD ranges for each month of the given year. */
@@ -115,12 +154,9 @@ function getSmsDateRangeLabel(
     if (customEnd) return `until ${formatShortDate(customEnd)}`;
     return "Select start and end date";
   }
-  const days = SMS_RANGE_DAYS[rangeKey];
-  if (!days) return "";
-  const end = new Date(now);
-  const start = new Date(now);
-  start.setDate(start.getDate() - (days - 1));
-  return `${formatShortDate(start)} - ${formatShortDate(end)}`;
+  const bounds = getSmsRangeBounds(rangeKey, now);
+  if (!bounds) return "";
+  return `${formatShortDate(bounds.start)} - ${formatShortDate(bounds.end)}`;
 }
 
 function formatShortDate(d: Date): string {
