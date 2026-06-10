@@ -65,7 +65,7 @@ function getPageItems(current: number, total: number): PageItem[] {
 
 const SEARCH_BY_OPTIONS: IDropdownOption[] = [
   { key: "projectId", text: "Project ID" },
-  { key: "ownerEmail", text: "Owner Email" },
+  { key: "ownerEmail", text: "Owner" },
 ];
 
 const ALL_PLANS_KEY = "__all__";
@@ -125,7 +125,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
     if (searchText.trim()) {
       if (searchBy === "projectId") params.app_id = searchText.trim();
       else if (searchBy === "ownerEmail")
-        params.owner_email = searchText.trim();
+        params.owner_search = searchText.trim();
     }
     if (planFilter !== ALL_PLANS_KEY) {
       params.plan = planFilter;

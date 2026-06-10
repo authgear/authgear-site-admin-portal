@@ -33,6 +33,7 @@ export interface AppsListResponse {
   total_count: number;
   page: number;
   page_size: number;
+  owner_search_truncated: boolean;
 }
 
 // ─── Collaborators ────────────────────────────────────────────────────────────
