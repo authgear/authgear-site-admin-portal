@@ -54,6 +54,7 @@ Base URL: `VITE_SITEADMIN_API_URL` env var (set to `https://siteadmin.authgear-s
 - `authgear.fetch()` auto-refreshes the access token — no manual retry needed.
 - `listApps` is paginated server-side; do not slice results client-side.
 - `SiteAdminAPIError` has `.code`, `.errorName`, `.reason`, `.message` fields.
+- **Date parameters:** the server stores everything in UTC. Always construct date strings using UTC methods — use `/date-handling` for the full rules.
 
 ## References
 

@@ -63,7 +63,8 @@ const SMS_RANGE_DAYS: Record<string, number> = {
   last60: 60,
 };
 
-/** Compute start/end Date bounds for a preset range key (null for custom). */
+/** Compute start/end Date bounds for a preset range key (null for custom).
+ *  All date arithmetic uses UTC; returned dates are UTC midnight. */
 function getSmsRangeBounds(
   rangeKey: string,
   now: Date
@@ -71,29 +72,31 @@ function getSmsRangeBounds(
   const days = SMS_RANGE_DAYS[rangeKey];
   if (days) {
     const start = new Date(now);
-    start.setDate(start.getDate() - (days - 1));
+    start.setUTCDate(start.getUTCDate() - (days - 1));
     return { start, end: new Date(now) };
   }
   switch (rangeKey) {
     case "mtd":
       return {
-        start: new Date(now.getFullYear(), now.getMonth(), 1),
+        start: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)),
         end: new Date(now),
       };
     case "lastMonth":
       return {
-        start: new Date(now.getFullYear(), now.getMonth() - 1, 1),
-        end: new Date(now.getFullYear(), now.getMonth(), 0),
+        start: new Date(
+          Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1)
+        ),
+        end: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0)),
       };
     case "ytd":
       return {
-        start: new Date(now.getFullYear(), 0, 1),
+        start: new Date(Date.UTC(now.getUTCFullYear(), 0, 1)),
         end: new Date(now),
       };
     case "last12months": {
       const start = new Date(now);
-      start.setFullYear(start.getFullYear() - 1);
-      start.setDate(start.getDate() + 1);
+      start.setUTCFullYear(start.getUTCFullYear() - 1);
+      start.setUTCDate(start.getUTCDate() + 1);
       return { start, end: new Date(now) };
     }
     default:
@@ -164,6 +167,7 @@ function formatShortDate(d: Date): string {
     month: "short",
     day: "numeric",
     year: "numeric",
+    timeZone: "UTC",
   });
 }
 
@@ -189,11 +193,11 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
 
   const mauMonthKey = useMemo(() => {
     const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
   }, []);
 
   const [mauOverviewYear, setMauOverviewYear] = useState(() =>
-    new Date().getFullYear()
+    new Date().getUTCFullYear()
   );
   const [showOverviewYearPicker, setShowOverviewYearPicker] = useState(false);
   const mauOverviewYearTriggerRef = useRef<HTMLDivElement>(null);
@@ -201,7 +205,7 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
     useState<DOMRect | null>(null);
 
   const [smsTrendYear, setSmsTrendYear] = useState(() =>
-    new Date().getFullYear()
+    new Date().getUTCFullYear()
   );
   const [showSmsTrendYearPicker, setShowSmsTrendYearPicker] = useState(false);
   const smsTrendYearTriggerRef = useRef<HTMLDivElement>(null);
@@ -290,8 +294,9 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
     // Only fetch up to and including the current month; future months get 0.
     const fetchable = ranges.filter(
       (r) =>
-        smsTrendYear < now.getFullYear() ||
-        (smsTrendYear === now.getFullYear() && r.monthIndex <= now.getMonth())
+        smsTrendYear < now.getUTCFullYear() ||
+        (smsTrendYear === now.getUTCFullYear() &&
+          r.monthIndex <= now.getUTCMonth())
     );
     Promise.all(
       fetchable.map((r) =>
@@ -374,8 +379,9 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
       const isFuture = (() => {
         const now = new Date();
         return (
-          mauOverviewYear > now.getFullYear() ||
-          (mauOverviewYear === now.getFullYear() && month > now.getMonth() + 1)
+          mauOverviewYear > now.getUTCFullYear() ||
+          (mauOverviewYear === now.getUTCFullYear() &&
+            month > now.getUTCMonth() + 1)
         );
       })();
       const mau = isFuture ? 0 : (found?.count ?? 0);
@@ -548,7 +554,7 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
                     type="button"
                     className={styles.smsTrendGoToCurrent}
                     onClick={() => {
-                      setSmsTrendYear(new Date().getFullYear());
+                      setSmsTrendYear(new Date().getUTCFullYear());
                       setShowSmsTrendYearPicker(false);
                     }}
                   >
@@ -712,7 +718,7 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
                     type="button"
                     className={styles.mauMonthGoToToday}
                     onClick={() => {
-                      setMauOverviewYear(new Date().getFullYear());
+                      setMauOverviewYear(new Date().getUTCFullYear());
                       setShowOverviewYearPicker(false);
                     }}
                   >
@@ -781,13 +787,7 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
                 <TextField
                   readOnly
                   value={
-                    tempSmsStartDate
-                      ? tempSmsStartDate.toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })
-                      : ""
+                    tempSmsStartDate ? formatShortDate(tempSmsStartDate) : ""
                   }
                   placeholder="Select start date"
                   onClick={() => {
@@ -836,9 +836,27 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
                   }}
                 >
                   <Calendar
-                    value={tempSmsStartDate || undefined}
+                    value={
+                      // Calendar interprets value as local time, so convert UTC
+                      // midnight back to local midnight so it highlights the right day.
+                      tempSmsStartDate
+                        ? new Date(
+                            tempSmsStartDate.getUTCFullYear(),
+                            tempSmsStartDate.getUTCMonth(),
+                            tempSmsStartDate.getUTCDate()
+                          )
+                        : undefined
+                    }
                     onSelectDate={(date) => {
-                      setTempSmsStartDate(date);
+                      setTempSmsStartDate(
+                        new Date(
+                          Date.UTC(
+                            date.getFullYear(),
+                            date.getMonth(),
+                            date.getDate()
+                          )
+                        )
+                      );
                       setShowSmsStartCalendar(false);
                     }}
                     styles={{
@@ -867,15 +885,7 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
               <div ref={smsEndDateInputRef} style={{ position: "relative" }}>
                 <TextField
                   readOnly
-                  value={
-                    tempSmsEndDate
-                      ? tempSmsEndDate.toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })
-                      : ""
-                  }
+                  value={tempSmsEndDate ? formatShortDate(tempSmsEndDate) : ""}
                   placeholder="Select end date"
                   onClick={() => {
                     setShowSmsEndCalendar(!showSmsEndCalendar);
@@ -923,9 +933,27 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
                   }}
                 >
                   <Calendar
-                    value={tempSmsEndDate || undefined}
+                    value={
+                      // Calendar interprets value as local time, so convert UTC
+                      // midnight back to local midnight so it highlights the right day.
+                      tempSmsEndDate
+                        ? new Date(
+                            tempSmsEndDate.getUTCFullYear(),
+                            tempSmsEndDate.getUTCMonth(),
+                            tempSmsEndDate.getUTCDate()
+                          )
+                        : undefined
+                    }
                     onSelectDate={(date) => {
-                      setTempSmsEndDate(date);
+                      setTempSmsEndDate(
+                        new Date(
+                          Date.UTC(
+                            date.getFullYear(),
+                            date.getMonth(),
+                            date.getDate()
+                          )
+                        )
+                      );
                       setShowSmsEndCalendar(false);
                     }}
                     styles={{
