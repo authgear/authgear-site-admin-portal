@@ -95,6 +95,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
   const [planFilter, setPlanFilter] = useState<string>(ALL_PLANS_KEY);
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+  const [sortExplicit, setSortExplicit] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [planOptions, setPlanOptions] = useState<IDropdownOption[]>([
     { key: ALL_PLANS_KEY, text: "All plans" },
@@ -113,19 +114,21 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
       });
   }, []);
 
+  const ownerSearch = searchBy === "ownerEmail" ? searchText.trim() : undefined;
+  // When owner_search is active without an explicit sort choice, the server
+  // defaults to relevance — we omit sort/order to let that happen.
+  const sendSort = !ownerSearch || sortExplicit;
+
   useEffect(() => {
     setLoading(true);
     setError(null);
-    const params: ListAppsParams = {
-      page: currentPage,
-      page_size: PAGE_SIZE,
-      sort: sortKey,
-      order: sortOrder,
-    };
-    if (searchText.trim()) {
-      if (searchBy === "projectId") params.app_id = searchText.trim();
-      else if (searchBy === "ownerEmail")
-        params.owner_search = searchText.trim();
+    const params: ListAppsParams = { page: currentPage, page_size: PAGE_SIZE };
+    if (ownerSearch) params.owner_search = ownerSearch;
+    if (searchText.trim() && searchBy === "projectId")
+      params.app_id = searchText.trim();
+    if (sendSort) {
+      params.sort = sortKey;
+      params.order = sortOrder;
     }
     if (planFilter !== ALL_PLANS_KEY) {
       params.plan = planFilter;
@@ -137,7 +140,16 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
       })
       .catch((err: SiteAdminAPIError) => setError(err))
       .finally(() => setLoading(false));
-  }, [currentPage, searchBy, searchText, planFilter, sortKey, sortOrder]);
+  }, [
+    currentPage,
+    searchBy,
+    searchText,
+    planFilter,
+    sortKey,
+    sortOrder,
+    ownerSearch,
+    sendSort,
+  ]);
 
   const columns: IColumn[] = useMemo(
     () => [
@@ -274,6 +286,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
   const onToggleSort = useCallback(
     (key: SortKey) => {
       setCurrentPage(1);
+      setSortExplicit(true);
       setSortKey((prevKey) => {
         if (prevKey === key) return prevKey;
         return key;
@@ -294,6 +307,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
     (_event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption) => {
       if (option) {
         setSearchBy(option.key as string);
+        setSortExplicit(false);
         setCurrentPage(1);
       }
     },
@@ -303,6 +317,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
   const onSearchChange = useCallback(
     (_event?: React.ChangeEvent<HTMLInputElement>, newValue?: string) => {
       setSearchText(newValue || "");
+      setSortExplicit(false);
       setCurrentPage(1);
     },
     []
@@ -313,6 +328,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
     setPlanFilter(ALL_PLANS_KEY);
     setSortKey("created_at");
     setSortOrder("desc");
+    setSortExplicit(false);
     setCurrentPage(1);
   }, []);
 
@@ -383,7 +399,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
               aria-label="Sort by Last Month MAU"
             >
               Last Month MAU
-              {sortKey === "mau" && (
+              {sendSort && sortKey === "mau" && (
                 <Icon
                   iconName={sortOrder === "asc" ? "SortUp" : "SortDown"}
                   className={styles.sortIcon}
@@ -399,7 +415,7 @@ const ProjectsScreen: React.VFC = function ProjectsScreen() {
               aria-label="Sort by Created at"
             >
               Created at
-              {sortKey === "created_at" && (
+              {sendSort && sortKey === "created_at" && (
                 <Icon
                   iconName={sortOrder === "asc" ? "SortUp" : "SortDown"}
                   className={styles.sortIcon}

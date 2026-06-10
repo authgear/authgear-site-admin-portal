@@ -46,7 +46,7 @@ const ScreenNav: React.VFC = function ScreenNav() {
     };
     if (debouncedQuery) {
       if (debouncedQuery.includes("@")) {
-        params.owner_email = debouncedQuery;
+        params.owner_search = debouncedQuery;
       } else {
         params.app_id = debouncedQuery;
       }
