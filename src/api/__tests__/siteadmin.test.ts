@@ -21,6 +21,7 @@ describe("siteadmin API functions", () => {
         total_count: 0,
         page: 1,
         page_size: 20,
+        owner_search_truncated: false,
       });
 
       await siteadmin.listApps();
@@ -34,6 +35,7 @@ describe("siteadmin API functions", () => {
         total_count: 0,
         page: 2,
         page_size: 50,
+        owner_search_truncated: false,
       });
 
       await siteadmin.listApps({ page: 2, page_size: 50 });
@@ -49,16 +51,17 @@ describe("siteadmin API functions", () => {
         total_count: 0,
         page: 1,
         page_size: 20,
+        owner_search_truncated: false,
       });
 
       await siteadmin.listApps({
         app_id: "my-app",
-        owner_email: "user@example.com",
+        owner_search: "user@example.com",
         plan: "pro",
       });
 
       expect(mockApiRequest).toHaveBeenCalledWith(
-        "/api/v1/apps?app_id=my-app&owner_email=user%40example.com&plan=pro"
+        "/api/v1/apps?app_id=my-app&owner_search=user%40example.com&plan=pro"
       );
     });
 
@@ -68,12 +71,32 @@ describe("siteadmin API functions", () => {
         total_count: 0,
         page: 1,
         page_size: 20,
+        owner_search_truncated: false,
       });
 
       await siteadmin.listApps({ sort: "mau", order: "desc" });
 
       expect(mockApiRequest).toHaveBeenCalledWith(
         "/api/v1/apps?sort=mau&order=desc"
+      );
+    });
+
+    it("should support relevance sort with owner_search", async () => {
+      mockApiRequest.mockResolvedValue({
+        apps: [],
+        total_count: 0,
+        page: 1,
+        page_size: 20,
+        owner_search_truncated: false,
+      });
+
+      await siteadmin.listApps({
+        owner_search: "alice",
+        sort: "relevance",
+      });
+
+      expect(mockApiRequest).toHaveBeenCalledWith(
+        "/api/v1/apps?owner_search=alice&sort=relevance"
       );
     });
 
@@ -91,6 +114,7 @@ describe("siteadmin API functions", () => {
         total_count: 1,
         page: 1,
         page_size: 20,
+        owner_search_truncated: false,
       };
       mockApiRequest.mockResolvedValue(mockResponse);
 
