@@ -16,9 +16,10 @@ import type { AppDetail } from "../api/types";
 import UsageContent, { MAU_CAP } from "./UsageContent";
 import PlanContent from "./PlanContent";
 import PortalAdminContent from "./PortalAdminContent";
+import AuditLogContent from "./AuditLogContent";
 import styles from "./ProjectDetailsPage.module.css";
 
-type TabKey = "overview" | "usage" | "plan" | "portalAdmin";
+type TabKey = "overview" | "usage" | "plan" | "portalAdmin" | "auditLog";
 
 /** URL hash segment for each tab */
 const TAB_KEY_TO_HASH: Record<TabKey, string> = {
@@ -26,6 +27,7 @@ const TAB_KEY_TO_HASH: Record<TabKey, string> = {
   usage: "usage",
   plan: "plan",
   portalAdmin: "portal-admin",
+  auditLog: "audit-log",
 };
 
 const HASH_TO_TAB_KEY: Record<string, TabKey> = {
@@ -33,6 +35,7 @@ const HASH_TO_TAB_KEY: Record<string, TabKey> = {
   usage: "usage",
   plan: "plan",
   "portal-admin": "portalAdmin",
+  "audit-log": "auditLog",
 };
 
 function tabKeyFromHash(hash: string): TabKey {
@@ -299,9 +302,16 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
           <PivotItem headerText="Usage" itemKey="usage" />
           <PivotItem headerText="Plan" itemKey="plan" />
           <PivotItem headerText="Portal Admin" itemKey="portalAdmin" />
+          <PivotItem headerText="Audit Log" itemKey="auditLog" />
         </Pivot>
 
-        <div className={styles.tabContent}>
+        <div
+          className={
+            selectedTab === "auditLog"
+              ? styles.tabContentFullWidth
+              : styles.tabContent
+          }
+        >
           {selectedTab === "overview" && (
             <>
               <h3 className={styles.sectionHeading}>Usage</h3>
@@ -388,6 +398,9 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
           )}
           {selectedTab === "portalAdmin" && (
             <PortalAdminContent appId={appDetail.id} />
+          )}
+          {selectedTab === "auditLog" && (
+            <AuditLogContent appId={appDetail.id} />
           )}
         </div>
       </div>
