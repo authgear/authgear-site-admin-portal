@@ -429,6 +429,109 @@ describe("siteadmin API functions", () => {
     });
   });
 
+  describe("listAuditLogs", () => {
+    it("should call apiRequest with no query string when no params", async () => {
+      mockApiRequest.mockResolvedValue({
+        audit_logs: [],
+        total_count: 0,
+        page: 1,
+        page_size: 20,
+      });
+
+      await siteadmin.listAuditLogs();
+
+      expect(mockApiRequest).toHaveBeenCalledWith("/api/v1/audit-logs");
+    });
+
+    it("should include pagination parameters", async () => {
+      mockApiRequest.mockResolvedValue({
+        audit_logs: [],
+        total_count: 0,
+        page: 2,
+        page_size: 20,
+      });
+
+      await siteadmin.listAuditLogs({ page: 2, page_size: 20 });
+
+      expect(mockApiRequest).toHaveBeenCalledWith(
+        "/api/v1/audit-logs?page=2&page_size=20"
+      );
+    });
+
+    it("should include affected_app_id filter", async () => {
+      mockApiRequest.mockResolvedValue({
+        audit_logs: [],
+        total_count: 0,
+        page: 1,
+        page_size: 20,
+      });
+
+      await siteadmin.listAuditLogs({ affected_app_id: "my-app" });
+
+      expect(mockApiRequest).toHaveBeenCalledWith(
+        "/api/v1/audit-logs?affected_app_id=my-app"
+      );
+    });
+
+    it("should include order parameter", async () => {
+      mockApiRequest.mockResolvedValue({
+        audit_logs: [],
+        total_count: 0,
+        page: 1,
+        page_size: 20,
+      });
+
+      await siteadmin.listAuditLogs({ order: "asc" });
+
+      expect(mockApiRequest).toHaveBeenCalledWith(
+        "/api/v1/audit-logs?order=asc"
+      );
+    });
+
+    it("should combine all params", async () => {
+      mockApiRequest.mockResolvedValue({
+        audit_logs: [],
+        total_count: 0,
+        page: 1,
+        page_size: 20,
+      });
+
+      await siteadmin.listAuditLogs({
+        page: 1,
+        page_size: 20,
+        affected_app_id: "my-app",
+        order: "desc",
+      });
+
+      expect(mockApiRequest).toHaveBeenCalledWith(
+        "/api/v1/audit-logs?page=1&page_size=20&affected_app_id=my-app&order=desc"
+      );
+    });
+
+    it("should return audit logs list response", async () => {
+      const mockResponse = {
+        audit_logs: [
+          {
+            id: "0000000000000001",
+            created_at: "2024-01-01T00:00:00Z",
+            activity_type: "site_admin.app.plan.updated",
+            affected_app_id: "my-app",
+          },
+        ],
+        total_count: 1,
+        page: 1,
+        page_size: 20,
+      };
+      mockApiRequest.mockResolvedValue(mockResponse);
+
+      const result = await siteadmin.listAuditLogs({
+        affected_app_id: "my-app",
+      });
+
+      expect(result).toEqual(mockResponse);
+    });
+  });
+
   describe("changeAppPlan", () => {
     it("should POST with plan name in body", async () => {
       mockApiRequest.mockResolvedValue({

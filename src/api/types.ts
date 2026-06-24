@@ -91,3 +91,22 @@ export interface PlansListResponse {
 export interface ChangeAppPlanRequest {
   plan_name: string;
 }
+
+// ─── Site Admin Audit Logs ────────────────────────────────────────────────────
+
+export interface SiteAdminAuditLog {
+  id: string;
+  created_at: string; // RFC 3339
+  activity_type: string;
+  ip_address?: string;
+  user_agent?: string;
+  actor_user_id?: string;
+  affected_app_id?: string;
+}
+
+export interface SiteAdminAuditLogsListResponse {
+  audit_logs: SiteAdminAuditLog[];
+  total_count: number;
+  page: number;
+  page_size: number;
+}
