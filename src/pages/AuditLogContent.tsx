@@ -1,9 +1,12 @@
 import React, { useMemo, useState, useCallback, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   ShimmeredDetailsList,
   DetailsListLayoutMode,
   SelectionMode,
   IColumn,
+  IDetailsRowProps,
+  DetailsRow,
   ColumnActionsMode,
   Text,
   Icon,
@@ -123,6 +126,22 @@ const AuditLogContent: React.VFC<AuditLogContentProps> =
       setCurrentPage(1);
     }, []);
 
+    const onRenderRow = useCallback(
+      (props?: IDetailsRowProps) => {
+        if (props == null) return null;
+        const item = props.item as SiteAdminAuditLog;
+        return (
+          <Link
+            to={`/project/${appId}/audit-log/${item.id}`}
+            className={styles.rowLink}
+          >
+            <DetailsRow {...props} />
+          </Link>
+        );
+      },
+      [appId]
+    );
+
     const onRenderItemColumn = useCallback(
       (item: SiteAdminAuditLog, _index?: number, column?: IColumn) => {
         switch (column?.key) {
@@ -184,6 +203,7 @@ const AuditLogContent: React.VFC<AuditLogContentProps> =
             className={styles.list}
             enableShimmer={loading}
             enableUpdateAnimations={false}
+            onRenderRow={onRenderRow}
             onRenderItemColumn={onRenderItemColumn}
             selectionMode={SelectionMode.none}
             layoutMode={DetailsListLayoutMode.fixedColumns}

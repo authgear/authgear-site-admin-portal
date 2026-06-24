@@ -54,6 +54,17 @@
   width: 100%;
 }
 
+.rowLink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.rowLink:hover {
+  text-decoration: none;
+  color: inherit;
+}
+
 /* Hide default Fluent UI header — we use our custom header above */
 .listContainer :global(.ms-DetailsList .ms-DetailsHeader) {
   display: none !important;
