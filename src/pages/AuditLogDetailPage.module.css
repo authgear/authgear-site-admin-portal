@@ -1,0 +1,156 @@
+.root {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  row-gap: 24px;
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  font-family: var(--font-family-base);
+}
+
+/* ── Breadcrumb — matches ProjectDetailsPage ──────────────────────────────── */
+
+.breadcrumbRow {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.breadcrumb {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-base);
+  color: #605e5c;
+  font-size: 28px;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.breadcrumbLink {
+  color: #605e5c;
+  text-decoration: none;
+  padding: 2px 8px;
+  margin: -2px -8px;
+  border-radius: 4px;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.breadcrumbLink:hover {
+  background-color: #f3f2f1;
+  color: #605e5c;
+  text-decoration: none;
+}
+
+.breadcrumbSepIcon {
+  font-size: 14px;
+  color: #605e5c;
+  margin: 0 4px;
+}
+
+.breadcrumbCurrent {
+  color: #201f1e;
+  font-weight: 600;
+}
+
+/* ── Field rows ───────────────────────────────────────────────────────────── */
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 752px;
+}
+
+.fieldRow {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.fieldLabel {
+  font-family: var(--font-family-base);
+  font-size: 14px;
+  font-weight: 600;
+  color: #201f1e;
+  flex-shrink: 0;
+  min-width: 120px;
+}
+
+.fieldValue {
+  font-family: var(--font-family-base);
+  font-size: 14px;
+  font-weight: 400;
+  color: #323130;
+  word-break: break-all;
+}
+
+/* ── Raw Event Log ────────────────────────────────────────────────────────── */
+
+.rawSection {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #edebe9;
+  border-radius: 4px;
+  overflow: hidden;
+  max-width: 752px;
+}
+
+.rawHeader {
+  padding: 10px 16px;
+  background-color: #f3f2f1;
+  border-bottom: 1px solid #edebe9;
+}
+
+.rawTitle {
+  font-family: var(--font-family-base);
+  font-size: 14px;
+  font-weight: 600;
+  color: #201f1e;
+}
+
+.codeBlock {
+  height: 260px;
+}
+
+/* ── Not-found state — matches ProjectDetailsPage ─────────────────────────── */
+
+.notFoundContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 64px 24px;
+  text-align: center;
+  gap: 12px;
+}
+
+.notFoundIcon {
+  font-size: 48px;
+  color: #c8c6c4;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.notFoundHeading {
+  font-family: var(--font-family-base);
+  font-size: 20px;
+  font-weight: 600;
+  color: #201f1e;
+  margin: 0;
+}
+
+.notFoundDescription {
+  font-family: var(--font-family-base);
+  font-size: 14px;
+  color: #605e5c;
+  margin: 0 0 8px 0;
+  max-width: 320px;
+}
