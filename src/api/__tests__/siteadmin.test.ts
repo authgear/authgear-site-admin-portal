@@ -532,6 +532,59 @@ describe("siteadmin API functions", () => {
     });
   });
 
+  describe("getAuditLog", () => {
+    it("should call apiRequest with encoded log ID", async () => {
+      mockApiRequest.mockResolvedValue({
+        id: "0000000000000001",
+        created_at: "2024-01-01T00:00:00Z",
+        activity_type: "site_admin.app.plan.updated",
+        data: {},
+      });
+
+      await siteadmin.getAuditLog("0000000000000001");
+
+      expect(mockApiRequest).toHaveBeenCalledWith(
+        "/api/v1/audit-logs/0000000000000001"
+      );
+    });
+
+    it("should URL-encode log ID with special characters", async () => {
+      mockApiRequest.mockResolvedValue({
+        id: "id/with/slashes",
+        created_at: "2024-01-01T00:00:00Z",
+        activity_type: "site_admin.app.plan.updated",
+        data: {},
+      });
+
+      await siteadmin.getAuditLog("id/with/slashes");
+
+      expect(mockApiRequest).toHaveBeenCalledWith(
+        "/api/v1/audit-logs/id%2Fwith%2Fslashes"
+      );
+    });
+
+    it("should return audit log detail with data", async () => {
+      const mockResponse = {
+        id: "0000000000000001",
+        created_at: "2024-01-01T00:00:00Z",
+        activity_type: "site_admin.app.plan.updated",
+        actor_user_id: "user-123",
+        ip_address: "1.2.3.4",
+        user_agent: "Mozilla/5.0",
+        affected_app_id: "my-app",
+        data: {
+          context: { client_id: "abc123" },
+          payload: { app_id: "my-app", plan: "pro" },
+        },
+      };
+      mockApiRequest.mockResolvedValue(mockResponse);
+
+      const result = await siteadmin.getAuditLog("0000000000000001");
+
+      expect(result).toEqual(mockResponse);
+    });
+  });
+
   describe("changeAppPlan", () => {
     it("should POST with plan name in body", async () => {
       mockApiRequest.mockResolvedValue({

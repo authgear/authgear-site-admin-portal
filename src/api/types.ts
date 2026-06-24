@@ -110,3 +110,7 @@ export interface SiteAdminAuditLogsListResponse {
   page: number;
   page_size: number;
 }
+
+export interface SiteAdminAuditLogDetail extends SiteAdminAuditLog {
+  data: Record<string, unknown>;
+}

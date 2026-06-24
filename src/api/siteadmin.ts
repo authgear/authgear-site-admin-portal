@@ -14,6 +14,7 @@ import type {
   MonthlyActiveUsersUsage,
   PlansListResponse,
   SiteAdminAuditLogsListResponse,
+  SiteAdminAuditLogDetail,
 } from "./types";
 
 // ─── Apps ─────────────────────────────────────────────────────────────────────
@@ -135,6 +136,10 @@ export function listAuditLogs(
   if (params?.order) qs.set("order", params.order);
   const query = qs.toString();
   return apiRequest(`/api/v1/audit-logs${query ? `?${query}` : ""}`);
+}
+
+export function getAuditLog(id: string): Promise<SiteAdminAuditLogDetail> {
+  return apiRequest(`/api/v1/audit-logs/${encodeURIComponent(id)}`);
 }
 
 // ─── Plans ────────────────────────────────────────────────────────────────────
