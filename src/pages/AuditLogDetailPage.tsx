@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   Text,
@@ -6,6 +6,7 @@ import {
   SpinnerSize,
   PrimaryButton,
   Icon,
+  IconButton,
 } from "@fluentui/react";
 import { getAuditLog } from "../api/siteadmin";
 import { SiteAdminAPIError } from "../api/client";
@@ -46,6 +47,14 @@ const AuditLogDetailPage: React.VFC = function AuditLogDetailPage() {
   const [log, setLog] = useState<SiteAdminAuditLogDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<SiteAdminAPIError | null>(null);
+  const [copyFeedback, setCopyFeedback] = useState(false);
+
+  const onCopy = useCallback(() => {
+    if (!log) return;
+    void navigator.clipboard.writeText(JSON.stringify(log.data, null, 2));
+    setCopyFeedback(true);
+    setTimeout(() => setCopyFeedback(false), 1500);
+  }, [log]);
   useEffect(() => {
     if (!logId) return;
     setLoading(true);
@@ -126,6 +135,7 @@ const AuditLogDetailPage: React.VFC = function AuditLogDetailPage() {
 
   const clientId = getClientId(log.data);
   const formattedTimestamp = formatTimestamp(log.created_at);
+  const rawJson = JSON.stringify(log.data, null, 2);
 
   return (
     <div className={styles.root}>
@@ -149,10 +159,20 @@ const AuditLogDetailPage: React.VFC = function AuditLogDetailPage() {
       <div className={styles.rawSection}>
         <div className={styles.rawHeader}>
           <span className={styles.rawTitle}>Raw Event Log</span>
+          <IconButton
+            iconProps={{ iconName: copyFeedback ? "CheckMark" : "Copy" }}
+            title="Copy"
+            ariaLabel="Copy raw log"
+            onClick={onCopy}
+            styles={{
+              root: { color: "#605e5c" },
+              rootHovered: { color: "#323130", backgroundColor: "#edebe9" },
+            }}
+          />
         </div>
         <CodeBlock
           className={styles.codeBlock}
-          value={JSON.stringify(log.data, null, 2)}
+          value={rawJson}
           language="json"
         />
       </div>
