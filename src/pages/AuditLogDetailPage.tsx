@@ -68,31 +68,39 @@ const AuditLogDetailPage: React.VFC = function AuditLogDetailPage() {
     );
   }
 
+  const breadcrumb = projectId ? (
+    <Text as="h1" variant="xxLarge" block className={styles.breadcrumb}>
+      <Link to="/" className={styles.breadcrumbLink}>
+        Projects
+      </Link>
+      <Icon iconName="ChevronRight" className={styles.breadcrumbSepIcon} />
+      <Link
+        to={`/project/${projectId}#audit-log`}
+        className={styles.breadcrumbLink}
+      >
+        Project Details
+      </Link>
+      <Icon iconName="ChevronRight" className={styles.breadcrumbSepIcon} />
+      <span className={styles.breadcrumbCurrent}>Log Details</span>
+    </Text>
+  ) : (
+    <Text as="h1" variant="xxLarge" block className={styles.breadcrumb}>
+      <Link to="/audit-logs" className={styles.breadcrumbLink}>
+        Site Admin Logs
+      </Link>
+      <Icon iconName="ChevronRight" className={styles.breadcrumbSepIcon} />
+      <span className={styles.breadcrumbCurrent}>Log Details</span>
+    </Text>
+  );
+
+  const backPath = projectId
+    ? `/project/${projectId}#audit-log`
+    : "/audit-logs";
+
   if (error != null || log == null) {
     return (
       <div className={styles.root}>
-        <div className={styles.breadcrumbRow}>
-          <Text as="h1" variant="xxLarge" block className={styles.breadcrumb}>
-            <Link to="/" className={styles.breadcrumbLink}>
-              Projects
-            </Link>
-            <Icon
-              iconName="ChevronRight"
-              className={styles.breadcrumbSepIcon}
-            />
-            <Link
-              to={`/project/${projectId ?? ""}`}
-              className={styles.breadcrumbLink}
-            >
-              Project Details
-            </Link>
-            <Icon
-              iconName="ChevronRight"
-              className={styles.breadcrumbSepIcon}
-            />
-            <span className={styles.breadcrumbCurrent}>Log Details</span>
-          </Text>
-        </div>
+        <div className={styles.breadcrumbRow}>{breadcrumb}</div>
         <div className={styles.notFoundContainer}>
           <Icon iconName="SearchIssue" className={styles.notFoundIcon} />
           <h2 className={styles.notFoundHeading}>Log entry not found</h2>
@@ -101,8 +109,8 @@ const AuditLogDetailPage: React.VFC = function AuditLogDetailPage() {
               "This audit log entry doesn’t exist or may have been removed."}
           </p>
           <PrimaryButton
-            text="Back to Project"
-            onClick={() => navigate(`/project/${projectId ?? ""}#audit-log`)}
+            text={projectId ? "Back to Project" : "Back to Site Admin Logs"}
+            onClick={() => navigate(backPath)}
             styles={{
               root: { backgroundColor: "#176df3", borderColor: "#176df3" },
               rootHovered: {
@@ -121,22 +129,7 @@ const AuditLogDetailPage: React.VFC = function AuditLogDetailPage() {
 
   return (
     <div className={styles.root}>
-      <div className={styles.breadcrumbRow}>
-        <Text as="h1" variant="xxLarge" block className={styles.breadcrumb}>
-          <Link to="/" className={styles.breadcrumbLink}>
-            Projects
-          </Link>
-          <Icon iconName="ChevronRight" className={styles.breadcrumbSepIcon} />
-          <Link
-            to={`/project/${projectId ?? ""}#audit-log`}
-            className={styles.breadcrumbLink}
-          >
-            Project Details
-          </Link>
-          <Icon iconName="ChevronRight" className={styles.breadcrumbSepIcon} />
-          <span className={styles.breadcrumbCurrent}>Log Details</span>
-        </Text>
-      </div>
+      <div className={styles.breadcrumbRow}>{breadcrumb}</div>
 
       <div className={styles.fields}>
         <FieldRow label="Activity Type" value={log.activity_type} />

@@ -1,0 +1,224 @@
+.root {
+  @apply flex flex-col h-full overflow-auto;
+  background-color: #ffffff;
+}
+
+.header {
+  @apply flex items-center gap-2 py-6;
+  padding-left: 24px;
+  padding-right: 24px;
+  background-color: #ffffff;
+}
+
+.content {
+  @apply flex flex-col gap-6;
+  padding: 0 24px 24px 24px;
+}
+
+/* ── Table ────────────────────────────────────────────────────────────────── */
+
+.listContainer {
+  @apply flex flex-col relative;
+  min-width: 820px;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.tableHeader {
+  display: flex;
+  min-width: 820px;
+  border-bottom: 1px solid #edebe9;
+  background-color: #ffffff;
+}
+
+.tableHeaderCell {
+  flex: 0 0 auto;
+  padding: 12px;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-family-base);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  color: #201f1e;
+  box-sizing: border-box;
+}
+
+.tableHeaderSortable {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  text-align: left;
+}
+
+.tableHeaderSortable:hover {
+  background-color: #f3f2f1;
+}
+
+.sortIcon {
+  color: #605e5c;
+  font-size: 12px;
+}
+
+.list {
+  min-width: 820px;
+  width: 100%;
+}
+
+/* Hide Fluent UI header — we use the custom header above */
+.listContainer :global(.ms-DetailsList .ms-DetailsHeader) {
+  display: none !important;
+}
+
+/* Scope cell sizing to this table */
+.listContainer :global(.ms-DetailsRow) {
+  border-bottom: 1px solid #edebe9;
+}
+
+.listContainer :global(.ms-DetailsRow-cell) {
+  padding: 0 12px !important;
+  min-height: auto;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.listContainer :global(.ms-DetailsRow-cell:nth-child(1)) {
+  width: 300px !important;
+  min-width: 300px !important;
+  max-width: 300px !important;
+}
+
+.listContainer :global(.ms-DetailsRow-cell:nth-child(2)) {
+  width: 260px !important;
+  min-width: 260px !important;
+  max-width: 260px !important;
+}
+
+.listContainer :global(.ms-DetailsRow-cell:nth-child(3)) {
+  width: 260px !important;
+  min-width: 260px !important;
+  max-width: 260px !important;
+}
+
+/* ── Cell styles ──────────────────────────────────────────────────────────── */
+
+.cellText {
+  font-family: var(--font-family-base);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+  color: #605e5c;
+}
+
+.cellLink {
+  font-family: var(--font-family-base);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+  color: #176df3;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.cellLink:hover {
+  text-decoration: underline;
+  color: #176df3;
+}
+
+/* ── Empty state ──────────────────────────────────────────────────────────── */
+
+.emptyState {
+  padding: 48px 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.emptyText {
+  font-family: var(--font-family-base);
+  font-size: 14px;
+  color: #a19f9d;
+}
+
+/* ── Pagination ───────────────────────────────────────────────────────────── */
+
+.pagination {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 820px;
+  margin: 12px 0 0 0;
+  padding-top: 16px;
+  padding-right: 12px;
+  font-family: var(--font-family-base);
+  font-weight: 600;
+}
+
+.pagination :global(.ms-IconButton-icon),
+.pagination :global(.ms-Icon) {
+  font-weight: 600;
+  -webkit-text-stroke: 0.35px currentColor;
+  paint-order: stroke fill;
+}
+
+.paginationPages {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2px;
+  margin: 0 8px;
+}
+
+.paginationPageBtn {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-family-base);
+  color: #201f1e;
+  line-height: 20px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paginationPageBtn:hover {
+  background-color: #f3f2f1;
+  color: #201f1e;
+}
+
+.paginationCurrent {
+  font-weight: 600;
+  color: #a19f9d;
+  background-color: transparent;
+  cursor: not-allowed;
+}
+
+.paginationCurrent:hover {
+  color: #a19f9d;
+  background-color: transparent;
+  cursor: not-allowed;
+}
+
+.paginationEllipsis {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  font-size: 14px;
+  font-family: var(--font-family-base);
+  color: #605e5c;
+  line-height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
