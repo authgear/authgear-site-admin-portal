@@ -213,7 +213,9 @@ const AuditLogContent: React.VFC<AuditLogContentProps> =
           />
           {!loading && logs.length === 0 && !error && (
             <div className={styles.emptyState}>
-              <Text className={styles.emptyText}>No audit log entries.</Text>
+              <Text className={styles.emptyText}>
+                No site admin log entries.
+              </Text>
             </div>
           )}
         </div>

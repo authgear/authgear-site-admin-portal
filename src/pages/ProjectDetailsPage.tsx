@@ -302,7 +302,7 @@ const ProjectDetailsPage: React.VFC = function ProjectDetailsPage() {
           <PivotItem headerText="Usage" itemKey="usage" />
           <PivotItem headerText="Plan" itemKey="plan" />
           <PivotItem headerText="Portal Admin" itemKey="portalAdmin" />
-          <PivotItem headerText="Audit Log" itemKey="auditLog" />
+          <PivotItem headerText="Site Admin Log" itemKey="auditLog" />
         </Pivot>
 
         <div
