@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Text,
   CommandButton,
@@ -27,6 +27,7 @@ const commandButtonStyles = {
 
 const ScreenHeader: React.VFC = function ScreenHeader() {
   const { userInfo, logout } = useAuthgear();
+  const navigate = useNavigate();
   const [isMobilePanelOpen, setIsMobilePanelOpen] = useState(false);
 
   const onOpenMobilePanel = useCallback(() => {
@@ -105,6 +106,14 @@ const ScreenHeader: React.VFC = function ScreenHeader() {
             },
           }}
         />
+
+        <CommandButton
+          className={styles.headerNavLink}
+          styles={commandButtonStyles}
+          onClick={() => navigate("/audit-logs")}
+        >
+          Site Admin Log
+        </CommandButton>
 
         <CommandButton
           className={styles.userButton}
