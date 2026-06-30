@@ -13,6 +13,8 @@ import type {
   MessagingUsage,
   MonthlyActiveUsersUsage,
   PlansListResponse,
+  SiteAdminAuditLogsListResponse,
+  SiteAdminAuditLogDetail,
 } from "./types";
 
 // ─── Apps ─────────────────────────────────────────────────────────────────────
@@ -112,6 +114,32 @@ export function getAppMonthlyActiveUsers(
   return apiRequest(
     `/api/v1/apps/${encodeURIComponent(appId)}/usage/monthly-active-users?${qs}`
   );
+}
+
+// ─── Audit Logs ───────────────────────────────────────────────────────────────
+
+export interface ListAuditLogsParams {
+  page?: number;
+  page_size?: number;
+  affected_app_id?: string;
+  order?: "asc" | "desc";
+}
+
+export function listAuditLogs(
+  params?: ListAuditLogsParams
+): Promise<SiteAdminAuditLogsListResponse> {
+  const qs = new URLSearchParams();
+  if (params?.page != null) qs.set("page", String(params.page));
+  if (params?.page_size != null) qs.set("page_size", String(params.page_size));
+  if (params?.affected_app_id)
+    qs.set("affected_app_id", params.affected_app_id);
+  if (params?.order) qs.set("order", params.order);
+  const query = qs.toString();
+  return apiRequest(`/api/v1/audit-logs${query ? `?${query}` : ""}`);
+}
+
+export function getAuditLog(id: string): Promise<SiteAdminAuditLogDetail> {
+  return apiRequest(`/api/v1/audit-logs/${encodeURIComponent(id)}`);
 }
 
 // ─── Plans ────────────────────────────────────────────────────────────────────

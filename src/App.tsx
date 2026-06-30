@@ -5,6 +5,8 @@ import { AuthgearProvider, useAuthgear } from "./auth/AuthgearContext";
 import ScreenLayout from "./components/ScreenLayout";
 import ProjectsScreen from "./pages/ProjectsScreen";
 import ProjectDetailsPage from "./pages/ProjectDetailsPage";
+import AuditLogDetailPage from "./pages/AuditLogDetailPage";
+import SiteAdminAuditLogScreen from "./pages/SiteAdminAuditLogScreen";
 import AuthRedirectPage from "./auth/AuthRedirectPage";
 import LoginPage from "./auth/LoginPage";
 import APITestPage from "./pages/APITestPage";
@@ -58,6 +60,12 @@ const AuthenticatedApp: React.VFC = function AuthenticatedApp() {
         <Route path="/" element={<ProjectsScreen />} />
         <Route path="/api-test" element={<APITestPage />} />
         <Route path="/project/:projectId" element={<ProjectDetailsPage />} />
+        <Route
+          path="/project/:projectId/audit-log/:logId"
+          element={<AuditLogDetailPage />}
+        />
+        <Route path="/audit-logs" element={<SiteAdminAuditLogScreen />} />
+        <Route path="/audit-logs/:logId" element={<AuditLogDetailPage />} />
       </Routes>
     </ScreenLayout>
   );

@@ -70,6 +70,16 @@
   text-decoration: underline;
 }
 
+.headerNavLink {
+  display: none;
+}
+
+@media (min-width: 641px) {
+  .headerNavLink {
+    display: inline-flex;
+  }
+}
+
 .userButton {
   color: white;
 }

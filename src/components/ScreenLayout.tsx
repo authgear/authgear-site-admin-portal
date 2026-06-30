@@ -12,7 +12,10 @@ const ScreenLayout: React.VFC<ScreenLayoutProps> = function ScreenLayout(
   props: ScreenLayoutProps
 ) {
   const { pathname } = useLocation();
-  const showNav = pathname !== "/" && pathname !== "/api-test";
+  const showNav =
+    pathname !== "/" &&
+    pathname !== "/api-test" &&
+    !pathname.startsWith("/audit-logs");
 
   return (
     <div className={styles.root}>
