@@ -4,7 +4,11 @@ import cn from "classnames";
 import { isCollection, type Document } from "yaml";
 import type { FeatureConfig, ValidationErrorCause } from "../../api/types";
 import { getAtPointer, parseJsonPointer } from "../../utils/jsonPointer";
-import { FIELD_REGISTRY, FieldDef } from "./fieldRegistry";
+import {
+  FIELD_REGISTRY,
+  SECTION_DESCRIPTIONS,
+  FieldDef,
+} from "./fieldRegistry";
 import { deleteAndPruneIn } from "./yamlDocumentEdits";
 import { formatDisplayValue } from "./formatDisplayValue";
 import BooleanFieldControl from "./BooleanFieldControl";
@@ -148,6 +152,7 @@ const FeatureConfigTableView: React.VFC<FeatureConfigTableViewProps> =
         <thead>
           <tr>
             <th className={styles.tableColSetting}>Setting</th>
+            <th className={styles.tableColDescription}>What it controls</th>
             <th className={styles.tableColPlan}>📋 Plan Config</th>
             <th>✏️ App Config</th>
           </tr>
@@ -156,8 +161,13 @@ const FeatureConfigTableView: React.VFC<FeatureConfigTableViewProps> =
           {groups.map((group) => (
             <React.Fragment key={group.section}>
               <tr>
-                <td colSpan={3} className={styles.sectionHeaderRow}>
+                <td colSpan={4} className={styles.sectionHeaderRow}>
                   {group.section}
+                  {SECTION_DESCRIPTIONS[group.section] != null && (
+                    <div className={styles.sectionDescription}>
+                      {SECTION_DESCRIPTIONS[group.section]}
+                    </div>
+                  )}
                 </td>
               </tr>
               {group.fields.map((field) => {
@@ -191,6 +201,11 @@ const FeatureConfigTableView: React.VFC<FeatureConfigTableViewProps> =
                         )}
                       </div>
                       <div className={styles.jsonPath}>{field.jsonPointer}</div>
+                    </td>
+                    <td
+                      className={cn(styles.tableCell, styles.fieldDescription)}
+                    >
+                      {field.description}
                     </td>
                     <td className={styles.tableCell}>
                       <span className={styles.planValue}>

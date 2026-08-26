@@ -24,6 +24,10 @@
   width: 260px;
 }
 
+.tableColDescription {
+  width: 280px;
+}
+
 .tableColPlan {
   width: 160px;
 }
@@ -48,6 +52,11 @@
   @apply flex items-center gap-2;
 }
 
+.fieldDescription {
+  font-size: 12px;
+  color: #605e5c;
+}
+
 .jsonPath {
   font-size: 11px;
   color: #a19f9d;
@@ -65,6 +74,12 @@
   font-weight: 600;
   border-bottom: 1px solid #e1dfdd;
   border-top: 2px solid #e1dfdd;
+}
+
+.sectionDescription {
+  font-size: 12px;
+  font-weight: 400;
+  color: #605e5c;
 }
 
 .planValue {

@@ -3,10 +3,16 @@ import type { ValidationErrorCause } from "../../../api/types";
 import type { FieldDef } from "../fieldRegistry";
 
 const REGISTRY: FieldDef[] = [
-  { jsonPointer: "/oauth/client/maximum", label: "Maximum", control: "number" },
+  {
+    jsonPointer: "/oauth/client/maximum",
+    label: "Maximum",
+    description: "Hard cap on the number of applications.",
+    control: "number",
+  },
   {
     jsonPointer: "/usage/limits/email",
     label: "Email usage limit",
+    description: "Caps how many emails the project can send per period.",
     control: "usageLimitList",
   },
 ];
