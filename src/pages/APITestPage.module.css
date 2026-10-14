@@ -1,0 +1,46 @@
+.root {
+  padding: var(--space-7);
+  max-width: 800px;
+  background-color: var(--color-background);
+
+  @apply mobile:p-4;
+}
+
+.title {
+  margin: 0 0 var(--space-2) 0;
+  color: var(--gray-12);
+}
+
+.description {
+  margin: 0 0 var(--space-5) 0;
+}
+
+.button {
+  margin-bottom: var(--space-5);
+}
+
+.statusLabel {
+  margin: 0 0 var(--space-2) 0;
+}
+
+.result {
+  @apply overflow-x-auto whitespace-pre-wrap break-words;
+  margin: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-3);
+  background-color: var(--gray-a3);
+  font-family: var(--code-font-family);
+  font-size: var(--font-size-1);
+}
+
+.resultIdle {
+  color: var(--gray-11);
+}
+
+.resultOk {
+  color: var(--green-11);
+}
+
+.resultError {
+  color: var(--red-11);
+}

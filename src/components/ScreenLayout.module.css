@@ -1,4 +1,3 @@
-/* Match auth-fraud responsive layout */
 .root {
   display: flex;
   flex-direction: column;
@@ -16,71 +15,19 @@
   flex-direction: row;
 }
 
-@media (min-width: 641px) {
-  .body {
-    height: calc(100vh - var(--screen-header-height));
-  }
-}
-
 .nav {
-  width: 260px;
-  flex-shrink: 0;
-  min-height: 0;
-  border-right: 1px solid #edebe9;
-  overflow: hidden;
-  background-color: #ffffff;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  transition:
-    width 200ms ease,
-    border-right-color 200ms ease;
-}
+  flex-shrink: 0;
+  width: 260px;
+  min-height: 0;
+  overflow-x: hidden;
+  border-right: 1px solid var(--gray-a6);
+  /* Same accent wash as the Authgear portal sidebar. */
+  background-color: var(--accent-a2);
+  overflow-y: auto;
 
-.navHidden {
-  width: 0;
-  border-right-color: transparent;
-}
-
-/* Disable transition/animation only on Nav (project list), not on SearchBox */
-.nav :global(.ms-Nav),
-.nav :global(.ms-Nav) * {
-  transition: none !important;
-  animation: none !important;
-}
-
-/* Selected sidebar item: background + left border (all routes including audit-log log details) */
-.nav :global(.ms-Nav-compositeLink.is-selected .ms-Nav-link),
-.nav :global(.ms-Nav-link[aria-current="page"]),
-.nav :global([aria-current="page"]) {
-  background-color: #f3f2f1 !important;
-  font-weight: 600;
-}
-
-.nav :global(.ms-Nav-compositeLink.is-selected .ms-Nav-link)::after,
-.nav :global(.ms-Nav-link[aria-current="page"])::after,
-.nav :global([aria-current="page"])::after {
-  border-left: 2px solid #176df3;
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  pointer-events: none;
-}
-
-@media (min-width: 641px) {
-  .nav {
-    height: calc(100vh - var(--screen-header-height));
-    max-height: calc(100vh - var(--screen-header-height));
-  }
-}
-
-@media (max-width: 640px) {
-  .nav {
-    display: none;
-  }
+  @apply mobile:hidden;
 }
 
 .content {

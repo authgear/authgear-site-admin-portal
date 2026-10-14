@@ -1,11 +1,5 @@
-import React from "react";
-import {
-  Dialog,
-  DialogType,
-  DialogFooter,
-  PrimaryButton,
-  DefaultButton,
-} from "@fluentui/react";
+import React, { useCallback } from "react";
+import { ConfirmationDialog } from "./v2/ConfirmationDialog/ConfirmationDialog";
 
 export interface BlockerDialogProps {
   hidden: boolean;
@@ -26,21 +20,26 @@ const BlockerDialog: React.VFC<BlockerDialogProps> = function BlockerDialog({
   onConfirm,
   onDismiss,
 }) {
+  const onOpenChange = useCallback(
+    (open: boolean) => {
+      if (!open) {
+        onDismiss?.();
+      }
+    },
+    [onDismiss]
+  );
+
   return (
-    <Dialog
-      hidden={hidden}
-      onDismiss={onDismiss}
-      dialogContentProps={{
-        type: DialogType.normal,
-        title,
-        subText,
-      }}
-    >
-      <DialogFooter>
-        <PrimaryButton text={confirmText} onClick={onConfirm} />
-        <DefaultButton text={cancelText} onClick={onDismiss} />
-      </DialogFooter>
-    </Dialog>
+    <ConfirmationDialog
+      open={!hidden}
+      onOpenChange={onOpenChange}
+      title={title}
+      description={subText}
+      confirmText={confirmText}
+      cancelText={cancelText}
+      onConfirm={() => onConfirm?.()}
+      onCancel={() => onDismiss?.()}
+    />
   );
 };
 

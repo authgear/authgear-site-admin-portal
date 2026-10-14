@@ -1,0 +1,60 @@
+.root {
+  @apply flex flex-col;
+  gap: var(--space-2);
+  min-width: 280px;
+
+  @apply mobile:min-w-0;
+}
+
+.chips {
+  @apply flex flex-wrap list-none m-0 p-0;
+  gap: var(--space-1);
+}
+
+.chipRemove {
+  @apply inline-flex items-center justify-center p-0 border-0 bg-transparent cursor-pointer;
+  margin-left: var(--space-1);
+  color: var(--gray-11);
+  border-radius: var(--radius-1);
+}
+
+.chipRemove:hover:not(:disabled) {
+  color: var(--gray-12);
+}
+
+.chipRemove:focus-visible {
+  outline: 2px solid var(--focus-8);
+  outline-offset: 1px;
+}
+
+.chipRemove:disabled {
+  @apply cursor-default;
+  opacity: 0.5;
+}
+
+.anchor {
+  @apply w-full;
+}
+
+.popover {
+  width: var(--radix-popover-trigger-width);
+  max-height: 280px;
+  padding: var(--space-1);
+}
+
+.listbox {
+  @apply list-none m-0 p-0;
+}
+
+.option {
+  @apply cursor-pointer;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-2);
+  font-size: var(--font-size-2);
+  color: var(--gray-12);
+}
+
+.optionActive {
+  background-color: var(--accent-a3);
+  color: var(--accent-12);
+}

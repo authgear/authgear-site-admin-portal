@@ -4,6 +4,10 @@ import authgear from "@authgear/web";
 import App from "./App";
 import { AUTHGEAR_ENDPOINT, AUTHGEAR_CLIENT_ID } from "./config";
 
+// Light mode only for now. The class matches the Authgear portal's, so the
+// color overrides and any dark mode added later key off the same selector.
+document.documentElement.classList.add("light-theme");
+
 async function init() {
   try {
     await authgear.configure({

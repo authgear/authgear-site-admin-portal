@@ -1,287 +1,158 @@
 .root {
   @apply flex flex-col h-full overflow-auto;
-  background-color: #ffffff;
+  background-color: var(--color-background);
 }
 
 .header {
-  @apply flex items-center gap-2 py-6;
-  padding-left: 24px;
-  padding-right: 24px;
-  background-color: #ffffff;
+  @apply flex items-center gap-2;
+  padding: var(--space-6) var(--space-5);
+  @apply mobile:px-4;
 }
 
 .content {
-  @apply flex flex-col gap-6;
-  padding: 0 24px 24px 24px;
+  @apply flex flex-col;
+  gap: var(--space-5);
+  padding: 0 var(--space-5) var(--space-5);
+  @apply mobile:px-4;
 }
+
+/* ── Filters ──────────────────────────────────────────────────────────────── */
 
 .toolbar {
-  @apply flex items-center gap-4;
+  @apply flex flex-wrap items-center;
+  gap: var(--space-2) var(--space-5);
 }
 
-.searchByLabel {
-  @apply shrink-0;
-  font-family: var(--font-family-base);
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 20px;
-  color: #201f1e;
+.filterGroup {
+  @apply flex flex-wrap items-center;
+  gap: var(--space-3);
+  @apply mobile:w-full;
 }
 
-.searchByDropdown {
+.label {
   @apply shrink-0;
-  width: 162px;
+  color: var(--gray-12);
+}
+
+.select {
+  width: 10rem;
+  @apply mobile:flex-1;
 }
 
 .searchBox {
-  @apply shrink-0;
   width: 300px;
+  min-width: 12rem;
+  @apply mobile:w-full mobile:min-w-0;
 }
 
+/* Match the Select trigger height regardless of --scaling. */
+.searchBox:global(.rt-TextFieldRoot) {
+  --text-field-height: 2rem;
+}
+
+.searchIcon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--gray-11);
+}
+
+.searchClearButton {
+  @apply inline-flex items-center justify-center p-0 border-none bg-transparent cursor-pointer;
+  color: var(--gray-11);
+}
+
+.searchClearButton:hover {
+  color: var(--gray-12);
+}
+
+/* Radix ghost buttons hug content with negative margins; keep a normal gap. */
 .clearButton {
-  @apply shrink-0;
-  color: #a19f9d;
-  font-family: var(--font-family-base);
-  font-weight: 400;
-  font-size: 14px;
+  margin: 0;
 }
 
-.clearButton:hover {
-  color: #605e5c;
-}
+/* ── Table ────────────────────────────────────────────────────────────────── */
 
-.rowLink {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-}
-
-.rowLink:hover {
-  text-decoration: none;
-  color: inherit;
-}
-
-.listContainer {
-  @apply flex flex-col relative;
-  min-width: 960px;
+.tableWrapper {
   overflow-x: auto;
-  overflow-y: visible;
 }
 
-/* Pagination — align with auth-fraud table: same width as table (900px), right-aligned */
-.pagination {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-end;
-  min-width: 960px;
-  margin: 12px 0 0 0;
-  padding-top: 16px;
-  padding-right: 12px;
-  font-family: var(--font-family-base);
-  font-weight: 600;
-}
-
-.pagination :global(.ms-IconButton-icon),
-.pagination :global(.ms-Icon) {
-  font-weight: 600;
-  -webkit-text-stroke: 0.35px currentColor;
-  paint-order: stroke fill;
-}
-
-.paginationPages {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 2px;
-  margin: 0 8px;
-}
-
-.paginationPageBtn {
-  min-width: 28px;
-  height: 28px;
-  padding: 0 6px;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: var(--font-family-base);
-  color: #201f1e;
-  line-height: 20px;
-  border: none;
-  border-radius: 4px;
-  background: transparent;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.paginationPageBtn:hover {
-  background-color: #f3f2f1;
-  color: #201f1e;
-}
-
-.paginationCurrent {
-  font-weight: 600;
-  color: #a19f9d;
-  background-color: transparent;
-  cursor: not-allowed;
-}
-
-.paginationCurrent:hover {
-  color: #a19f9d;
-  background-color: transparent;
-  cursor: not-allowed;
-}
-
-.paginationEllipsis {
-  min-width: 28px;
-  height: 28px;
-  padding: 0 6px;
-  font-size: 14px;
-  font-family: var(--font-family-base);
-  color: #605e5c;
-  line-height: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  user-select: none;
-}
-
-/* Custom table header - same widths as columns so content aligns */
-/* Header and row use same column widths (must match COLUMN_WIDTHS in TeamsScreen.tsx) */
-.tableHeader {
-  display: flex;
-  min-width: 960px;
-  border-bottom: 1px solid #edebe9;
-  background-color: #ffffff;
-}
-
-.tableHeaderCell {
-  flex: 0 0 auto;
-  padding: 12px;
-  min-height: 42px;
-  display: flex;
-  align-items: center;
-  font-family: var(--font-family-base);
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 20px;
-  color: #201f1e;
-  box-sizing: border-box;
-}
-
-.list {
-  min-width: 960px;
-  width: 100%;
-}
-
-/* Hide default Fluent UI header only in Teams list - we use custom header above */
-.listContainer :global(.ms-DetailsList .ms-DetailsHeader) {
-  display: none !important;
-}
-
-/* Ensure Fluent UI DetailsList and its viewport don't clip the header */
-:global(.ms-DetailsList),
-:global(.ms-DetailsList .ms-Viewport) {
+.table {
   min-width: 960px;
 }
 
-:global(.ms-DetailsList .ms-DetailsHeader-wrapper) {
-  overflow: visible;
+.colWide {
+  width: 200px;
+}
+
+.colNarrow {
+  width: 160px;
+}
+
+.sortButton {
+  @apply inline-flex items-center p-0 border-none bg-transparent cursor-pointer;
+  gap: var(--space-1);
+  font: inherit;
+  font-weight: inherit;
+  color: inherit;
+  border-radius: var(--radius-2);
+}
+
+.sortButton:hover {
+  color: var(--accent-11);
+}
+
+.sortButton:focus-visible {
+  outline: 2px solid var(--focus-8);
+  outline-offset: 2px;
 }
 
 .sortIcon {
-  color: #605e5c;
-  font-size: 12px;
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--gray-11);
 }
 
-/* Custom cell styles */
-.projectNameCell {
-  @apply flex flex-col gap-1 justify-center py-3;
-}
-
-.projectName {
-  font-family: var(--font-family-base);
-  font-weight: 600;
-  font-size: 12px;
-  line-height: 16px;
-  color: #201f1e;
-}
-
-.projectId {
-  font-family: var(--font-family-base);
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 14px;
-  color: #605e5c;
-}
-
-.cellText {
-  font-family: var(--font-family-base);
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 14px;
-  color: #605e5c;
-}
-
-/* Wrapper to left-align Owner email and Plan content with header */
-.cellContentLeft {
-  display: block;
-  width: 100%;
-  text-align: left;
-}
-
-/* Left-align Owner email and Plan column cells to match headers */
-.cellAlignLeft {
-  text-align: left !important;
-  justify-content: flex-start !important;
-}
-
-.cellAlignLeft > div,
-.cellAlignLeft > span {
-  text-align: left !important;
-  justify-content: flex-start !important;
-  width: 100%;
-}
-
-:global(.ms-DetailsRow) {
-  border-bottom: 1px solid #edebe9;
-}
-
-/* Force row cell widths to match header (equal width columns) */
-:global(.ms-DetailsRow-cell) {
-  padding: 0 12px !important;
-  min-height: auto;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  flex: 0 0 auto;
-}
-
-:global(.ms-DetailsRow-cell:nth-child(1)),
-:global(.ms-DetailsRow-cell:nth-child(2)),
-:global(.ms-DetailsRow-cell:nth-child(3)),
-:global(.ms-DetailsRow-cell:nth-child(5)) {
-  width: 200px !important;
-  min-width: 200px !important;
-  max-width: 200px !important;
-}
-
-:global(.ms-DetailsRow-cell:nth-child(4)) {
-  width: 160px !important;
-  min-width: 160px !important;
-  max-width: 160px !important;
-}
-
-.tableHeaderSortable {
-  background: none;
-  border: none;
-  padding: 12px;
+.clickableRow {
   cursor: pointer;
-  color: inherit;
-  text-align: left;
 }
 
-.tableHeaderSortable:hover {
-  background-color: #f3f2f1;
+.clickableRow:hover {
+  background-color: var(--gray-a2);
+}
+
+.clickableRow:focus-visible {
+  outline: 2px solid var(--focus-8);
+  outline-offset: -2px;
+}
+
+.idLink {
+  font-size: var(--font-size-2);
+  font-weight: 500;
+  color: var(--gray-12);
+  text-decoration: none;
+}
+
+.idLink:hover,
+.idLink:focus-visible {
+  color: var(--accent-11);
+  text-decoration: underline;
+}
+
+.noOwner {
+  font-style: italic;
+}
+
+.loading {
+  @apply flex justify-center;
+  padding: var(--space-7);
+}
+
+.emptyText {
+  margin: 0;
+  padding: var(--space-7) 0;
+  text-align: center;
+}
+
+.pagination {
+  align-self: flex-end;
 }

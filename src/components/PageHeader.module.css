@@ -1,0 +1,45 @@
+.header {
+  @apply flex flex-col gap-2;
+}
+
+.backLink {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--accent-11);
+  text-decoration: none;
+}
+
+.backLink:hover {
+  color: var(--accent-11);
+  text-decoration: underline;
+}
+
+.backLinkIcon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.titleRow {
+  @apply flex items-center min-w-0;
+  gap: var(--space-3);
+}
+
+.pageTitle {
+  margin: 0;
+  min-width: 0;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  color: var(--gray-12);
+  overflow-wrap: anywhere;
+}
+
+.titleAccessory {
+  @apply flex items-center shrink-0;
+  gap: var(--space-2);
+}

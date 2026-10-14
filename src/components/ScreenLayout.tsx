@@ -1,5 +1,4 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
 import ScreenHeader from "./ScreenHeader";
 import ScreenNav from "./ScreenNav";
 import styles from "./ScreenLayout.module.css";
@@ -11,19 +10,11 @@ interface ScreenLayoutProps {
 const ScreenLayout: React.VFC<ScreenLayoutProps> = function ScreenLayout(
   props: ScreenLayoutProps
 ) {
-  const { pathname } = useLocation();
-  const showNav =
-    pathname !== "/" &&
-    pathname !== "/api-test" &&
-    !pathname.startsWith("/audit-logs");
-
   return (
     <div className={styles.root}>
       <ScreenHeader />
       <div className={styles.body}>
-        <div
-          className={showNav ? styles.nav : `${styles.nav} ${styles.navHidden}`}
-        >
+        <div className={styles.nav}>
           <ScreenNav />
         </div>
         <div className={styles.content}>{props.children}</div>

@@ -1,8 +1,4 @@
 .title {
   margin: 0;
-  font-family: var(--font-family-base);
-  font-weight: 600;
-  font-size: 28px;
-  line-height: 36px;
-  color: #000000;
+  color: var(--gray-12);
 }

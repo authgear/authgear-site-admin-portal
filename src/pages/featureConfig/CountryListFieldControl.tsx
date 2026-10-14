@@ -1,11 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ChoiceGroup,
-  IChoiceGroupOption,
-  ITag,
-  TagPicker,
-} from "@fluentui/react";
-import { COUNTRIES } from "../../data/countries";
+import React, { useCallback, useEffect, useState } from "react";
+import { RadioGroup } from "@radix-ui/themes";
+import CountryTagPicker from "./CountryTagPicker";
 import styles from "./CountryListFieldControl.module.css";
 
 export interface CountryListFieldControlProps {
@@ -28,16 +23,11 @@ function deriveMode(value: string[] | undefined): Mode {
   return "restrict";
 }
 
-const MODE_OPTIONS: IChoiceGroupOption[] = [
+const MODE_OPTIONS: { key: Mode; text: string }[] = [
   { key: "inherit", text: "Inherit from plan" },
   { key: "allowAll", text: "Allow all countries" },
   { key: "restrict", text: "Restrict to selected countries" },
 ];
-
-function countryTag(code: string): ITag {
-  const country = COUNTRIES.find((c) => c.code === code);
-  return { key: code, name: country ? `${country.name} (${code})` : code };
-}
 
 const CountryListFieldControl: React.VFC<CountryListFieldControlProps> =
   function CountryListFieldControl({ value, disabled, onChange }) {
@@ -56,11 +46,8 @@ const CountryListFieldControl: React.VFC<CountryListFieldControlProps> =
     }, [value]);
 
     const onModeChange = useCallback(
-      (
-        _e?: React.FormEvent<HTMLElement | HTMLInputElement>,
-        option?: IChoiceGroupOption
-      ) => {
-        const next = (option?.key as Mode | undefined) ?? "inherit";
+      (key: string) => {
+        const next = (key as Mode | undefined) ?? "inherit";
         setMode(next);
         if (next === "inherit") {
           onChange(undefined);
@@ -73,49 +60,32 @@ const CountryListFieldControl: React.VFC<CountryListFieldControlProps> =
       [onChange, value]
     );
 
-    const selectedTags: ITag[] = useMemo(
-      () => (value ?? []).map(countryTag),
-      [value]
-    );
-
-    const onResolveSuggestions = useCallback(
-      (filter: string, selected?: ITag[]): ITag[] => {
-        const selectedKeys = new Set((selected ?? []).map((t) => t.key));
-        const lower = filter.toLowerCase();
-        return COUNTRIES.filter(
-          (c) =>
-            !selectedKeys.has(c.code) &&
-            (c.code.toLowerCase().startsWith(lower) ||
-              c.name.toLowerCase().includes(lower))
-        )
-          .slice(0, 20)
-          .map((c) => countryTag(c.code));
-      },
-      []
-    );
-
-    const onTagsChange = useCallback(
-      (items?: ITag[]) => {
-        onChange((items ?? []).map((t) => t.key as string));
+    const onCodesChange = useCallback(
+      (codes: string[]) => {
+        onChange(codes);
       },
       [onChange]
     );
 
     return (
       <div className={styles.root}>
-        <ChoiceGroup
+        <RadioGroup.Root
           className={styles.modeChoice}
-          options={MODE_OPTIONS}
-          selectedKey={mode}
+          size="2"
+          value={mode}
           disabled={disabled}
-          onChange={onModeChange}
-        />
+          onValueChange={onModeChange}
+        >
+          {MODE_OPTIONS.map((option) => (
+            <RadioGroup.Item key={option.key} value={option.key}>
+              {option.text}
+            </RadioGroup.Item>
+          ))}
+        </RadioGroup.Root>
         {mode === "restrict" && (
-          <TagPicker
-            className={styles.picker}
-            selectedItems={selectedTags}
-            onResolveSuggestions={onResolveSuggestions}
-            onChange={onTagsChange}
+          <CountryTagPicker
+            selectedCodes={value ?? []}
+            onChange={onCodesChange}
             disabled={disabled}
           />
         )}

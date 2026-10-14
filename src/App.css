@@ -1,21 +1,16 @@
-@import "@fontsource/inter/400.css";
-@import "@fontsource/inter/500.css";
-@import "@fontsource/inter/600.css";
-@import "@fontsource/inter/700.css";
+@import "tailwindcss/base";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Radix must load after Tailwind's base styles so preflight does not reset it.
+   See https://www.radix-ui.com/themes/docs/overview/styling#tailwind-base-styles */
+@import "@radix-ui/themes/styles.css";
+
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+@import "./styles/radix-color-overrides.css";
+@import "./styles/radix-theme-overrides.css";
 
 :root {
   --screen-header-height: 48px;
-  --font-family-base:
-    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", sans-serif;
-}
-
-* {
-  box-sizing: border-box;
 }
 
 html,
@@ -25,9 +20,26 @@ body,
   padding: 0;
   width: 100%;
   height: 100%;
-  font-family: var(--font-family-base);
 }
 
-body {
-  background-color: #ffffff;
+html {
+  /* Same system font stack as the Authgear portal. */
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", "Helvetica",
+    "Arial", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+/* Radix only paints its background inside .radix-themes, so paint the
+   document too. The class is set on <html> in index.tsx. */
+html.light-theme {
+  background-color: white;
+  color-scheme: light;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+button[disabled] {
+  cursor: not-allowed;
 }

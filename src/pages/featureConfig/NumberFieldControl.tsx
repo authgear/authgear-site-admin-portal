@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Checkbox, TextField } from "@fluentui/react";
+import { Checkbox, Text } from "@radix-ui/themes";
+import { TextField } from "../../components/v2/TextField/TextField";
 import styles from "./NumberFieldControl.module.css";
 
 export interface NumberFieldControlProps {
@@ -23,11 +24,8 @@ const NumberFieldControl: React.VFC<NumberFieldControlProps> =
     }, [value]);
 
     const onOverrideChange = useCallback(
-      (
-        _e?: React.FormEvent<HTMLElement | HTMLInputElement>,
-        checked?: boolean
-      ) => {
-        if (checked) {
+      (checked: boolean | "indeterminate") => {
+        if (checked === true) {
           const initial = typeof planValue === "number" ? planValue : 0;
           setText(String(initial));
           onChange(initial);
@@ -40,11 +38,8 @@ const NumberFieldControl: React.VFC<NumberFieldControlProps> =
     );
 
     const onTextChange = useCallback(
-      (
-        _e: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>,
-        newValue?: string
-      ) => {
-        const nextText = newValue ?? "";
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        const nextText = e.currentTarget.value;
         setText(nextText);
         const parsed = Number(nextText);
         if (nextText.trim() !== "" && Number.isFinite(parsed)) {
@@ -56,20 +51,24 @@ const NumberFieldControl: React.VFC<NumberFieldControlProps> =
 
     return (
       <div className={styles.root}>
-        <Checkbox
-          label="Override"
-          checked={overridden}
-          disabled={disabled}
-          onChange={onOverrideChange}
-        />
-        {overridden && (
-          <TextField
-            className={styles.input}
-            type="number"
-            value={text}
+        <Text as="label" size="2" className={styles.checkboxLabel}>
+          <Checkbox
+            checked={overridden}
             disabled={disabled}
-            onChange={onTextChange}
+            onCheckedChange={onOverrideChange}
           />
+          Override
+        </Text>
+        {overridden && (
+          <div className={styles.input}>
+            <TextField
+              size="2"
+              type="number"
+              value={text}
+              disabled={disabled}
+              onChange={onTextChange}
+            />
+          </div>
         )}
       </div>
     );

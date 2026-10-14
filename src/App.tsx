@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
-import { initializeIcons, Spinner, SpinnerSize } from "@fluentui/react";
 import { AuthgearProvider, useAuthgear } from "./auth/AuthgearContext";
 import ScreenLayout from "./components/ScreenLayout";
+import ShowLoading from "./components/ShowLoading";
+import { ThemeProvider } from "./components/v2/ThemeProvider/ThemeProvider";
+import { ToastProvider } from "./components/v2/Toast/Toast";
 import ProjectsScreen from "./pages/ProjectsScreen";
 import ProjectDetailsPage from "./pages/ProjectDetailsPage";
 import AuditLogDetailPage from "./pages/AuditLogDetailPage";
@@ -13,8 +15,6 @@ import APITestPage from "./pages/APITestPage";
 import AccessDeniedPage from "./pages/AccessDeniedPage";
 import { listApps } from "./api/siteadmin";
 import "./App.css";
-
-initializeIcons();
 
 const AuthenticatedApp: React.VFC = function AuthenticatedApp() {
   const { sessionState, userInfoLoading } = useAuthgear();
@@ -36,18 +36,7 @@ const AuthenticatedApp: React.VFC = function AuthenticatedApp() {
   }
 
   if (userInfoLoading || accessChecking) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100vh",
-        }}
-      >
-        <Spinner size={SpinnerSize.large} />
-      </div>
-    );
+    return <ShowLoading fullScreen={true} />;
   }
 
   if (accessDenied) {
@@ -82,9 +71,13 @@ const router = createBrowserRouter([
 
 const App: React.VFC = function App() {
   return (
-    <AuthgearProvider>
-      <RouterProvider router={router} />
-    </AuthgearProvider>
+    <ThemeProvider>
+      <ToastProvider>
+        <AuthgearProvider>
+          <RouterProvider router={router} />
+        </AuthgearProvider>
+      </ToastProvider>
+    </ThemeProvider>
   );
 };
 

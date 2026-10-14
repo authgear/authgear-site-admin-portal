@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
-import { TooltipHost, DirectionalHint } from "@fluentui/react";
+import { Tooltip } from "@radix-ui/themes";
+import tooltipStyles from "./v2/Tooltip/Tooltip.module.css";
 import styles from "./MonthlyBarChart.module.css";
 
 const MONTH_NAMES = [
@@ -48,13 +49,14 @@ function niceAxisCeiling(max: number): number {
   return niceFrac * pow;
 }
 
-/** True if monthKey (YYYY-MM) is after the current calendar month. */
+/** True if monthKey (YYYY-MM) is after the current UTC calendar month. */
 function isMonthKeyInFuture(monthKey: string): boolean {
   const now = new Date();
   const [y, m] = monthKey.split("-").map(Number);
   if (!y || !m) return false;
   return (
-    y > now.getFullYear() || (y === now.getFullYear() && m > now.getMonth() + 1)
+    y > now.getUTCFullYear() ||
+    (y === now.getUTCFullYear() && m > now.getUTCMonth() + 1)
   );
 }
 
@@ -81,7 +83,9 @@ const MonthlyBarChart: React.VFC<MonthlyBarChartProps> = ({
   ariaLabel,
 }) => {
   const max = useMemo(
-    () => niceAxisCeiling(Math.max(1, ...data.map((d) => d.value))),
+    // At least 4 so the five quarter ticks are distinct whole numbers;
+    // with a max of 1 they would round to 1, 1, 1, 0, 0.
+    () => niceAxisCeiling(Math.max(4, ...data.map((d) => d.value))),
     [data]
   );
 
@@ -116,30 +120,29 @@ const MonthlyBarChart: React.VFC<MonthlyBarChartProps> = ({
                 <span className={styles.barValue}>
                   {hasData ? formatCompactNumber(value) : " "}
                 </span>
-                <div
-                  className={styles.barTrack}
-                  role="img"
-                  aria-label={tooltipContent}
+                <Tooltip
+                  content={tooltipContent}
+                  side="top"
+                  delayDuration={0}
+                  className={tooltipStyles.tooltip}
                 >
-                  <TooltipHost
-                    content={tooltipContent}
-                    directionalHint={DirectionalHint.topCenter}
-                    delay={0}
-                    hostClassName={styles.barTooltipHost}
-                    tooltipProps={{
-                      calloutProps: { gapSpace: 2, isBeakVisible: true },
-                    }}
+                  <div
+                    className={styles.barTrack}
+                    role="img"
+                    aria-label={tooltipContent}
                   >
                     <div
                       className={fillClass}
-                      style={{
-                        height: hasData ? `${fillHeightPx}px` : "0",
-                        minHeight: 0,
-                      }}
+                      style={{ height: `${fillHeightPx}px` }}
                     />
-                  </TooltipHost>
-                </div>
-                <span className={styles.barLabel}>{MONTH_NAMES[i]}</span>
+                  </div>
+                </Tooltip>
+                <span className={styles.barLabel}>
+                  <span className={styles.barLabelFull}>{MONTH_NAMES[i]}</span>
+                  <span className={styles.barLabelShort} aria-hidden>
+                    {MONTH_NAMES[i].charAt(0)}
+                  </span>
+                </span>
               </div>
             );
           })}

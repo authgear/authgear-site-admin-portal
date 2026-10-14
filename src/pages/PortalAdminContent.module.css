@@ -1,167 +1,66 @@
-/* Portal Admin tab — Invite button + Owner email table (align with Audit Log / UI) */
+/* Portal Admin tab — Add Admin button + collaborators table */
 .root {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  min-width: 0;
-  width: 100%;
-  padding-bottom: 48px;
-  font-family: var(--font-family-base);
+  @apply flex flex-col w-full min-w-0;
+  gap: var(--space-5);
+  padding-bottom: var(--space-8);
 }
 
 .inviteRow {
-  display: flex;
-  align-items: center;
+  @apply flex items-center;
 }
 
-/* Card — no outer border (table has row borders only) */
-.card {
-  border: none;
-  border-radius: 8px;
-  background-color: #ffffff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  overflow: hidden;
+.tableWrapper {
+  @apply w-full overflow-x-auto;
 }
 
-/* Table aligns with Fluent DetailsList: header 14px/600, row 12px, padding 8px 16px */
 .table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: var(--font-family-base);
-}
-
-.table th {
-  text-align: left;
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #201f1e;
-  background-color: #ffffff;
-  border-bottom: 1px solid #edebe9;
-}
-
-.table td {
-  padding: 10px 16px;
-  font-size: 12px;
-  line-height: 16px;
-  color: #605e5c;
-  border-bottom: 1px solid #edebe9;
-  vertical-align: middle;
-  box-sizing: border-box;
-}
-
-.table tbody tr {
-  background-color: #ffffff;
-}
-
-.table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.table tbody tr:hover {
-  background-color: #f3f2f1;
+  @apply w-full;
 }
 
 .emailCell {
-  font-size: 12px;
-  color: #605e5c;
+  @apply break-all;
+  color: var(--gray-12);
 }
 
-.ownerBadge {
-  color: #605e5c;
-  font-weight: 400;
+.roleColumn {
+  width: 120px;
 }
 
-.statusAccepted {
-  color: #33ba89;
-  font-weight: 500;
+.actionColumn {
+  width: 220px;
 }
 
 .actionCell {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+  @apply flex items-center flex-wrap;
+  gap: var(--space-4);
+  /* Offset ghost-button padding so labels align with the column header */
+  margin-left: calc(var(--space-2) * -1);
 }
 
-.actionPromote {
-  font-family: "Segoe UI", sans-serif;
-  font-size: 12px;
-  color: #176df3;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  text-decoration: none;
+.emptyCell {
+  @apply text-center;
+  padding-block: var(--space-4);
 }
 
-.actionPromote:hover {
-  text-decoration: underline;
-  color: #1259cc;
+/* Dialogs */
+.inviteForm {
+  @apply flex flex-col;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
 }
 
-.actionRemove {
-  font-family: var(--font-family-base);
-  font-size: 12px;
-  color: #e23d3d;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  text-decoration: none;
+.dialogButtons {
+  @apply flex flex-row flex-wrap justify-end;
+  gap: var(--space-3);
 }
 
-.actionRemove:hover {
-  text-decoration: underline;
-  color: #c93535;
-}
-
-.actionRemove:disabled {
-  color: #a19f9d;
-  cursor: not-allowed;
-  text-decoration: none;
-}
-
-.actionRemove:disabled:hover {
-  text-decoration: none;
-  color: #a19f9d;
-}
-
-/* Invite modal */
-.inviteModalBody {
-  margin-bottom: 20px;
-}
-
-.inviteModalLabel {
-  font-family: var(--font-family-base);
-  font-size: 14px;
+.dialogEmail {
   font-weight: 600;
-  color: #323130;
-  margin: 0 0 8px 0;
-  display: block;
+  color: var(--gray-12);
 }
 
-.inviteModalButtons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 24px;
-}
-
-/* Remove modal */
-.removeModalMessage {
-  font-family: var(--font-family-base);
-  font-size: 14px;
-  color: #323130;
-  line-height: 1.5;
-  margin: 0 0 24px 0;
-}
-
-.removeModalEmail {
-  font-weight: 600;
-}
-
-.removeModalButtons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
+.dialogError {
+  @apply block;
+  margin-top: var(--space-3);
+  color: var(--red-11);
 }

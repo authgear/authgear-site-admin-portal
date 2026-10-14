@@ -1,13 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ActionButton,
-  ChoiceGroup,
-  Dropdown,
-  IconButton,
-  IChoiceGroupOption,
-  IDropdownOption,
-  TextField,
-} from "@fluentui/react";
+import React, { useCallback, useEffect, useId, useMemo, useState } from "react";
+import { Button, IconButton, RadioGroup, Select } from "@radix-ui/themes";
+import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
+import { FormField } from "../../components/v2/FormField/FormField";
+import { TextField } from "../../components/v2/TextField/TextField";
 import styles from "./UsageLimitListFieldControl.module.css";
 
 export interface UsageLimitRule {
@@ -37,18 +32,18 @@ function deriveMode(value: UsageLimitRule[] | undefined): Mode {
   return "custom";
 }
 
-const MODE_OPTIONS: IChoiceGroupOption[] = [
+const MODE_OPTIONS: { key: Mode; text: string }[] = [
   { key: "inherit", text: "Inherit from plan" },
   { key: "noLimit", text: "No limit" },
   { key: "custom", text: "Set limit(s)" },
 ];
 
-const PERIOD_OPTIONS: IDropdownOption[] = [
+const PERIOD_OPTIONS: { key: UsageLimitRule["period"]; text: string }[] = [
   { key: "day", text: "Day" },
   { key: "month", text: "Month" },
 ];
 
-const ACTION_OPTIONS: IDropdownOption[] = [
+const ACTION_OPTIONS: { key: UsageLimitRule["action"]; text: string }[] = [
   { key: "alert", text: "Alert (notify only)" },
   { key: "block", text: "Block (enforce quota)" },
 ];
@@ -74,17 +69,16 @@ interface RuleRowProps {
  */
 function RuleRow({ rule, disabled, onChange, onRemove }: RuleRowProps) {
   const [quotaText, setQuotaText] = useState(String(rule.quota));
+  const periodId = useId();
+  const actionId = useId();
 
   useEffect(() => {
     setQuotaText(String(rule.quota));
   }, [rule.quota]);
 
   const onQuotaChange = useCallback(
-    (
-      _e: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>,
-      newValue?: string
-    ) => {
-      const nextText = newValue ?? "";
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const nextText = e.currentTarget.value;
       setQuotaText(nextText);
       const parsed = Number(nextText);
       if (nextText.trim() !== "" && Number.isFinite(parsed) && parsed >= 0) {
@@ -96,45 +90,71 @@ function RuleRow({ rule, disabled, onChange, onRemove }: RuleRowProps) {
 
   return (
     <div className={styles.ruleRow}>
-      <TextField
-        className={styles.quotaInput}
-        type="number"
-        min={0}
-        label="Quota"
-        value={quotaText}
-        disabled={disabled}
-        onChange={onQuotaChange}
-      />
-      <Dropdown
-        className={styles.periodDropdown}
-        label="Period"
-        options={PERIOD_OPTIONS}
-        selectedKey={rule.period}
-        disabled={disabled}
-        onChange={(_e, option) =>
-          option &&
-          onChange({ ...rule, period: option.key as UsageLimitRule["period"] })
-        }
-      />
-      <Dropdown
-        className={styles.actionDropdown}
-        label="Action"
-        options={ACTION_OPTIONS}
-        selectedKey={rule.action}
-        disabled={disabled}
-        onChange={(_e, option) =>
-          option &&
-          onChange({ ...rule, action: option.key as UsageLimitRule["action"] })
-        }
-      />
+      <div className={styles.quotaInput}>
+        <TextField
+          size="2"
+          type="number"
+          label="Quota"
+          value={quotaText}
+          disabled={disabled}
+          onChange={onQuotaChange}
+        />
+      </div>
+      <div className={styles.periodDropdown}>
+        <FormField size="2" label="Period" htmlFor={periodId} labelSpace="1">
+          <Select.Root
+            size="2"
+            value={rule.period}
+            disabled={disabled}
+            onValueChange={(v) =>
+              onChange({ ...rule, period: v as UsageLimitRule["period"] })
+            }
+          >
+            <Select.Trigger id={periodId} className={styles.selectTrigger} />
+            <Select.Content position="popper">
+              {PERIOD_OPTIONS.map((o) => (
+                <Select.Item key={o.key} value={o.key}>
+                  {o.text}
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select.Root>
+        </FormField>
+      </div>
+      <div className={styles.actionDropdown}>
+        <FormField size="2" label="Action" htmlFor={actionId} labelSpace="1">
+          <Select.Root
+            size="2"
+            value={rule.action}
+            disabled={disabled}
+            onValueChange={(v) =>
+              onChange({ ...rule, action: v as UsageLimitRule["action"] })
+            }
+          >
+            <Select.Trigger id={actionId} className={styles.selectTrigger} />
+            <Select.Content position="popper">
+              {ACTION_OPTIONS.map((o) => (
+                <Select.Item key={o.key} value={o.key}>
+                  {o.text}
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select.Root>
+        </FormField>
+      </div>
       <IconButton
+        type="button"
+        size="2"
+        variant="ghost"
+        color="gray"
         className={styles.removeButton}
-        iconProps={{ iconName: "Delete" }}
         title="Remove limit"
-        ariaLabel="Remove limit"
+        aria-label="Remove limit"
         disabled={disabled}
         onClick={onRemove}
-      />
+      >
+        <TrashIcon />
+      </IconButton>
     </div>
   );
 }
@@ -158,11 +178,8 @@ const UsageLimitListFieldControl: React.VFC<UsageLimitListFieldControlProps> =
     const rules = useMemo(() => value ?? [], [value]);
 
     const onModeChange = useCallback(
-      (
-        _e?: React.FormEvent<HTMLElement | HTMLInputElement>,
-        option?: IChoiceGroupOption
-      ) => {
-        const next = (option?.key as Mode | undefined) ?? "inherit";
+      (key: string) => {
+        const next = (key as Mode | undefined) ?? "inherit";
         setMode(next);
         if (next === "inherit") {
           onChange(undefined);
@@ -195,13 +212,19 @@ const UsageLimitListFieldControl: React.VFC<UsageLimitListFieldControlProps> =
 
     return (
       <div className={styles.root}>
-        <ChoiceGroup
+        <RadioGroup.Root
           className={styles.modeChoice}
-          options={MODE_OPTIONS}
-          selectedKey={mode}
+          size="2"
+          value={mode}
           disabled={disabled}
-          onChange={onModeChange}
-        />
+          onValueChange={onModeChange}
+        >
+          {MODE_OPTIONS.map((option) => (
+            <RadioGroup.Item key={option.key} value={option.key}>
+              {option.text}
+            </RadioGroup.Item>
+          ))}
+        </RadioGroup.Root>
         {mode === "custom" && (
           <div className={styles.rules}>
             {rules.map((rule, index) => (
@@ -213,13 +236,18 @@ const UsageLimitListFieldControl: React.VFC<UsageLimitListFieldControlProps> =
                 onRemove={() => removeRuleAt(index)}
               />
             ))}
-            <ActionButton
-              iconProps={{ iconName: "Add" }}
-              disabled={disabled}
-              onClick={addRule}
-            >
-              Add limit
-            </ActionButton>
+            <div>
+              <Button
+                type="button"
+                size="2"
+                variant="ghost"
+                disabled={disabled}
+                onClick={addRule}
+              >
+                <PlusIcon />
+                Add limit
+              </Button>
+            </div>
           </div>
         )}
       </div>

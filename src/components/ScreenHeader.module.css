@@ -1,48 +1,27 @@
 .header {
-  background-color: #176df3;
-  height: var(--screen-header-height, 48px);
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
-  padding: 0 18px 0 10px;
+  border-bottom: 1px solid var(--gray-a6);
+  background-color: var(--color-background);
+  height: var(--screen-header-height);
   position: sticky;
   top: 0;
   z-index: 9999;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  gap: 24px;
+  padding: 0 16px;
+}
+
+.mobileView {
+  @apply hidden mobile:flex mobile:flex-row mobile:items-center;
 }
 
 .desktopView {
-  display: none;
-  align-items: center;
-  gap: 8px;
-  margin-right: auto;
+  @apply mobile:hidden flex flex-row items-center;
+  min-width: 0;
 }
 
-@media (min-width: 641px) {
-  .desktopView {
-    display: flex;
-  }
-}
-
-.mobileHamburger {
-  display: none;
-  margin-left: 16px;
-  margin-right: auto;
-  border-radius: 4px;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
-}
-
-@media (max-width: 640px) {
-  .mobileHamburger {
-    display: block;
-  }
-}
-
-.logoContainer {
+.brand {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -50,120 +29,193 @@
 }
 
 .appName {
-  font-family: "Red Hat Display", sans-serif;
-  font-size: 21px;
-  line-height: 21px;
-  color: white;
-  font-weight: 400;
+  font-size: var(--font-size-3);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--gray-12);
+  white-space: nowrap;
+}
+
+.headerDivider {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 1px;
+  height: 20px;
+  margin: 0 12px;
+  background-color: var(--gray-a5);
 }
 
 .portalUrl {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.75);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  font-size: var(--font-size-2);
+  color: var(--gray-a11);
   text-decoration: none;
-  border-left: 1px solid rgba(255, 255, 255, 0.3);
-  padding-left: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .portalUrl:hover {
-  color: white;
-  text-decoration: underline;
+  color: var(--gray-12);
 }
 
-.headerNavLink {
-  display: none;
-}
-
-@media (min-width: 641px) {
-  .headerNavLink {
-    display: inline-flex;
-  }
-}
-
-.userButton {
-  color: white;
-}
-
-.userButton :global(.ms-Button-label) {
-  color: white;
-}
-
-.userButton :global(.ms-Button-menuIcon) {
-  color: white;
-}
-
-.mobilePanelContent {
-  width: 260px;
-  max-width: 100%;
-  min-width: 0;
-  min-height: 100vh;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.mobileSidebarHeader {
-  padding: 16px;
-  border-bottom: none;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  background-color: #ffffff;
+.portalUrlIcon {
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
 }
 
-.mobileSidebarLogoRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.mobileSidebarGridButton {
+.hamburger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
-  margin: 0;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
   border: none;
-  background: none;
+  background: transparent;
+  border-radius: var(--radius-2);
   cursor: pointer;
+  color: var(--gray-12);
 }
 
-.mobileSidebarGridButton:hover {
-  background-color: #f3f2f1;
-  border-radius: 4px;
+.hamburger:hover {
+  background-color: var(--gray-a3);
 }
 
-.mobileSidebarGridIcon {
-  font-size: 16px;
-  color: #176df3;
+.hamburgerIcon {
+  width: 20px;
+  height: 20px;
 }
 
-.mobileSidebarAppName {
-  font-family: "Red Hat Display", sans-serif;
-  font-size: 21px;
-  line-height: 21px;
-  color: #201f1e;
-  font-weight: 400;
+.drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
 }
 
-.mobilePanelNav {
-  flex: 1 1 0;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-
-.mobilePanelNav :global(.ms-Nav) {
-  min-height: min-content;
-}
-
-.mobilePanelNav :global(.ms-Nav-navItems) {
+.drawerOverlay {
+  position: absolute;
+  inset: 0;
+  border: none;
+  padding: 0;
   margin: 0;
+  background-color: var(--black-a6);
+  cursor: pointer;
+  animation: drawerOverlayIn 0.2s ease;
 }
 
-.mobilePanelNav :global(.ms-Nav-groupContent) {
-  margin-bottom: 0;
+.drawerPanel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  width: 280px;
+  max-width: 85vw;
+  flex-direction: column;
+  background-color: var(--color-background);
+  box-shadow: var(--shadow-5);
+  animation: drawerPanelIn 0.2s ease;
+}
+
+/* Exit animations while the drawer is closing (still mounted). */
+.drawerClosing .drawerOverlay {
+  animation: drawerOverlayOut 0.2s ease forwards;
+}
+
+.drawerClosing .drawerPanel {
+  animation: drawerPanelOut 0.2s ease forwards;
+}
+
+@keyframes drawerOverlayIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes drawerOverlayOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes drawerPanelIn {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes drawerPanelOut {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.drawerHeader {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--screen-header-height);
+  padding: 0 var(--space-3);
+  border-bottom: 1px solid var(--gray-a6);
+}
+
+.drawerBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.actions {
+  @apply ml-auto flex items-center;
+  gap: 16px;
+}
+
+.avatarButton {
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  border-radius: 9999px;
+}
+
+.userMenuIdentity {
+  display: flex;
+  flex-direction: column;
+  max-width: 240px;
+  padding: var(--space-2) var(--space-3);
+}
+
+.userMenuEmail {
+  font-size: var(--font-size-2);
+  font-weight: 500;
+  color: var(--gray-12);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

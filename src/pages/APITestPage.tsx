@@ -3,10 +3,13 @@
  * Access at: /api-test
  */
 import React, { useState } from "react";
-import { PrimaryButton, Text } from "@fluentui/react";
+import cn from "classnames";
+import { Code, Heading, Text } from "@radix-ui/themes";
 import { listApps } from "../api/siteadmin";
 import { SiteAdminAPIError } from "../api/client";
 import { SITEADMIN_API_URL } from "../config";
+import { PrimaryButton } from "../components/v2/Button/PrimaryButton/PrimaryButton";
+import styles from "./APITestPage.module.css";
 
 const APITestPage: React.VFC = function APITestPage() {
   const [result, setResult] = useState<string | null>(null);
@@ -34,53 +37,43 @@ const APITestPage: React.VFC = function APITestPage() {
       });
   };
 
-  const statusColor =
-    status === "ok" ? "#107c10" : status === "error" ? "#d13438" : "#605e5c";
+  const statusClassName =
+    status === "ok"
+      ? styles.resultOk
+      : status === "error"
+        ? styles.resultError
+        : styles.resultIdle;
 
   return (
-    <div style={{ padding: 32, maxWidth: 800 }}>
-      <Text variant="xLarge" block style={{ marginBottom: 8 }}>
+    <div className={styles.root}>
+      <Heading as="h1" size="6" className={styles.title}>
         API Connection Test
-      </Text>
-      <Text
-        variant="small"
-        block
-        style={{ color: "#605e5c", marginBottom: 24 }}
-      >
-        Calls <code>GET {SITEADMIN_API_URL}/api/v1/apps</code> using the current
+      </Heading>
+      <Text as="p" size="2" color="gray" className={styles.description}>
+        Calls <Code>GET {SITEADMIN_API_URL}/api/v1/apps</Code> using the current
         Authgear session token.
       </Text>
 
-      <PrimaryButton
-        text={status === "loading" ? "Testing…" : "Test listApps()"}
-        disabled={status === "loading"}
-        onClick={handleTest}
-        style={{ marginBottom: 24 }}
-      />
+      <div className={styles.button}>
+        <PrimaryButton
+          size="2"
+          text={status === "loading" ? "Testing…" : "Test listApps()"}
+          disabled={status === "loading"}
+          onClick={handleTest}
+        />
+      </div>
 
       {result !== null && (
         <>
           <Text
-            variant="mediumPlus"
-            block
-            style={{ color: statusColor, marginBottom: 8, fontWeight: 600 }}
+            as="p"
+            size="3"
+            weight="bold"
+            className={cn(styles.statusLabel, statusClassName)}
           >
             {status === "ok" ? "Success" : "Error"}
           </Text>
-          <pre
-            style={{
-              background: "#f3f2f1",
-              padding: 16,
-              borderRadius: 4,
-              overflowX: "auto",
-              fontSize: 13,
-              color: statusColor,
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-word",
-            }}
-          >
-            {result}
-          </pre>
+          <pre className={cn(styles.result, statusClassName)}>{result}</pre>
         </>
       )}
     </div>

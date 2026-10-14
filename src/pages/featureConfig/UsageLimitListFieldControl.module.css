@@ -1,17 +1,22 @@
 .root {
-  @apply flex flex-col gap-2 py-1;
+  @apply flex flex-col;
+  gap: var(--space-2);
+  padding-block: var(--space-1);
 }
 
 .modeChoice {
-  @apply flex flex-col gap-1;
+  @apply flex flex-col;
+  gap: var(--space-1);
 }
 
 .rules {
-  @apply flex flex-col gap-2;
+  @apply flex flex-col;
+  gap: var(--space-3);
 }
 
 .ruleRow {
-  @apply flex items-end gap-2;
+  @apply flex flex-wrap items-end;
+  gap: var(--space-2);
 }
 
 .quotaInput {
@@ -26,6 +31,10 @@
   @apply w-52;
 }
 
+.selectTrigger {
+  @apply w-full;
+}
+
 .removeButton {
-  @apply mb-0.5;
+  margin-bottom: var(--space-2);
 }

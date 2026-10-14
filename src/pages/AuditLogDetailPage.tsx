@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { IconButton, Text } from "@radix-ui/themes";
 import {
-  Text,
-  Spinner,
-  SpinnerSize,
-  PrimaryButton,
-  Icon,
-  IconButton,
-} from "@fluentui/react";
+  CheckIcon,
+  CopyIcon,
+  MagnifyingGlassIcon,
+} from "@radix-ui/react-icons";
+import PageHeader from "../components/PageHeader";
+import ShowLoading from "../components/ShowLoading";
+import { PrimaryButton } from "../components/v2/Button/PrimaryButton/PrimaryButton";
 import { getAuditLog } from "../api/siteadmin";
 import { SiteAdminAPIError } from "../api/client";
 import type { SiteAdminAuditLogDetail } from "../api/types";
@@ -68,38 +69,21 @@ const AuditLogDetailPage: React.VFC = function AuditLogDetailPage() {
 
   if (loading) {
     return (
-      <div
-        className={styles.root}
-        style={{ alignItems: "center", justifyContent: "center" }}
-      >
-        <Spinner size={SpinnerSize.large} />
+      <div className={styles.root}>
+        <ShowLoading />
       </div>
     );
   }
 
-  const breadcrumb = projectId ? (
-    <Text as="h1" variant="xxLarge" block className={styles.breadcrumb}>
-      <Link to="/" className={styles.breadcrumbLink}>
-        Projects
-      </Link>
-      <Icon iconName="ChevronRight" className={styles.breadcrumbSepIcon} />
-      <Link
-        to={`/project/${projectId}#audit-log`}
-        className={styles.breadcrumbLink}
-      >
-        Project Details
-      </Link>
-      <Icon iconName="ChevronRight" className={styles.breadcrumbSepIcon} />
-      <span className={styles.breadcrumbCurrent}>Log Details</span>
-    </Text>
-  ) : (
-    <Text as="h1" variant="xxLarge" block className={styles.breadcrumb}>
-      <Link to="/audit-logs" className={styles.breadcrumbLink}>
-        Site Admin Logs
-      </Link>
-      <Icon iconName="ChevronRight" className={styles.breadcrumbSepIcon} />
-      <span className={styles.breadcrumbCurrent}>Log Details</span>
-    </Text>
+  const header = (
+    <PageHeader
+      backLink={
+        projectId
+          ? { to: `/project/${projectId}#audit-log`, label: projectId }
+          : { to: "/audit-logs", label: "Site Admin Log" }
+      }
+      title="Log Details"
+    />
   );
 
   const backPath = projectId
@@ -109,24 +93,33 @@ const AuditLogDetailPage: React.VFC = function AuditLogDetailPage() {
   if (error != null || log == null) {
     return (
       <div className={styles.root}>
-        <div className={styles.breadcrumbRow}>{breadcrumb}</div>
+        {header}
         <div className={styles.notFoundContainer}>
-          <Icon iconName="SearchIssue" className={styles.notFoundIcon} />
-          <h2 className={styles.notFoundHeading}>Log entry not found</h2>
-          <p className={styles.notFoundDescription}>
+          <MagnifyingGlassIcon
+            className={styles.notFoundIcon}
+            aria-hidden={true}
+          />
+          <Text
+            as="p"
+            size="5"
+            weight="bold"
+            className={styles.notFoundHeading}
+          >
+            Log entry not found
+          </Text>
+          <Text
+            as="p"
+            size="2"
+            color="gray"
+            className={styles.notFoundDescription}
+          >
             {error?.message ??
               "This audit log entry doesn’t exist or may have been removed."}
-          </p>
+          </Text>
           <PrimaryButton
+            size="2"
             text={projectId ? "Back to Project" : "Back to Site Admin Logs"}
             onClick={() => navigate(backPath)}
-            styles={{
-              root: { backgroundColor: "#176df3", borderColor: "#176df3" },
-              rootHovered: {
-                backgroundColor: "#1562db",
-                borderColor: "#1562db",
-              },
-            }}
           />
         </div>
       </div>
@@ -139,7 +132,7 @@ const AuditLogDetailPage: React.VFC = function AuditLogDetailPage() {
 
   return (
     <div className={styles.root}>
-      <div className={styles.breadcrumbRow}>{breadcrumb}</div>
+      {header}
 
       <div className={styles.fields}>
         <FieldRow label="Activity Type" value={log.activity_type} />
@@ -160,15 +153,17 @@ const AuditLogDetailPage: React.VFC = function AuditLogDetailPage() {
         <div className={styles.rawHeader}>
           <span className={styles.rawTitle}>Raw Event Log</span>
           <IconButton
-            iconProps={{ iconName: copyFeedback ? "CheckMark" : "Copy" }}
+            type="button"
+            variant="ghost"
+            color="gray"
+            size="2"
+            className={styles.copyButton}
             title="Copy"
-            ariaLabel="Copy raw log"
+            aria-label="Copy raw log"
             onClick={onCopy}
-            styles={{
-              root: { color: "#605e5c" },
-              rootHovered: { color: "#323130", backgroundColor: "#edebe9" },
-            }}
-          />
+          >
+            {copyFeedback ? <CheckIcon /> : <CopyIcon />}
+          </IconButton>
         </div>
         <CodeBlock
           className={styles.codeBlock}

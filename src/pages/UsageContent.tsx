@@ -1,37 +1,31 @@
-import React, {
-  useState,
-  useMemo,
-  useRef,
-  useEffect,
-  useCallback,
-} from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import {
-  Icon,
-  Dropdown,
-  IDropdownOption,
-  Callout,
-  TooltipHost,
+  Button,
+  Dialog,
   IconButton,
-  DirectionalHint,
-  Modal,
-  Stack,
-  TextField,
-  Calendar,
-  Text,
-  DefaultButton,
-  PrimaryButton,
+  Popover,
+  Select,
   Spinner,
-  SpinnerSize,
-} from "@fluentui/react";
+  Tooltip,
+} from "@radix-ui/themes";
+import {
+  CalendarIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+} from "@radix-ui/react-icons";
 import {
   getAppMessagingUsage,
   getAppMonthlyActiveUsers,
 } from "../api/siteadmin";
 import type { MessagingUsage, MonthlyActiveUsersCount } from "../api/types";
 import MonthlyBarChart from "../components/MonthlyBarChart";
+import { DateField } from "../components/v2/DateField/DateField";
+import { PrimaryButton } from "../components/v2/Button/PrimaryButton/PrimaryButton";
+import { SecondaryButton } from "../components/v2/Button/SecondaryButton/SecondaryButton";
+import tooltipStyles from "../components/v2/Tooltip/Tooltip.module.css";
 import styles from "./UsageContent.module.css";
 
-const SMS_DATE_RANGE_OPTIONS: IDropdownOption[] = [
+const SMS_DATE_RANGE_OPTIONS: Array<{ key: string; text: string }> = [
   { key: "last7", text: "Last 7 days" },
   { key: "last30", text: "Last 30 days" },
   { key: "last60", text: "Last 60 days" },
@@ -171,6 +165,100 @@ function formatShortDate(d: Date): string {
   });
 }
 
+const DATE_STR_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/** UTC-midnight Date → yyyy-MM-dd (the DateField value format). */
+function toDateFieldValue(d: Date | null): string {
+  return d ? d.toISOString().slice(0, 10) : "";
+}
+
+/** yyyy-MM-dd → UTC-midnight Date, or null if empty/invalid. */
+function parseDateFieldValue(value: string): Date | null {
+  const m = DATE_STR_PATTERN.exec(value);
+  if (!m) return null;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const date = new Date(Date.UTC(y, mo - 1, d));
+  if (
+    date.getUTCFullYear() !== y ||
+    date.getUTCMonth() !== mo - 1 ||
+    date.getUTCDate() !== d
+  ) {
+    return null;
+  }
+  return date;
+}
+
+interface YearPickerProps {
+  year: number;
+  onChange: React.Dispatch<React.SetStateAction<number>>;
+  /** Accessible name prefix for the trigger, e.g. "SMS trend year" */
+  label: string;
+}
+
+/** Year selector: a trigger showing the year, opening a popover with
+ *  previous/next year arrows and a "Go to current year" shortcut. */
+const YearPicker: React.VFC<YearPickerProps> = ({ year, onChange, label }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Trigger>
+        <button
+          type="button"
+          className={styles.yearTrigger}
+          aria-label={`${label}: ${year}. Click to choose year.`}
+        >
+          <span className={styles.yearTriggerText}>{year}</span>
+          <CalendarIcon className={styles.yearTriggerIcon} aria-hidden />
+        </button>
+      </Popover.Trigger>
+      <Popover.Content
+        side="bottom"
+        align="end"
+        sideOffset={4}
+        className={styles.yearPopover}
+      >
+        <div className={styles.yearPanel}>
+          <div className={styles.yearPanelRow}>
+            <span className={styles.yearPanelText}>{year}</span>
+            <div className={styles.yearPanelArrows}>
+              <IconButton
+                size="1"
+                variant="ghost"
+                color="gray"
+                aria-label="Previous year"
+                onClick={() => onChange((y) => y - 1)}
+              >
+                <ChevronUpIcon />
+              </IconButton>
+              <IconButton
+                size="1"
+                variant="ghost"
+                color="gray"
+                aria-label="Next year"
+                onClick={() => onChange((y) => y + 1)}
+              >
+                <ChevronDownIcon />
+              </IconButton>
+            </div>
+          </div>
+          <div className={styles.yearPanelFooter}>
+            <Button
+              size="2"
+              variant="ghost"
+              onClick={() => {
+                onChange(new Date().getUTCFullYear());
+                setOpen(false);
+              }}
+            >
+              Go to current year
+            </Button>
+          </div>
+        </div>
+      </Popover.Content>
+    </Popover.Root>
+  );
+};
+
 export const MAU_CAP = 25000;
 
 interface UsageContentProps {
@@ -184,12 +272,9 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
   );
   const [smsCustomEndDate, setSmsCustomEndDate] = useState<Date | null>(null);
   const [showSmsDateModal, setShowSmsDateModal] = useState(false);
-  const [tempSmsStartDate, setTempSmsStartDate] = useState<Date | null>(null);
-  const [tempSmsEndDate, setTempSmsEndDate] = useState<Date | null>(null);
-  const [showSmsStartCalendar, setShowSmsStartCalendar] = useState(false);
-  const [showSmsEndCalendar, setShowSmsEndCalendar] = useState(false);
-  const smsStartDateInputRef = useRef<HTMLDivElement>(null);
-  const smsEndDateInputRef = useRef<HTMLDivElement>(null);
+  // Draft values in the custom range dialog, as yyyy-MM-dd strings (UTC dates).
+  const [tempSmsStartDate, setTempSmsStartDate] = useState<string>("");
+  const [tempSmsEndDate, setTempSmsEndDate] = useState<string>("");
 
   const mauMonthKey = useMemo(() => {
     const now = new Date();
@@ -199,18 +284,10 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
   const [mauOverviewYear, setMauOverviewYear] = useState(() =>
     new Date().getUTCFullYear()
   );
-  const [showOverviewYearPicker, setShowOverviewYearPicker] = useState(false);
-  const mauOverviewYearTriggerRef = useRef<HTMLDivElement>(null);
-  const [mauOverviewYearTargetRect, setMauOverviewYearTargetRect] =
-    useState<DOMRect | null>(null);
 
   const [smsTrendYear, setSmsTrendYear] = useState(() =>
     new Date().getUTCFullYear()
   );
-  const [showSmsTrendYearPicker, setShowSmsTrendYearPicker] = useState(false);
-  const smsTrendYearTriggerRef = useRef<HTMLDivElement>(null);
-  const [smsTrendYearTargetRect, setSmsTrendYearTargetRect] =
-    useState<DOMRect | null>(null);
 
   const [smsTrendCounts, setSmsTrendCounts] = useState<number[]>([]);
   const [smsTrendLoading, setSmsTrendLoading] = useState(false);
@@ -233,8 +310,8 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
 
   useEffect(() => {
     if (showSmsDateModal) {
-      setTempSmsStartDate(smsCustomStartDate);
-      setTempSmsEndDate(smsCustomEndDate);
+      setTempSmsStartDate(toDateFieldValue(smsCustomStartDate));
+      setTempSmsEndDate(toDateFieldValue(smsCustomEndDate));
     }
   }, [showSmsDateModal, smsCustomStartDate, smsCustomEndDate]);
 
@@ -389,6 +466,8 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
     });
   }, [mauChartCounts, mauOverviewYear]);
 
+  const tempStartValid = parseDateFieldValue(tempSmsStartDate) != null;
+
   return (
     <div className={styles.root}>
       {/* SMS/WhatsApp Cost (Estimated) */}
@@ -396,67 +475,48 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
         <div className={styles.cardHeader}>
           <h3 className={styles.cardTitle}>SMS/WhatsApp</h3>
           <div className={styles.cardHeaderControl}>
-            <Dropdown
-              options={SMS_DATE_RANGE_OPTIONS}
-              selectedKey={smsDateRangeKey}
-              onChange={(_, opt) => {
-                if (opt) {
-                  setSmsDateRangeKey(opt.key as string);
-                  if (opt.key === "custom") setShowSmsDateModal(true);
-                }
+            <Select.Root
+              value={smsDateRangeKey}
+              onValueChange={(key) => {
+                setSmsDateRangeKey(key);
+                if (key === "custom") setShowSmsDateModal(true);
               }}
-              styles={{
-                root: { minWidth: 160 },
-                title: {
-                  borderColor: "#edebe9",
-                  fontSize: 14,
-                  color: "#323130",
-                },
-                caretDown: { color: "#605e5c" },
-                dropdownItem: { fontSize: 14 },
-              }}
-            />
+            >
+              <Select.Trigger
+                className={styles.rangeSelectTrigger}
+                aria-label="SMS/WhatsApp date range"
+              />
+              <Select.Content position="popper">
+                {SMS_DATE_RANGE_OPTIONS.map((opt) => (
+                  <Select.Item key={opt.key} value={opt.key}>
+                    {opt.text}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Root>
           </div>
         </div>
-        <div
-          className={
-            smsDateRangeKey === "custom"
-              ? styles.smsDateRangeRowClickable
-              : undefined
-          }
-          role={smsDateRangeKey === "custom" ? "button" : undefined}
-          tabIndex={smsDateRangeKey === "custom" ? 0 : undefined}
-          onClick={
-            smsDateRangeKey === "custom"
-              ? () => setShowSmsDateModal(true)
-              : undefined
-          }
-          onKeyDown={
-            smsDateRangeKey === "custom"
-              ? (e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setShowSmsDateModal(true);
-                  }
-                }
-              : undefined
-          }
-        >
-          <p className={styles.smsDateRangeText}>
-            {smsDateRangeText}
-            {smsDateRangeKey === "custom" && (
-              <Icon
-                iconName="Calendar"
+        {smsDateRangeKey === "custom" ? (
+          <button
+            type="button"
+            className={styles.smsDateRangeButton}
+            onClick={() => setShowSmsDateModal(true)}
+          >
+            <span className={styles.smsDateRangeText}>
+              {smsDateRangeText}
+              <CalendarIcon
                 className={styles.smsDateRangeCalendarIcon}
                 aria-hidden
               />
-            )}
-          </p>
-        </div>
+            </span>
+          </button>
+        ) : (
+          <p className={styles.smsDateRangeText}>{smsDateRangeText}</p>
+        )}
         <div className={styles.smsDivider} aria-hidden />
         {messagingLoading ? (
-          <div style={{ padding: "8px 0" }}>
-            <Spinner size={SpinnerSize.small} />
+          <div className={styles.loading}>
+            <Spinner size="2" />
           </div>
         ) : smsCostRows ? (
           smsCostRows.map((row) => (
@@ -468,105 +528,22 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
             </div>
           ))
         ) : (
-          <p style={{ fontSize: 13, color: "#797775", margin: "8px 0" }}>
-            No data available.
-          </p>
+          <p className={styles.emptyText}>No data available.</p>
         )}
 
         <div className={styles.smsTrendDivider} aria-hidden />
 
-        <div className={styles.smsTrendHeader}>
-          <h3 className={styles.smsTrendTitle}>SMS trend</h3>
-          <div
-            ref={smsTrendYearTriggerRef}
-            className={styles.mauMonthWrap}
-            role="button"
-            tabIndex={0}
-            aria-haspopup="dialog"
-            aria-expanded={showSmsTrendYearPicker}
-            aria-label={`SMS trend year: ${smsTrendYear}. Click to choose year.`}
-            onClick={() => {
-              if (!showSmsTrendYearPicker && smsTrendYearTriggerRef.current) {
-                setSmsTrendYearTargetRect(
-                  smsTrendYearTriggerRef.current.getBoundingClientRect()
-                );
-              }
-              setShowSmsTrendYearPicker((v) => !v);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                if (!showSmsTrendYearPicker && smsTrendYearTriggerRef.current) {
-                  setSmsTrendYearTargetRect(
-                    smsTrendYearTriggerRef.current.getBoundingClientRect()
-                  );
-                }
-                setShowSmsTrendYearPicker((v) => !v);
-              }
-            }}
-          >
-            <span className={styles.mauMonthTriggerText}>{smsTrendYear}</span>
-            <Icon iconName="Calendar" className={styles.mauMonthTriggerIcon} />
-          </div>
+        <div className={styles.chartHeader}>
+          <h3 className={styles.chartTitle}>SMS trend</h3>
+          <YearPicker
+            year={smsTrendYear}
+            onChange={setSmsTrendYear}
+            label="SMS trend year"
+          />
         </div>
-        {showSmsTrendYearPicker &&
-          (smsTrendYearTargetRect ?? smsTrendYearTriggerRef.current) && (
-            <Callout
-              target={smsTrendYearTargetRect ?? smsTrendYearTriggerRef.current!}
-              onDismiss={() => {
-                setShowSmsTrendYearPicker(false);
-                setSmsTrendYearTargetRect(null);
-              }}
-              directionalHint={DirectionalHint.bottomRightEdge}
-              directionalHintFixed
-              isBeakVisible={false}
-              gapSpace={4}
-              className={styles.mauMonthCallout}
-            >
-              <div className={styles.smsTrendYearPanel}>
-                <div className={styles.smsTrendYearRow}>
-                  <span className={styles.smsTrendYearText}>
-                    {smsTrendYear}
-                  </span>
-                  <div className={styles.smsTrendYearArrows}>
-                    <IconButton
-                      iconProps={{ iconName: "ChevronUp" }}
-                      ariaLabel="Previous year"
-                      onClick={() => setSmsTrendYear((y) => y - 1)}
-                      styles={{
-                        root: { width: 24, height: 24 },
-                        icon: { fontSize: 12, color: "#323130" },
-                      }}
-                    />
-                    <IconButton
-                      iconProps={{ iconName: "ChevronDown" }}
-                      ariaLabel="Next year"
-                      onClick={() => setSmsTrendYear((y) => y + 1)}
-                      styles={{
-                        root: { width: 24, height: 24 },
-                        icon: { fontSize: 12, color: "#323130" },
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className={styles.smsTrendGoToCurrentWrap}>
-                  <button
-                    type="button"
-                    className={styles.smsTrendGoToCurrent}
-                    onClick={() => {
-                      setSmsTrendYear(new Date().getUTCFullYear());
-                      setShowSmsTrendYearPicker(false);
-                    }}
-                  >
-                    Go to current year
-                  </button>
-                </div>
-              </div>
-            </Callout>
-          )}
         {smsTrendLoading ? (
-          <div style={{ padding: "8px 0" }}>
-            <Spinner size={SpinnerSize.small} />
+          <div className={styles.loading}>
+            <Spinner size="2" />
           </div>
         ) : (
           <MonthlyBarChart
@@ -594,21 +571,15 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
               : `${mauCurrentCount.toLocaleString()} / ${MAU_CAP.toLocaleString()}`}
           </span>
         </div>
-        <TooltipHost
+        <Tooltip
           content={
             mauCardLoading
               ? "No data"
               : `Monthly active users: ${mauCurrentCount.toLocaleString()} of ${MAU_CAP.toLocaleString()}`
           }
-          directionalHint={DirectionalHint.topCenter}
-          delay={0}
-          hostClassName={styles.mauProgressBarTooltipHost}
-          tooltipProps={{
-            calloutProps: {
-              gapSpace: 8,
-              isBeakVisible: true,
-            },
-          }}
+          side="top"
+          delayDuration={0}
+          className={tooltipStyles.tooltip}
         >
           <div
             className={styles.mauProgressBar}
@@ -621,116 +592,25 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
             <div className={styles.mauProgressTrack}>
               <div
                 className={styles.mauProgressFill}
-                style={{ width: `${Math.min(100, mauPercent)}%` }}
+                style={{ width: `${mauPercent}%` }}
               />
             </div>
           </div>
-        </TooltipHost>
+        </Tooltip>
 
         <div className={styles.mauCardDivider} aria-hidden />
 
-        <div className={styles.mauOverviewHeader}>
-          <h3 className={styles.mauOverviewTitle}>Year</h3>
-          <div
-            ref={mauOverviewYearTriggerRef}
-            className={styles.mauMonthWrap}
-            role="button"
-            tabIndex={0}
-            aria-haspopup="dialog"
-            aria-expanded={showOverviewYearPicker}
-            aria-label={`Year: ${mauOverviewYear}. Click to choose year.`}
-            onClick={() => {
-              if (
-                !showOverviewYearPicker &&
-                mauOverviewYearTriggerRef.current
-              ) {
-                setMauOverviewYearTargetRect(
-                  mauOverviewYearTriggerRef.current.getBoundingClientRect()
-                );
-              }
-              setShowOverviewYearPicker((v) => !v);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                if (
-                  !showOverviewYearPicker &&
-                  mauOverviewYearTriggerRef.current
-                ) {
-                  setMauOverviewYearTargetRect(
-                    mauOverviewYearTriggerRef.current.getBoundingClientRect()
-                  );
-                }
-                setShowOverviewYearPicker((v) => !v);
-              }
-            }}
-          >
-            <span className={styles.mauMonthTriggerText}>
-              {mauOverviewYear}
-            </span>
-            <Icon iconName="Calendar" className={styles.mauMonthTriggerIcon} />
-          </div>
+        <div className={styles.chartHeader}>
+          <h3 className={styles.chartTitle}>Year</h3>
+          <YearPicker
+            year={mauOverviewYear}
+            onChange={setMauOverviewYear}
+            label="Year"
+          />
         </div>
-        {showOverviewYearPicker &&
-          (mauOverviewYearTargetRect ?? mauOverviewYearTriggerRef.current) && (
-            <Callout
-              target={
-                mauOverviewYearTargetRect ?? mauOverviewYearTriggerRef.current!
-              }
-              onDismiss={() => {
-                setShowOverviewYearPicker(false);
-                setMauOverviewYearTargetRect(null);
-              }}
-              directionalHint={DirectionalHint.bottomRightEdge}
-              directionalHintFixed
-              isBeakVisible={false}
-              gapSpace={4}
-              className={styles.mauMonthCallout}
-            >
-              <div className={styles.mauMonthPanel}>
-                <div className={styles.mauMonthPanelYearRow}>
-                  <span className={styles.mauMonthPanelYear}>
-                    {mauOverviewYear}
-                  </span>
-                  <div className={styles.mauMonthPanelYearArrows}>
-                    <IconButton
-                      iconProps={{ iconName: "ChevronUp" }}
-                      ariaLabel="Previous year"
-                      onClick={() => setMauOverviewYear((y) => y - 1)}
-                      styles={{
-                        root: { width: 24, height: 24 },
-                        icon: { fontSize: 12, color: "#323130" },
-                      }}
-                    />
-                    <IconButton
-                      iconProps={{ iconName: "ChevronDown" }}
-                      ariaLabel="Next year"
-                      onClick={() => setMauOverviewYear((y) => y + 1)}
-                      styles={{
-                        root: { width: 24, height: 24 },
-                        icon: { fontSize: 12, color: "#323130" },
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className={styles.mauMonthGoToTodayWrap}>
-                  <button
-                    type="button"
-                    className={styles.mauMonthGoToToday}
-                    onClick={() => {
-                      setMauOverviewYear(new Date().getUTCFullYear());
-                      setShowOverviewYearPicker(false);
-                    }}
-                  >
-                    Go to current year
-                  </button>
-                </div>
-              </div>
-            </Callout>
-          )}
         {mauChartLoading && (
-          <div style={{ padding: "8px 0" }}>
-            <Spinner size={SpinnerSize.small} />
+          <div className={styles.loading}>
+            <Spinner size="2" />
           </div>
         )}
         <MonthlyBarChart
@@ -744,260 +624,47 @@ const UsageContent: React.VFC<UsageContentProps> = ({ appId }) => {
         />
       </div>
 
-      {/* SMS/WhatsApp Cost — Custom date range modal */}
-      <Modal
-        isOpen={showSmsDateModal}
-        onDismiss={() => {
-          setShowSmsDateModal(false);
-          setShowSmsStartCalendar(false);
-          setShowSmsEndCalendar(false);
-        }}
-        isBlocking={false}
-        styles={{ main: { maxWidth: 400, width: "90%" } }}
-      >
-        <div style={{ padding: 24 }}>
-          <Text
-            styles={{
-              root: {
-                fontSize: 18,
-                fontWeight: 600,
-                color: "#323130",
-                marginBottom: 20,
-              },
-            }}
-          >
-            Custom Date Range
-          </Text>
-          <Stack tokens={{ childrenGap: 20 }}>
-            <div>
-              <Text
-                styles={{
-                  root: {
-                    fontSize: 14,
-                    fontWeight: 600,
-                    color: "#323130",
-                    marginBottom: 8,
-                    display: "block",
-                  },
-                }}
-              >
-                Start Date
-              </Text>
-              <div ref={smsStartDateInputRef} style={{ position: "relative" }}>
-                <TextField
-                  readOnly
-                  value={
-                    tempSmsStartDate ? formatShortDate(tempSmsStartDate) : ""
-                  }
-                  placeholder="Select start date"
-                  onClick={() => {
-                    setShowSmsStartCalendar(!showSmsStartCalendar);
-                    setShowSmsEndCalendar(false);
-                  }}
-                  styles={{
-                    root: { width: "100%" },
-                    field: { cursor: "pointer" },
-                  }}
-                  onRenderSuffix={() => (
-                    <Icon
-                      iconName="Calendar"
-                      styles={{
-                        root: {
-                          fontSize: 16,
-                          color: "#605e5c",
-                          cursor: "pointer",
-                        },
-                      }}
-                      onClick={() => {
-                        setShowSmsStartCalendar(!showSmsStartCalendar);
-                        setShowSmsEndCalendar(false);
-                      }}
-                    />
-                  )}
-                />
-              </div>
-              {showSmsStartCalendar && smsStartDateInputRef.current && (
-                <div
-                  data-calendar-container
-                  style={{
-                    position: "fixed",
-                    top:
-                      smsStartDateInputRef.current.getBoundingClientRect()
-                        .bottom + 4,
-                    left: smsStartDateInputRef.current.getBoundingClientRect()
-                      .left,
-                    zIndex: 10000,
-                    backgroundColor: "#ffffff",
-                    border: "1px solid #edebe9",
-                    borderRadius: 4,
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                    maxHeight: "400px",
-                    overflowY: "auto",
-                  }}
-                >
-                  <Calendar
-                    value={
-                      // Calendar interprets value as local time, so convert UTC
-                      // midnight back to local midnight so it highlights the right day.
-                      tempSmsStartDate
-                        ? new Date(
-                            tempSmsStartDate.getUTCFullYear(),
-                            tempSmsStartDate.getUTCMonth(),
-                            tempSmsStartDate.getUTCDate()
-                          )
-                        : undefined
-                    }
-                    onSelectDate={(date) => {
-                      setTempSmsStartDate(
-                        new Date(
-                          Date.UTC(
-                            date.getFullYear(),
-                            date.getMonth(),
-                            date.getDate()
-                          )
-                        )
-                      );
-                      setShowSmsStartCalendar(false);
-                    }}
-                    styles={{
-                      root: { padding: 12, width: "100%" },
-                      monthPickerWrapper: { paddingRight: 8 },
-                      divider: { marginLeft: 8, marginRight: 8 },
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-            <div>
-              <Text
-                styles={{
-                  root: {
-                    fontSize: 14,
-                    fontWeight: 600,
-                    color: "#323130",
-                    marginBottom: 8,
-                    display: "block",
-                  },
-                }}
-              >
-                End Date
-              </Text>
-              <div ref={smsEndDateInputRef} style={{ position: "relative" }}>
-                <TextField
-                  readOnly
-                  value={tempSmsEndDate ? formatShortDate(tempSmsEndDate) : ""}
-                  placeholder="Select end date"
-                  onClick={() => {
-                    setShowSmsEndCalendar(!showSmsEndCalendar);
-                    setShowSmsStartCalendar(false);
-                  }}
-                  styles={{
-                    root: { width: "100%" },
-                    field: { cursor: "pointer" },
-                  }}
-                  onRenderSuffix={() => (
-                    <Icon
-                      iconName="Calendar"
-                      styles={{
-                        root: {
-                          fontSize: 16,
-                          color: "#605e5c",
-                          cursor: "pointer",
-                        },
-                      }}
-                      onClick={() => {
-                        setShowSmsEndCalendar(!showSmsEndCalendar);
-                        setShowSmsStartCalendar(false);
-                      }}
-                    />
-                  )}
-                />
-              </div>
-              {showSmsEndCalendar && smsEndDateInputRef.current && (
-                <div
-                  data-calendar-container
-                  style={{
-                    position: "fixed",
-                    top:
-                      smsEndDateInputRef.current.getBoundingClientRect()
-                        .bottom + 4,
-                    left: smsEndDateInputRef.current.getBoundingClientRect()
-                      .left,
-                    zIndex: 10000,
-                    backgroundColor: "#ffffff",
-                    border: "1px solid #edebe9",
-                    borderRadius: 4,
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                    maxHeight: "400px",
-                    overflowY: "auto",
-                  }}
-                >
-                  <Calendar
-                    value={
-                      // Calendar interprets value as local time, so convert UTC
-                      // midnight back to local midnight so it highlights the right day.
-                      tempSmsEndDate
-                        ? new Date(
-                            tempSmsEndDate.getUTCFullYear(),
-                            tempSmsEndDate.getUTCMonth(),
-                            tempSmsEndDate.getUTCDate()
-                          )
-                        : undefined
-                    }
-                    onSelectDate={(date) => {
-                      setTempSmsEndDate(
-                        new Date(
-                          Date.UTC(
-                            date.getFullYear(),
-                            date.getMonth(),
-                            date.getDate()
-                          )
-                        )
-                      );
-                      setShowSmsEndCalendar(false);
-                    }}
-                    styles={{
-                      root: { padding: 12, width: "100%" },
-                      monthPickerWrapper: { paddingRight: 8 },
-                      divider: { marginLeft: 8, marginRight: 8 },
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-            <Stack
-              horizontal
-              tokens={{ childrenGap: 12 }}
-              styles={{ root: { justifyContent: "flex-end", marginTop: 8 } }}
-            >
-              <DefaultButton
-                text="Cancel"
-                onClick={() => {
-                  setShowSmsDateModal(false);
-                  setShowSmsStartCalendar(false);
-                  setShowSmsEndCalendar(false);
-                  setTempSmsStartDate(smsCustomStartDate);
-                  setTempSmsEndDate(smsCustomEndDate);
-                }}
-                styles={{ root: { borderColor: "#edebe9", color: "#323130" } }}
-              />
-              <PrimaryButton
-                text="Done"
-                onClick={() => {
-                  setSmsCustomStartDate(tempSmsStartDate);
-                  setSmsCustomEndDate(tempSmsEndDate);
-                  setShowSmsDateModal(false);
-                  setShowSmsStartCalendar(false);
-                  setShowSmsEndCalendar(false);
-                }}
-                styles={{
-                  root: { backgroundColor: "#176df3", borderColor: "#176df3" },
-                }}
-              />
-            </Stack>
-          </Stack>
-        </div>
-      </Modal>
+      {/* SMS/WhatsApp Cost — Custom date range dialog */}
+      <Dialog.Root open={showSmsDateModal} onOpenChange={setShowSmsDateModal}>
+        <Dialog.Content maxWidth="400px" aria-describedby={undefined}>
+          <Dialog.Title size="4">Custom Date Range</Dialog.Title>
+          <div className={styles.dateDialogFields}>
+            <DateField
+              label="Start Date"
+              ariaLabel="Start date"
+              value={tempSmsStartDate}
+              onChange={setTempSmsStartDate}
+            />
+            <DateField
+              label="End Date"
+              ariaLabel="End date"
+              value={tempSmsEndDate}
+              onChange={setTempSmsEndDate}
+              min={tempStartValid ? tempSmsStartDate : undefined}
+            />
+          </div>
+          <div className={styles.dateDialogActions}>
+            <SecondaryButton
+              size="2"
+              text="Cancel"
+              onClick={() => {
+                setShowSmsDateModal(false);
+                setTempSmsStartDate(toDateFieldValue(smsCustomStartDate));
+                setTempSmsEndDate(toDateFieldValue(smsCustomEndDate));
+              }}
+            />
+            <PrimaryButton
+              size="2"
+              text="Done"
+              onClick={() => {
+                setSmsCustomStartDate(parseDateFieldValue(tempSmsStartDate));
+                setSmsCustomEndDate(parseDateFieldValue(tempSmsEndDate));
+                setShowSmsDateModal(false);
+              }}
+            />
+          </div>
+        </Dialog.Content>
+      </Dialog.Root>
     </div>
   );
 };
