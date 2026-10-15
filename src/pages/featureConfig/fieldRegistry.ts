@@ -56,14 +56,6 @@ export const FIELD_REGISTRY: FieldDef[] = [
     section: "UI",
   },
   {
-    jsonPointer: "/ui/auth_flow_builder_enabled",
-    label: "Auth flow builder enabled",
-    description:
-      "Yes: the project can use the auth flow builder in the portal, which is still in testing.",
-    control: "boolean",
-    section: "UI",
-  },
-  {
     jsonPointer: "/oauth/client/custom_ui_enabled",
     label: "Custom UI enabled",
     description:
@@ -193,5 +185,13 @@ export const FIELD_REGISTRY: FieldDef[] = [
       "Max number of non-blocking event hooks the project can configure.",
     control: "number",
     section: "Hook",
+  },
+  {
+    jsonPointer: "/portal/auth_flow_builder_enabled",
+    label: "Auth flow builder enabled",
+    description:
+      "Yes: the project can use the auth flow builder in the portal, which is still in testing.",
+    control: "boolean",
+    section: "Portal",
   },
 ];
