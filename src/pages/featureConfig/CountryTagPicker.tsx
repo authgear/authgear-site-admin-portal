@@ -1,6 +1,10 @@
 import React, { useCallback, useId, useMemo, useRef, useState } from "react";
 import cn from "classnames";
 import { Badge, Popover, TextField } from "@radix-ui/themes";
+// Radix Themes 3.3.0's Popover.Anchor drops its children, which hid the
+// search box, so use the primitive's Anchor. Themes is built on this same
+// radix-ui package, so it shares the Popover.Root context.
+import { Popover as PopoverPrimitive } from "radix-ui";
 import { Cross2Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { COUNTRIES } from "../../data/countries";
 import styles from "./CountryTagPicker.module.css";
@@ -161,7 +165,7 @@ const CountryTagPicker: React.VFC<CountryTagPickerProps> =
           </ul>
         )}
         <Popover.Root open={showList} onOpenChange={onOpenChange} modal={false}>
-          <Popover.Anchor ref={anchorRef} className={styles.anchor}>
+          <PopoverPrimitive.Anchor ref={anchorRef} className={styles.anchor}>
             <TextField.Root
               size="2"
               variant="surface"
@@ -184,7 +188,7 @@ const CountryTagPicker: React.VFC<CountryTagPickerProps> =
                 <MagnifyingGlassIcon />
               </TextField.Slot>
             </TextField.Root>
-          </Popover.Anchor>
+          </PopoverPrimitive.Anchor>
           <Popover.Content
             size="1"
             align="start"

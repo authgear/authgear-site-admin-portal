@@ -35,6 +35,11 @@
   @apply w-full;
 }
 
+/* Radix ghost buttons add padding and cancel it with negative margins; reset
+   both and match the 32px Action field so the icon centres on it. */
 .removeButton {
-  margin-bottom: var(--space-2);
+  margin: 0;
+  padding: 0;
+  width: 32px;
+  height: 32px;
 }

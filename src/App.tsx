@@ -14,7 +14,6 @@ import LoginPage from "./auth/LoginPage";
 import APITestPage from "./pages/APITestPage";
 import AccessDeniedPage from "./pages/AccessDeniedPage";
 import { listApps } from "./api/siteadmin";
-import "./App.css";
 
 const AuthenticatedApp: React.VFC = function AuthenticatedApp() {
   const { sessionState, userInfoLoading } = useAuthgear();

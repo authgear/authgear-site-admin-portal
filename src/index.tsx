@@ -1,6 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import authgear from "@authgear/web";
+// Global styles (Tailwind base, Radix Themes, overrides) must load before any
+// component CSS module, so module rules can override Radix like they do in the
+// Authgear portal. Keep this import above App.
+import "./App.css";
 import App from "./App";
 import { AUTHGEAR_ENDPOINT, AUTHGEAR_CLIENT_ID } from "./config";
 
