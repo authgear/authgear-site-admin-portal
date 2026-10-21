@@ -1,15 +1,11 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import {
-  DefaultButton,
-  MessageBar,
-  MessageBarType,
-  PrimaryButton,
-  Spinner,
-  SpinnerSize,
-} from "@fluentui/react";
-import cn from "classnames";
+import { SegmentedControl } from "@radix-ui/themes";
 import { Document, parseDocument } from "yaml";
 import NavigationBlockerDialog from "../components/NavigationBlockerDialog";
+import ShowLoading from "../components/ShowLoading";
+import { Callout } from "../components/v2/Callout/Callout";
+import { PrimaryButton } from "../components/v2/Button/PrimaryButton/PrimaryButton";
+import { SecondaryButton } from "../components/v2/Button/SecondaryButton/SecondaryButton";
 import useFeatureConfigDraft from "./featureConfig/useFeatureConfigDraft";
 import FeatureConfigTableView from "./featureConfig/FeatureConfigTableView";
 import FeatureConfigYamlView from "./featureConfig/FeatureConfigYamlView";
@@ -60,6 +56,13 @@ const FeatureConfigContent: React.VFC<FeatureConfigContentProps> =
       [parseError]
     );
 
+    const onViewValueChange = useCallback(
+      (value: string) => {
+        onSelectView(value as ViewMode);
+      },
+      [onSelectView]
+    );
+
     const onDocChange = useCallback(
       (nextDoc: Document) => {
         draft.setYamlText(documentToYamlText(nextDoc));
@@ -70,76 +73,50 @@ const FeatureConfigContent: React.VFC<FeatureConfigContentProps> =
     if (draft.loading) {
       return (
         <div className={styles.loadingRoot}>
-          <Spinner size={SpinnerSize.large} />
+          <ShowLoading />
         </div>
       );
     }
 
     if (draft.loadError) {
       return (
-        <MessageBar messageBarType={MessageBarType.error} isMultiline={false}>
-          {draft.loadError}
-        </MessageBar>
+        <Callout type="error" text={draft.loadError} showCloseButton={false} />
       );
     }
 
     return (
       <>
-        {/* Rendered outside .root: FluentUI's Layer leaves a marker element
-            in place when the dialog becomes visible, which would otherwise
-            become an extra flex item in .root's gapped column and shift
-            everything below it down. */}
+        {/* Rendered outside .root so the dialog never becomes an extra flex
+            item in .root's gapped column and shifts everything below it. */}
         <NavigationBlockerDialog getIsDirty={getIsDirty} />
         <div className={styles.root}>
           <div className={styles.viewToggleRow}>
-            <div className={styles.modeToggle}>
-              <button
-                type="button"
-                className={cn(
-                  styles.modeBtn,
-                  styles.modeBtnLeft,
-                  view === "table" && styles.modeBtnActive
-                )}
-                onClick={() => onSelectView("table")}
-              >
-                Table
-              </button>
-              <button
-                type="button"
-                className={cn(
-                  styles.modeBtn,
-                  view === "yaml" && styles.modeBtnActive
-                )}
-                onClick={() => onSelectView("yaml")}
-              >
-                YAML
-              </button>
-            </div>
+            <SegmentedControl.Root
+              size="2"
+              value={view}
+              onValueChange={onViewValueChange}
+            >
+              <SegmentedControl.Item value="table">Table</SegmentedControl.Item>
+              <SegmentedControl.Item value="yaml">YAML</SegmentedControl.Item>
+            </SegmentedControl.Root>
           </div>
 
           {parseError && (
-            <MessageBar
-              messageBarType={MessageBarType.error}
-              isMultiline={false}
-            >
-              {parseError}
-            </MessageBar>
+            <Callout type="error" text={parseError} showCloseButton={false} />
           )}
           {draft.errorMessage && (
-            <MessageBar
-              messageBarType={MessageBarType.error}
-              isMultiline={false}
-            >
-              {draft.errorMessage}
-            </MessageBar>
+            <Callout
+              type="error"
+              text={draft.errorMessage}
+              showCloseButton={false}
+            />
           )}
           {draft.saveSuccess && (
-            <MessageBar
-              messageBarType={MessageBarType.success}
-              isMultiline={false}
-            >
-              Feature config saved.
-            </MessageBar>
+            <Callout
+              type="success"
+              text="Feature config saved."
+              showCloseButton={false}
+            />
           )}
 
           {view === "table" && parsedDoc && parseError == null && (
@@ -165,22 +142,17 @@ const FeatureConfigContent: React.VFC<FeatureConfigContentProps> =
           )}
 
           <div className={styles.actionBar}>
-            <DefaultButton
+            <SecondaryButton
+              size="2"
               text="Discard"
               onClick={draft.discard}
               disabled={!draft.dirty || draft.saving}
             />
             <PrimaryButton
+              size="2"
               text={draft.saving ? "Saving…" : "Save"}
               onClick={draft.save}
               disabled={!draft.dirty || draft.saving || parseError != null}
-              styles={{
-                root: { backgroundColor: "#176df3", borderColor: "#176df3" },
-                rootHovered: {
-                  backgroundColor: "#1562db",
-                  borderColor: "#1562db",
-                },
-              }}
             />
           </div>
         </div>

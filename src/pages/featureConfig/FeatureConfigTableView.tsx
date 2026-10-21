@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from "react";
-import { Icon, TooltipHost } from "@fluentui/react";
+import { Table } from "@radix-ui/themes";
+import { CrossCircledIcon } from "@radix-ui/react-icons";
 import cn from "classnames";
 import { isCollection, type Document } from "yaml";
 import type { FeatureConfig, ValidationErrorCause } from "../../api/types";
@@ -17,6 +18,7 @@ import CountryListFieldControl from "./CountryListFieldControl";
 import UsageLimitListFieldControl, {
   type UsageLimitRule,
 } from "./UsageLimitListFieldControl";
+import { Tooltip } from "../../components/v2/Tooltip/Tooltip";
 import styles from "./FeatureConfigTableView.module.css";
 
 export interface FeatureConfigTableViewProps {
@@ -148,41 +150,50 @@ const FeatureConfigTableView: React.VFC<FeatureConfigTableViewProps> =
     const groups = useMemo(() => groupBySection(FIELD_REGISTRY), []);
 
     return (
-      <table className={styles.cmpTable}>
-        <thead>
-          <tr>
-            <th className={styles.tableColSetting}>Setting</th>
-            <th className={styles.tableColDescription}>What it controls</th>
-            <th className={styles.tableColPlan}>📋 Plan Config</th>
-            <th>✏️ App Config</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table.Root variant="surface" size="1" className={styles.cmpTable}>
+        <Table.Header>
+          <Table.Row>
+            <Table.ColumnHeaderCell className={styles.tableColSetting}>
+              Setting
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className={styles.tableColDescription}>
+              What it controls
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className={styles.tableColPlan}>
+              📋 Plan Config
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>✏️ App Config</Table.ColumnHeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
           {groups.map((group) => (
             <React.Fragment key={group.section}>
-              <tr>
-                <td colSpan={4} className={styles.sectionHeaderRow}>
+              <Table.Row>
+                <Table.Cell colSpan={4} className={styles.sectionHeaderRow}>
                   {group.section}
                   {SECTION_DESCRIPTIONS[group.section] != null && (
                     <div className={styles.sectionDescription}>
                       {SECTION_DESCRIPTIONS[group.section]}
                     </div>
                   )}
-                </td>
-              </tr>
+                </Table.Cell>
+              </Table.Row>
               {group.fields.map((field) => {
                 const errors = fieldErrors.get(field.jsonPointer);
                 const hasError = errors != null && errors.length > 0;
                 return (
-                  <tr
+                  <Table.Row
                     key={field.jsonPointer}
+                    align="center"
                     className={cn(hasError && styles.rowError)}
                   >
-                    <td className={cn(styles.tableCell, styles.tableCellLabel)}>
+                    <Table.RowHeaderCell
+                      className={cn(styles.tableCell, styles.tableCellLabel)}
+                    >
                       <div className={styles.fieldLabelRow}>
                         <span>{field.label}</span>
                         {hasError && (
-                          <TooltipHost
+                          <Tooltip
                             content={errors
                               .map(
                                 (e) =>
@@ -193,38 +204,42 @@ const FeatureConfigTableView: React.VFC<FeatureConfigTableViewProps> =
                               )
                               .join("; ")}
                           >
-                            <Icon
-                              iconName="ErrorBadge"
+                            <span
                               className={styles.errorIcon}
-                            />
-                          </TooltipHost>
+                              tabIndex={0}
+                              role="img"
+                              aria-label="Validation error"
+                            >
+                              <CrossCircledIcon />
+                            </span>
+                          </Tooltip>
                         )}
                       </div>
                       <div className={styles.jsonPath}>{field.jsonPointer}</div>
-                    </td>
-                    <td
+                    </Table.RowHeaderCell>
+                    <Table.Cell
                       className={cn(styles.tableCell, styles.fieldDescription)}
                     >
                       {field.description}
-                    </td>
-                    <td className={styles.tableCell}>
+                    </Table.Cell>
+                    <Table.Cell className={styles.tableCell}>
                       <span className={styles.planValue}>
                         {formatDisplayValue(
                           field.control,
                           getAtPointer(planFeatureConfig, field.jsonPointer)
                         )}
                       </span>
-                    </td>
-                    <td className={styles.tableCell}>
+                    </Table.Cell>
+                    <Table.Cell className={styles.tableCell}>
                       {renderAppConfigCell(field)}
-                    </td>
-                  </tr>
+                    </Table.Cell>
+                  </Table.Row>
                 );
               })}
             </React.Fragment>
           ))}
-        </tbody>
-      </table>
+        </Table.Body>
+      </Table.Root>
     );
   };
 

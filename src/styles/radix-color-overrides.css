@@ -1,0 +1,303 @@
+/* This file defines our own custom color palette */
+/* https://www.figma.com/design/wAIzBnO9un4fYcq5ampR5k/Radix-Themes-(Storybook)?node-id=3795-92063&t=hD90rcrEF95c6rUb-0 */
+/* All colors should be generated from https://www.radix-ui.com/colors/custom */
+
+/* stylelint-disable no-duplicate-selectors -- We always have dupliacted selectors in this file */
+/* stylelint-disable plugin/no-unsupported-browser-features,hue-degree-notation -- The css is generated */
+
+:root,
+.light,
+.light-theme {
+  --indigo-1: #fcfdff;
+  --indigo-2: #f5f9ff;
+  --indigo-3: #eaf3ff;
+  --indigo-4: #dbebff;
+  --indigo-5: #c9e1ff;
+  --indigo-6: #b4d4ff;
+  --indigo-7: #9bc2ff;
+  --indigo-8: #76a9fc;
+  --indigo-9: #176df3;
+  --indigo-10: #055fe1;
+  --indigo-11: #0e64e6;
+  --indigo-12: #0d2f68;
+
+  --indigo-a1: #0055ff03;
+  --indigo-a2: #0066ff0a;
+  --indigo-a3: #006eff15;
+  --indigo-a4: #0072ff24;
+  --indigo-a5: #0072ff36;
+  --indigo-a6: #016dff4b;
+  --indigo-a7: #0064ff64;
+  --indigo-a8: #005ffa89;
+  --indigo-a9: #005ff2e8;
+  --indigo-a10: #005ce0fa;
+  --indigo-a11: #005be5f1;
+  --indigo-a12: #002460f2;
+
+  --indigo-contrast: #fff;
+  --indigo-surface: #f3f8ffcc;
+  --indigo-indicator: #176df3;
+  --indigo-track: #176df3;
+}
+
+@supports (color: color(display-p3 1 1 1)) {
+  @media (color-gamut: p3) {
+    :root,
+    .light,
+    .light-theme {
+      --indigo-1: oklch(99.4% 0.003 260.1);
+      --indigo-2: oklch(98.2% 0.0102 260.1);
+      --indigo-3: oklch(96% 0.0212 260.1);
+      --indigo-4: oklch(93.7% 0.0405 260.1);
+      --indigo-5: oklch(90.5% 0.0596 260.1);
+      --indigo-6: oklch(86.4% 0.0785 260.1);
+      --indigo-7: oklch(80.8% 0.0993 260.1);
+      --indigo-8: oklch(73.3% 0.1339 260.1);
+      --indigo-9: oklch(56.9% 0.2159 260.1);
+      --indigo-10: oklch(52.5% 0.2113 260.1);
+      --indigo-11: oklch(54.1% 0.2113 260.1);
+      --indigo-12: oklch(32% 0.1072 260.1);
+
+      --indigo-a1: color(display-p3 0.0235 0.349 1 / 0.012);
+      --indigo-a2: color(display-p3 0.0235 0.349 0.8941 / 0.036);
+      --indigo-a3: color(display-p3 0.0078 0.3725 0.949 / 0.075);
+      --indigo-a4: color(display-p3 0.0078 0.3686 0.9412 / 0.13);
+      --indigo-a5: color(display-p3 0.0078 0.3725 0.9412 / 0.193);
+      --indigo-a6: color(display-p3 0.0039 0.3647 0.9451 / 0.271);
+      --indigo-a7: color(display-p3 0.0039 0.3294 0.949 / 0.361);
+      --indigo-a8: color(display-p3 0.0039 0.3098 0.9294 / 0.495);
+      --indigo-a9: color(display-p3 0 0.2706 0.902 / 0.797);
+      --indigo-a10: color(display-p3 0 0.2471 0.8235 / 0.844);
+      --indigo-a11: color(display-p3 0 0.251 0.8431 / 0.824);
+      --indigo-a12: color(display-p3 0 0.098 0.3333 / 0.91);
+
+      --indigo-contrast: #fff;
+      --indigo-surface: color(display-p3 0.9569 0.9725 1 / 0.8);
+      --indigo-indicator: oklch(56.9% 0.2159 260.1);
+      --indigo-track: oklch(56.9% 0.2159 260.1);
+    }
+  }
+}
+
+.dark,
+.dark-theme {
+  --indigo-1: #0a111d;
+  --indigo-2: #0e1827;
+  --indigo-3: #0e254c;
+  --indigo-4: #0e2f67;
+  --indigo-5: #133a7a;
+  --indigo-6: #1b458b;
+  --indigo-7: #23529f;
+  --indigo-8: #2960bb;
+  --indigo-9: #176df3;
+  --indigo-10: #005ee3;
+  --indigo-11: #83b7ff;
+  --indigo-12: #cfe3ff;
+
+  --indigo-a1: #0012fd0d;
+  --indigo-a2: #005cfb18;
+  --indigo-a3: #0661fd40;
+  --indigo-a4: #0964fd5d;
+  --indigo-a5: #166efe71;
+  --indigo-a6: #2577ff83;
+  --indigo-a7: #2f7dfe99;
+  --indigo-a8: #327ffeb7;
+  --indigo-a9: #1771fef3;
+  --indigo-a10: #0068ffe1;
+  --indigo-a11: #83b7ff;
+  --indigo-a12: #cfe3ff;
+
+  --indigo-contrast: #fff;
+  --indigo-surface: #0c1f3d80;
+  --indigo-indicator: #176df3;
+  --indigo-track: #176df3;
+}
+
+@supports (color: color(display-p3 1 1 1)) {
+  @media (color-gamut: p3) {
+    .dark,
+    .dark-theme {
+      --indigo-1: oklch(17.8% 0.0279 260.1);
+      --indigo-2: oklch(20.7% 0.0341 260.1);
+      --indigo-3: oklch(27.1% 0.0783 260.1);
+      --indigo-4: oklch(31.8% 0.1053 260.1);
+      --indigo-5: oklch(36.1% 0.118 260.1);
+      --indigo-6: oklch(40.4% 0.1249 260.1);
+      --indigo-7: oklch(45% 0.1358 260.1);
+      --indigo-8: oklch(50.3% 0.155 260.1);
+      --indigo-9: oklch(56.9% 0.2159 260.1);
+      --indigo-10: oklch(52.5% 0.2159 260.1);
+      --indigo-11: oklch(77.7% 0.1393 260.1);
+      --indigo-12: oklch(91.1% 0.0483 260.1);
+
+      --indigo-a1: color(display-p3 0 0.0667 0.9882 / 0.047);
+      --indigo-a2: color(display-p3 0.0235 0.3765 0.9922 / 0.089);
+      --indigo-a3: color(display-p3 0.1176 0.3843 1 / 0.236);
+      --indigo-a4: color(display-p3 0.1373 0.4 1 / 0.345);
+      --indigo-a5: color(display-p3 0.1882 0.4353 1 / 0.425);
+      --indigo-a6: color(display-p3 0.2314 0.4706 1 / 0.492);
+      --indigo-a7: color(display-p3 0.2745 0.5059 1 / 0.576);
+      --indigo-a8: color(display-p3 0.2902 0.5137 1 / 0.69);
+      --indigo-a9: color(display-p3 0.2196 0.4549 1 / 0.916);
+      --indigo-a10: color(display-p3 0.1647 0.4118 1 / 0.849);
+      --indigo-a11: color(display-p3 0.5725 0.7333 1 / 0.975);
+      --indigo-a12: color(display-p3 0.8392 0.898 1 / 0.988);
+
+      --indigo-contrast: #fff;
+      --indigo-surface: color(display-p3 0.0588 0.1098 0.2275 / 0.5);
+      --indigo-indicator: oklch(56.9% 0.2159 260.1);
+      --indigo-track: oklch(56.9% 0.2159 260.1);
+    }
+  }
+}
+
+:root,
+.light,
+.light-theme {
+  --slate-1: #fcfcfd;
+  --slate-2: #f9f9fb;
+  --slate-3: #eff0f3;
+  --slate-4: #e7e8ec;
+  --slate-5: #e0e1e6;
+  --slate-6: #d8d9e0;
+  --slate-7: #cdced7;
+  --slate-8: #b9bbc6;
+  --slate-9: #8b8d98;
+  --slate-10: #80828d;
+  --slate-11: #62636c;
+  --slate-12: #1e1f24;
+
+  --slate-a1: #00005503;
+  --slate-a2: #00005506;
+  --slate-a3: #00104010;
+  --slate-a4: #000b3618;
+  --slate-a5: #0009321f;
+  --slate-a6: #00073527;
+  --slate-a7: #00063332;
+  --slate-a8: #00083046;
+  --slate-a9: #00051d74;
+  --slate-a10: #00051b7f;
+  --slate-a11: #0002119d;
+  --slate-a12: #000107e1;
+
+  --slate-contrast: #ffffff;
+  --slate-surface: #ffffffcc;
+  --slate-indicator: #8b8d98;
+  --slate-track: #8b8d98;
+}
+
+@supports (color: color(display-p3 1 1 1)) {
+  @media (color-gamut: p3) {
+    :root,
+    .light,
+    .light-theme {
+      --slate-1: oklch(99.1% 0.0015 277.7);
+      --slate-2: oklch(98.2% 0.003 277.7);
+      --slate-3: oklch(95.6% 0.0045 277.7);
+      --slate-4: oklch(93.1% 0.0061 277.7);
+      --slate-5: oklch(91% 0.0077 277.7);
+      --slate-6: oklch(88.8% 0.0093 277.7);
+      --slate-7: oklch(85.3% 0.0117 277.7);
+      --slate-8: oklch(79.4% 0.016 277.7);
+      --slate-9: oklch(64.6% 0.0165 277.7);
+      --slate-10: oklch(61% 0.0161 277.7);
+      --slate-11: oklch(50.3% 0.0139 277.7);
+      --slate-12: oklch(24.1% 0.0099 277.7);
+
+      --slate-a1: color(display-p3 0.0235 0.0235 0.349 / 0.012);
+      --slate-a2: color(display-p3 0.0235 0.0235 0.349 / 0.024);
+      --slate-a3: color(display-p3 0.0078 0.0667 0.2549 / 0.063);
+      --slate-a4: color(display-p3 0.0118 0.051 0.2157 / 0.095);
+      --slate-a5: color(display-p3 0.0039 0.0392 0.2 / 0.122);
+      --slate-a6: color(display-p3 0.0039 0.0275 0.1804 / 0.153);
+      --slate-a7: color(display-p3 0.0078 0.0275 0.1843 / 0.197);
+      --slate-a8: color(display-p3 0.0039 0.0314 0.1765 / 0.275);
+      --slate-a9: color(display-p3 0.0039 0.0196 0.1059 / 0.455);
+      --slate-a10: color(display-p3 0.0039 0.0196 0.098 / 0.499);
+      --slate-a11: color(display-p3 0 0.0078 0.0588 / 0.616);
+      --slate-a12: color(display-p3 0 0.0039 0.0275 / 0.883);
+
+      --slate-contrast: #ffffff;
+      --slate-surface: color(display-p3 1 1 1 / 80%);
+      --slate-indicator: oklch(64.6% 0.0165 277.7);
+      --slate-track: oklch(64.6% 0.0165 277.7);
+    }
+  }
+}
+
+/* Dark slate, "Contrast" scheme: a deep ground with markedly stronger
+   surface, border and text separation than Radix's stock dark slate, which
+   read as flat and low-contrast in the portal. Without this block the `:root`
+   light scale above would win on <html class="dark"> — same specificity as
+   `.dark`, declared later. */
+.dark,
+.dark-theme {
+  --slate-1: #0f1114;
+  --slate-2: #16181d;
+  --slate-3: #1e2128;
+  --slate-4: #252932;
+  --slate-5: #2d323c;
+  --slate-6: #373d48;
+  --slate-7: #4a5160;
+  --slate-8: #646d7e;
+  --slate-9: #77808f;
+  --slate-10: #8a93a2;
+  --slate-11: #c6ccd6;
+  --slate-12: #ffffff;
+
+  --slate-a1: #00000000;
+  --slate-a2: #c6c8ff0a;
+  --slate-a3: #bfcdff16;
+  --slate-a4: #bbcdff21;
+  --slate-a5: #bfd3ff2b;
+  --slate-a6: #c4d8ff38;
+  --slate-a7: #c5d7ff52;
+  --slate-a8: #cbddff73;
+  --slate-a9: #d6e5ff85;
+  --slate-a10: #dbe8ff9a;
+  --slate-a11: #edf4ffd3;
+  --slate-a12: #ffffffff;
+
+  --slate-contrast: #ffffff;
+  --slate-surface: #16181d80;
+  --slate-indicator: #77808f;
+  --slate-track: #77808f;
+}
+
+@supports (color: color(display-p3 1 1 1)) {
+  @media (color-gamut: p3) {
+    .dark,
+    .dark-theme {
+      --slate-1: color(display-p3 0.0603 0.0664 0.0773);
+      --slate-2: color(display-p3 0.0877 0.0939 0.112);
+      --slate-3: color(display-p3 0.1198 0.129 0.1544);
+      --slate-4: color(display-p3 0.148 0.1603 0.193);
+      --slate-5: color(display-p3 0.1801 0.1955 0.2318);
+      --slate-6: color(display-p3 0.2201 0.2385 0.2785);
+      --slate-7: color(display-p3 0.2953 0.3168 0.3713);
+      --slate-8: color(display-p3 0.3987 0.4263 0.4881);
+      --slate-9: color(display-p3 0.4732 0.5008 0.5553);
+      --slate-10: color(display-p3 0.5477 0.5753 0.6298);
+      --slate-11: color(display-p3 0.7807 0.7992 0.8354);
+      --slate-12: color(display-p3 1 1 1);
+
+      --slate-a1: color(display-p3 0 0 0 / 0);
+      --slate-a2: color(display-p3 0.7779 0.7841 0.9831 / 0.039);
+      --slate-a3: color(display-p3 0.7591 0.8022 0.9838 / 0.086);
+      --slate-a4: color(display-p3 0.7465 0.8017 0.9836 / 0.129);
+      --slate-a5: color(display-p3 0.7637 0.825 0.9852 / 0.169);
+      --slate-a6: color(display-p3 0.7833 0.8446 0.9865 / 0.22);
+      --slate-a7: color(display-p3 0.7857 0.8409 0.9864 / 0.322);
+      --slate-a8: color(display-p3 0.8092 0.8644 0.9881 / 0.451);
+      --slate-a9: color(display-p3 0.8501 0.8962 0.9906 / 0.522);
+      --slate-a10: color(display-p3 0.8682 0.9082 0.9916 / 0.604);
+      --slate-a11: color(display-p3 0.9344 0.956 0.9958 / 0.827);
+      --slate-a12: color(display-p3 1 1 1 / 1);
+
+      --slate-contrast: #ffffff;
+      --slate-surface: color(display-p3 0.0877 0.0939 0.112 / 0.502);
+      --slate-indicator: color(display-p3 0.4732 0.5008 0.5553);
+      --slate-track: color(display-p3 0.4732 0.5008 0.5553);
+    }
+  }
+}

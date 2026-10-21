@@ -1,29 +1,26 @@
 import React from "react";
-import { PrimaryButton, Text } from "@fluentui/react";
+import { Heading, Text } from "@radix-ui/themes";
 import { useAuthgear } from "./AuthgearContext";
 import Logo from "../components/Logo";
+import { PrimaryButton } from "../components/v2/Button/PrimaryButton/PrimaryButton";
 import { PORTAL_URL } from "../config";
+import styles from "./LoginPage.module.css";
 
 const LoginPage: React.VFC = function LoginPage() {
   const { startLogin } = useAuthgear();
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100vh",
-        gap: "24px",
-      }}
-    >
+    <div className={styles.root}>
       <Logo />
-      <Text variant="xLarge">Authgear Site Admin Portal</Text>
-      <Text variant="small" style={{ color: "#605e5c" }}>
-        {PORTAL_URL}
-      </Text>
-      <PrimaryButton text="Sign in" onClick={startLogin} />
+      <div className={styles.heading}>
+        <Heading as="h1" size="6" weight="bold">
+          Authgear Site Admin Portal
+        </Heading>
+        <Text as="p" size="2" color="gray">
+          {PORTAL_URL}
+        </Text>
+      </div>
+      <PrimaryButton size="3" text="Sign in" onClick={startLogin} />
     </div>
   );
 };

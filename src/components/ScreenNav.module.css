@@ -1,82 +1,126 @@
-/* Scroll container: search + nav scroll together */
-.sidebarWrap {
+/* Item styles follow the Authgear portal sidebar (portal/src/ScreenNav.module.css). */
+
+.navList {
   display: flex;
   flex-direction: column;
-  min-height: 0;
-  flex: 1;
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
+  gap: var(--space-1);
+  padding: var(--space-3);
 }
 
-.sidebarSearch {
-  flex-shrink: 0;
-  padding: 12px;
-}
-
-/* Default box style (same as Teams toolbar SearchBox) for matching focus/click animation */
-.sidebarSearchBox {
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   width: 100%;
+  box-sizing: border-box;
+  min-height: 32px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-2);
+  font-size: var(--font-size-2);
+  line-height: var(--line-height-2);
+  color: var(--gray-12);
+  text-decoration: none;
 }
 
-.sidebarNavScroll {
-  flex: 1 1 0;
-  min-height: 0;
+.item:hover {
+  background-color: var(--gray-a3);
 }
 
-/* Fade-in for lazy-loaded sidebar items */
-@keyframes sidebarItemFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
+.itemSelected,
+.itemSelected:hover {
+  background-color: var(--accent-a3);
+  font-weight: 500;
+}
+
+.itemIcon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--gray-11);
+}
+
+.itemSelected .itemIcon {
+  color: var(--accent-a11);
+}
+
+.itemLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.groupChildren {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* A project row: the link plus its pin button, sharing one hover/selected
+   background. */
+.childRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-2);
+}
+
+.childRow:hover {
+  background-color: var(--gray-a3);
+}
+
+.childRow.itemSelected,
+.childRow.itemSelected:hover {
+  background-color: var(--accent-a3);
+}
+
+/* The row paints the background, not the link inside it. */
+.childRow .item:hover {
+  background-color: transparent;
+}
+
+/* Align child labels with the parent label (past the icon + gap), and leave
+   room on the right for the pin button. */
+.childItem {
+  padding-left: calc(var(--space-2) + 18px + var(--space-2));
+  padding-right: calc(var(--space-2) + 24px);
+}
+
+.childRow.itemSelected .itemLabel {
+  color: var(--accent-11);
+}
+
+/* Scoped under .childRow so these beat Radix's .rt-reset (opacity: unset),
+   which has equal specificity and loads later. */
+.childRow .pinButton {
+  position: absolute;
+  right: var(--space-1);
+  /* Revealed on row hover or keyboard focus; see below. */
+  opacity: 0;
+  transition: opacity 0.1s ease;
+}
+
+.childRow:hover .pinButton,
+.childRow .pinButton:focus-visible {
+  opacity: 1;
+}
+
+/* A filled pin on pinned rows stays visible so the state is readable. */
+.childRow .pinButtonPinned {
+  opacity: 1;
+  color: var(--gray-11);
+}
+
+/* Touch screens have no hover, so always show the button. */
+@media (hover: none) {
+  .childRow .pinButton {
     opacity: 1;
   }
-}
-
-.sidebarNavScroll :global(.ms-Nav-compositeLink) {
-  animation: sidebarItemFadeIn 0.3s ease-out;
-}
-
-.sidebarPagination {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-top: 1px solid #edebe9;
-}
-
-.sidebarPageBtn {
-  background: none;
-  border: 1px solid #edebe9;
-  border-radius: 4px;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  line-height: 1;
-  color: #323130;
-  cursor: pointer;
-  transition: background-color 0.1s ease;
-}
-
-.sidebarPageBtn:hover:not(:disabled) {
-  background-color: #f3f2f1;
-}
-
-.sidebarPageBtn:disabled {
-  color: #c8c6c4;
-  cursor: not-allowed;
-}
-
-.sidebarPageLabel {
-  font-family: var(--font-family-base);
-  font-size: 12px;
-  color: #605e5c;
-  min-width: 48px;
-  text-align: center;
 }

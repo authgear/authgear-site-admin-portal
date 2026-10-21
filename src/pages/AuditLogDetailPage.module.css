@@ -1,121 +1,65 @@
 .root {
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  row-gap: 24px;
-  flex: 1;
-  height: 100%;
-  overflow-y: auto;
-  font-family: var(--font-family-base);
-}
-
-/* ── Breadcrumb — matches ProjectDetailsPage ──────────────────────────────── */
-
-.breadcrumbRow {
-  display: flex;
-  align-items: center;
-  margin: 0;
-  padding: 0;
-}
-
-.breadcrumb {
-  margin: 0;
-  padding: 0;
-  font-family: var(--font-family-base);
-  color: #605e5c;
-  font-size: 28px;
-  font-weight: 400;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.breadcrumbLink {
-  color: #605e5c;
-  text-decoration: none;
-  padding: 2px 8px;
-  margin: -2px -8px;
-  border-radius: 4px;
-  transition:
-    background-color 0.15s ease,
-    color 0.15s ease;
-}
-
-.breadcrumbLink:hover {
-  background-color: #f3f2f1;
-  color: #605e5c;
-  text-decoration: none;
-}
-
-.breadcrumbSepIcon {
-  font-size: 14px;
-  color: #605e5c;
-  margin: 0 4px;
-}
-
-.breadcrumbCurrent {
-  color: #201f1e;
-  font-weight: 600;
+  @apply flex flex-col flex-1 h-full overflow-y-auto;
+  padding: var(--space-5);
+  row-gap: var(--space-5);
+  background-color: var(--color-background);
 }
 
 /* ── Field rows ───────────────────────────────────────────────────────────── */
 
 .fields {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  @apply flex flex-col;
+  gap: var(--space-3);
   max-width: 752px;
 }
 
 .fieldRow {
-  display: flex;
-  flex-direction: row;
-  gap: 12px;
-  align-items: baseline;
+  @apply flex flex-row items-baseline;
+  gap: var(--space-3);
+  @apply mobile:flex-col mobile:gap-1;
 }
 
 .fieldLabel {
-  font-family: var(--font-family-base);
-  font-size: 14px;
+  @apply shrink-0;
+  font-size: var(--font-size-2);
   font-weight: 600;
-  color: #201f1e;
-  flex-shrink: 0;
+  color: var(--gray-12);
   min-width: 120px;
 }
 
 .fieldValue {
-  font-family: var(--font-family-base);
-  font-size: 14px;
-  font-weight: 400;
-  color: #323130;
+  font-size: var(--font-size-2);
+  color: var(--gray-11);
   word-break: break-all;
 }
 
 /* ── Raw Event Log ────────────────────────────────────────────────────────── */
 
 .rawSection {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid #edebe9;
-  border-radius: 4px;
-  overflow: hidden;
+  @apply flex flex-col overflow-hidden;
+  border: 1px solid var(--gray-a6);
+  border-radius: var(--radius-3);
   max-width: 752px;
+  background-color: var(--color-panel-solid);
 }
 
 .rawHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 4px 4px 16px;
-  background-color: #f3f2f1;
-  border-bottom: 1px solid #edebe9;
+  @apply flex items-center justify-between;
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-4);
+  min-height: 40px;
+  background-color: var(--gray-a2);
+  border-bottom: 1px solid var(--gray-a6);
 }
 
 .rawTitle {
-  font-family: var(--font-family-base);
-  font-size: 14px;
+  font-size: var(--font-size-2);
   font-weight: 600;
-  color: #201f1e;
+  color: var(--gray-12);
+}
+
+/* Radix ghost buttons use negative margins; keep it inside the header. */
+.copyButton {
+  margin: 0;
 }
 
 .codeBlock {
@@ -125,35 +69,24 @@
 /* ── Not-found state — matches ProjectDetailsPage ─────────────────────────── */
 
 .notFoundContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  padding: 64px 24px;
-  text-align: center;
-  gap: 12px;
+  @apply flex flex-1 flex-col items-center justify-center text-center;
+  padding: var(--space-9) var(--space-5);
+  gap: var(--space-3);
 }
 
 .notFoundIcon {
-  font-size: 48px;
-  color: #c8c6c4;
-  line-height: 1;
-  margin-bottom: 4px;
+  width: 48px;
+  height: 48px;
+  color: var(--gray-8);
+  margin-bottom: var(--space-1);
 }
 
 .notFoundHeading {
-  font-family: var(--font-family-base);
-  font-size: 20px;
-  font-weight: 600;
-  color: #201f1e;
   margin: 0;
+  color: var(--gray-12);
 }
 
 .notFoundDescription {
-  font-family: var(--font-family-base);
-  font-size: 14px;
-  color: #605e5c;
-  margin: 0 0 8px 0;
+  margin: 0 0 var(--space-2) 0;
   max-width: 320px;
 }

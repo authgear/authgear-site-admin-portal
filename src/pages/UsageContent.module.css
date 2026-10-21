@@ -1,19 +1,19 @@
-/* Usage tab — Subscription Fee, SMS/WhatsApp Cost, Monthly Active User */
+/* Usage tab — SMS/WhatsApp usage and Monthly Active Users */
 .root {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-5);
   min-width: 0;
   width: 100%;
-  padding-bottom: 48px;
+  padding-bottom: var(--space-8);
 }
 
 .card {
-  border: 1px solid #edebe9;
-  border-radius: 8px;
-  background-color: #ffffff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  padding: 20px 24px;
+  @apply rounded-lg border border-solid;
+  /* Same frame as the Overview tab's cards. */
+  border-color: var(--gray-5);
+  background-color: var(--color-panel-solid);
+  padding: var(--space-5) var(--space-5);
   min-width: 0;
 }
 
@@ -21,15 +21,14 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
 .cardTitle {
-  font-family: var(--font-family-base);
-  font-size: 18px;
-  font-weight: 400;
-  color: #323130;
+  font-size: var(--font-size-4);
+  font-weight: 500;
+  color: var(--gray-12);
   margin: 0;
 }
 
@@ -37,59 +36,85 @@
   flex-shrink: 0;
 }
 
+.rangeSelectTrigger {
+  min-width: 160px;
+}
+
+.loading {
+  display: flex;
+  padding: var(--space-2) 0;
+}
+
+.emptyText {
+  font-size: var(--font-size-2);
+  color: var(--gray-11);
+  margin: var(--space-2) 0;
+}
+
 .mauCurrentMonthRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
 .mauCurrentMonthLabel {
-  font-family: var(--font-family-base);
-  font-size: 14px;
-  font-weight: 400;
-  color: #323130;
+  font-size: var(--font-size-2);
+  color: var(--gray-12);
 }
 
 .mauCurrentMonthValue {
-  font-family: var(--font-family-base);
-  font-size: 14px;
+  font-size: var(--font-size-2);
   font-weight: 600;
-  color: #323130;
+  color: var(--gray-12);
 }
 
-/* SMS/WhatsApp Cost card */
-.smsDateRangeRowClickable {
-  cursor: pointer;
+/* SMS/WhatsApp card — selected range label (clickable for custom range) */
+.smsDateRangeButton {
   display: flex;
   align-items: center;
-  gap: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  border-radius: var(--radius-2);
 }
 
-.smsDateRangeRowClickable:hover .smsDateRangeText {
-  color: #323130;
+.smsDateRangeButton:focus-visible {
+  outline: 2px solid var(--focus-8);
+  outline-offset: 2px;
+}
+
+.smsDateRangeButton .smsDateRangeText {
+  margin: 0 0 var(--space-3) 0;
+}
+
+.smsDateRangeButton:hover .smsDateRangeText,
+.smsDateRangeButton:hover .smsDateRangeCalendarIcon {
+  color: var(--gray-12);
 }
 
 .smsDateRangeText {
-  font-family: var(--font-family-base);
-  font-size: 12px;
-  color: #605e5c;
-  margin: 0 0 12px 0;
+  font-size: var(--font-size-1);
+  color: var(--gray-11);
+  margin: 0 0 var(--space-3) 0;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-2);
 }
 
 .smsDateRangeCalendarIcon {
-  font-size: 14px;
-  color: #605e5c;
+  width: 14px;
+  height: 14px;
+  color: var(--gray-11);
 }
 
 .smsDivider {
   height: 1px;
-  background-color: #edebe9;
-  margin: 0 0 16px 0;
+  background-color: var(--gray-a6);
+  margin: 0 0 var(--space-4) 0;
   width: 100%;
 }
 
@@ -97,8 +122,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #f3f2f1;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--gray-a4);
 }
 
 .smsRow:last-child {
@@ -106,248 +131,169 @@
 }
 
 .smsLabel {
-  font-family: var(--font-family-base);
-  font-size: 14px;
-  color: #323130;
+  font-size: var(--font-size-2);
+  color: var(--gray-12);
   margin: 0;
 }
 
 .smsValue {
-  font-family: var(--font-family-base);
-  font-size: 14px;
-  color: #605e5c;
+  font-size: var(--font-size-2);
+  color: var(--gray-11);
   margin: 0;
 }
 
-/* Monthly Active User card — month-only picker trigger */
-.mauMonthWrap {
+.smsTrendDivider {
+  height: 1px;
+  background-color: var(--gray-a6);
+  margin: var(--space-5) 0;
+  width: 100%;
+}
+
+.mauCardDivider {
+  height: 1px;
+  background-color: var(--gray-a6);
+  margin: var(--space-7) 0;
+  width: 100%;
+}
+
+/* Chart section header — title + year picker */
+.chartHeader {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.chartTitle {
+  font-size: var(--font-size-2);
+  font-weight: 400;
+  color: var(--gray-12);
+  margin: 0;
+}
+
+/* Year picker trigger */
+.yearTrigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   flex-shrink: 0;
   min-width: 120px;
-  height: 32px;
-  padding: 0 8px 0 12px;
-  border: 1px solid #edebe9;
-  border-radius: 2px;
-  background-color: #ffffff;
+  height: var(--space-6);
+  padding: 0 var(--space-2) 0 var(--space-3);
+  border: 1px solid var(--gray-a7);
+  border-radius: var(--radius-2);
+  background-color: var(--color-surface);
   cursor: pointer;
-  font-family: var(--font-family-base);
-  font-size: 14px;
-  color: #323130;
+  font: inherit;
+  font-size: var(--font-size-2);
+  color: var(--gray-12);
 }
 
-.mauMonthWrap:hover {
-  border-color: #323130;
+.yearTrigger:hover {
+  border-color: var(--gray-a8);
 }
 
-.mauMonthTriggerText {
+.yearTrigger:focus-visible {
+  outline: 2px solid var(--focus-8);
+  outline-offset: -1px;
+}
+
+.yearTriggerText {
   flex: 1;
   text-align: left;
   min-width: 0;
 }
 
-.mauMonthTriggerIcon {
-  font-size: 16px;
-  color: #605e5c;
+.yearTriggerIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--gray-11);
   flex-shrink: 0;
 }
 
-/* Month/Year picker callout panel — used by the year picker for the MAU chart */
-.mauMonthCallout :global(.ms-Callout-main) {
-  padding: 0;
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border: 1px solid #edebe9;
+/* Year picker popover panel */
+.yearPopover {
+  padding: var(--space-4);
 }
 
-.mauMonthPanel {
+.yearPanel {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  padding: 16px;
-  min-width: 220px;
-  background-color: #ffffff;
+  gap: var(--space-3);
+  min-width: 188px;
 }
 
-.mauMonthPanelYearRow {
+.yearPanelRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
   width: 100%;
 }
 
-.mauMonthPanelYear {
-  font-family: var(--font-family-base);
-  font-size: 18px;
+.yearPanelText {
+  font-size: var(--font-size-4);
   font-weight: 600;
-  color: #323130;
+  color: var(--gray-12);
 }
 
-.mauMonthPanelYearArrows {
+.yearPanelArrows {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: var(--space-1);
 }
 
-.mauMonthGoToTodayWrap {
+.yearPanelFooter {
   display: flex;
   justify-content: flex-end;
   width: 100%;
 }
 
-.mauMonthGoToToday {
-  font-family: var(--font-family-base);
-  font-size: 14px;
-  color: #176df3;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px 0;
-  text-decoration: none;
-}
-
-.mauMonthGoToToday:hover {
-  text-decoration: underline;
-  color: #1562db;
-}
-
-.mauCardDivider {
-  height: 1px;
-  background-color: #edebe9;
-  margin: 32px 0;
-  width: 100%;
-}
-
+/* MAU progress bar: square edges, neutral track, accent fill */
 .mauProgressValueRow {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 8px;
-}
-
-/* Fluent UI HorizontalBarChart-style: square edges, neutral track, theme fill */
-.mauProgressBarTooltipHost {
-  width: 100%;
-  display: block;
+  margin-bottom: var(--space-2);
 }
 
 .mauProgressBar {
   width: 100%;
   min-width: 0;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 
 .mauProgressTrack {
   width: 100%;
   height: 8px;
-  background-color: #edebe9;
+  background-color: var(--gray-a4);
   overflow: hidden;
 }
 
 .mauProgressFill {
   height: 100%;
   min-width: 0;
-  background-color: #176df3;
+  background-color: var(--accent-9);
   transition: width 0.2s ease-out;
 }
 
 .mauProgressValue {
-  font-family: var(--font-family-base);
-  font-size: 14px;
+  font-size: var(--font-size-2);
   font-weight: 600;
-  color: #323130;
+  color: var(--gray-12);
 }
 
-/* MAU monthly overview — title + year dropdown */
-.mauOverviewHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.mauOverviewTitle {
-  font-family: var(--font-family-base);
-  font-size: 14px;
-  font-weight: 400;
-  color: #323130;
-  margin: 0;
-}
-
-.smsTrendDivider {
-  height: 1px;
-  background-color: #edebe9;
-  margin: 24px 0;
-  width: 100%;
-}
-
-.smsTrendHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.smsTrendTitle {
-  font-family: var(--font-family-base);
-  font-size: 14px;
-  font-weight: 400;
-  color: #323130;
-  margin: 0;
-}
-
-.smsTrendYearPanel {
+/* Custom date range dialog */
+.dateDialogFields {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  padding: 16px;
-  min-width: 220px;
-  background-color: #ffffff;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
 }
 
-.smsTrendYearRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-  width: 100%;
-}
-
-.smsTrendYearText {
-  font-family: var(--font-family-base);
-  font-size: 18px;
-  font-weight: 600;
-  color: #323130;
-}
-
-.smsTrendYearArrows {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.smsTrendGoToCurrentWrap {
+.dateDialogActions {
   display: flex;
   justify-content: flex-end;
-  width: 100%;
-}
-
-.smsTrendGoToCurrent {
-  font-family: var(--font-family-base);
-  font-size: 14px;
-  color: #176df3;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px 0;
-  text-decoration: none;
-}
-
-.smsTrendGoToCurrent:hover {
-  text-decoration: underline;
-  color: #1562db;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
 }

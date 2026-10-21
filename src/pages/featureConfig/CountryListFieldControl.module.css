@@ -1,11 +1,10 @@
 .root {
-  @apply flex flex-col gap-2 py-1;
+  @apply flex flex-col;
+  gap: var(--space-2);
+  padding-block: var(--space-1);
 }
 
 .modeChoice {
-  @apply flex flex-col gap-1;
-}
-
-.picker {
-  @apply min-w-[280px];
+  @apply flex flex-col;
+  gap: var(--space-1);
 }

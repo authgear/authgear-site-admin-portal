@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
-import { Checkbox, Toggle } from "@fluentui/react";
+import { Checkbox, Text } from "@radix-ui/themes";
+import { Toggle } from "../../components/v2/Toggle/Toggle";
 import styles from "./BooleanFieldControl.module.css";
 
 export interface BooleanFieldControlProps {
@@ -16,17 +17,14 @@ const BooleanFieldControl: React.VFC<BooleanFieldControlProps> =
     const overridden = value !== undefined;
 
     const onOverrideChange = useCallback(
-      (
-        _e?: React.FormEvent<HTMLElement | HTMLInputElement>,
-        checked?: boolean
-      ) => {
-        onChange(checked ? Boolean(planValue) : undefined);
+      (checked: boolean | "indeterminate") => {
+        onChange(checked === true ? Boolean(planValue) : undefined);
       },
       [onChange, planValue]
     );
 
     const onValueChange = useCallback(
-      (_e: React.MouseEvent<HTMLElement>, checked?: boolean) => {
+      (checked: boolean) => {
         onChange(Boolean(checked));
       },
       [onChange]
@@ -34,20 +32,20 @@ const BooleanFieldControl: React.VFC<BooleanFieldControlProps> =
 
     return (
       <div className={styles.root}>
-        <Checkbox
-          label="Override"
-          checked={overridden}
-          disabled={disabled}
-          onChange={onOverrideChange}
-        />
+        <Text as="label" size="2" className={styles.checkboxLabel}>
+          <Checkbox
+            checked={overridden}
+            disabled={disabled}
+            onCheckedChange={onOverrideChange}
+          />
+          Override
+        </Text>
         {overridden && (
           <Toggle
-            className={styles.toggle}
             checked={value}
-            onText="Yes"
-            offText="No"
+            text={value ? "Yes" : "No"}
             disabled={disabled}
-            onChange={onValueChange}
+            onCheckedChange={onValueChange}
           />
         )}
       </div>

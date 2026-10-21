@@ -1,6 +1,6 @@
 import React from "react";
 import cn from "classnames";
-import { Text } from "@fluentui/react";
+import { Heading } from "@radix-ui/themes";
 import styles from "./ScreenTitle.module.css";
 
 export interface ScreenTitleProps {
@@ -13,14 +13,14 @@ const ScreenTitle: React.VFC<ScreenTitleProps> = function ScreenTitle(
 ) {
   const { className, children } = props;
   return (
-    <Text
+    <Heading
       as="h1"
-      variant="xxLarge"
-      block={true}
+      size="7"
+      weight="bold"
       className={cn(styles.title, className)}
     >
       {children}
-    </Text>
+    </Heading>
   );
 };
 

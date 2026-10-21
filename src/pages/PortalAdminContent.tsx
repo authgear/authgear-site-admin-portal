@@ -1,12 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
-import {
-  PrimaryButton,
-  DefaultButton,
-  Modal,
-  TextField,
-  Spinner,
-  SpinnerSize,
-} from "@fluentui/react";
+import { Button, Dialog, Table, Text } from "@radix-ui/themes";
+import { PlusIcon } from "@radix-ui/react-icons";
 import {
   listAppCollaborators,
   addAppCollaborator,
@@ -14,6 +8,13 @@ import {
   promoteAppCollaborator,
 } from "../api/siteadmin";
 import type { Collaborator } from "../api/types";
+import ShowLoading from "../components/ShowLoading";
+import { Badge } from "../components/v2/Badge/Badge";
+import { Callout } from "../components/v2/Callout/Callout";
+import { ConfirmationDialog } from "../components/v2/ConfirmationDialog/ConfirmationDialog";
+import { PrimaryButton } from "../components/v2/Button/PrimaryButton/PrimaryButton";
+import { SecondaryButton } from "../components/v2/Button/SecondaryButton/SecondaryButton";
+import { TextField } from "../components/v2/TextField/TextField";
 import styles from "./PortalAdminContent.module.css";
 
 interface PortalAdminContentProps {
@@ -143,177 +144,163 @@ const PortalAdminContent: React.VFC<PortalAdminContentProps> = ({ appId }) => {
       .finally(() => setInviting(false));
   };
 
+  const onInviteSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!inviteEmail.trim() || inviting) return;
+    confirmInvite();
+  };
+
+  const actionErrorNode = actionError ? (
+    <span className={styles.dialogError} role="alert">
+      {actionError}
+    </span>
+  ) : null;
+
   return (
     <div className={styles.root}>
       <div className={styles.inviteRow}>
-        <PrimaryButton
-          text="Add Admin"
-          iconProps={{ iconName: "Add" }}
+        <Button
+          type="button"
+          size="2"
+          variant="solid"
+          color="indigo"
           onClick={openInviteModal}
-          styles={{
-            root: {
-              backgroundColor: "#176df3",
-              borderColor: "#176df3",
-              fontSize: 14,
-            },
-            icon: { color: "#ffffff", fontSize: 14 },
-          }}
-        />
+        >
+          <PlusIcon />
+          Add Admin
+        </Button>
       </div>
 
       {loading ? (
-        <div
-          style={{
-            padding: "24px 0",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <Spinner size={SpinnerSize.medium} />
-        </div>
+        <ShowLoading />
       ) : loadError ? (
-        <p style={{ color: "#a4262c", fontSize: 14 }}>{loadError}</p>
+        <Callout type="error" text={loadError} showCloseButton={false} />
       ) : (
-        <div className={styles.card}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
+        <div className={styles.tableWrapper}>
+          <Table.Root variant="surface" className={styles.table}>
+            <Table.Header>
+              <Table.Row>
+                <Table.ColumnHeaderCell>Email</Table.ColumnHeaderCell>
+                <Table.ColumnHeaderCell className={styles.roleColumn}>
+                  Role
+                </Table.ColumnHeaderCell>
+                <Table.ColumnHeaderCell className={styles.actionColumn}>
+                  Action
+                </Table.ColumnHeaderCell>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
               {collaborators.map((entry) => (
-                <tr key={entry.id}>
-                  <td className={styles.emailCell}>{entry.user_email}</td>
-                  <td>
-                    <span className={styles.statusAccepted}>
-                      {entry.role === "owner" ? "Owner" : "Editor"}
-                    </span>
-                  </td>
-                  <td>
+                <Table.Row key={entry.id} align="center">
+                  <Table.Cell className={styles.emailCell}>
+                    <Text as="span" size="2">
+                      {entry.user_email}
+                    </Text>
+                  </Table.Cell>
+                  <Table.Cell className={styles.roleColumn}>
+                    <Badge
+                      size="1"
+                      variant={entry.role === "owner" ? "info" : "neutral"}
+                      text={entry.role === "owner" ? "Owner" : "Editor"}
+                    />
+                  </Table.Cell>
+                  <Table.Cell className={styles.actionColumn}>
                     <div className={styles.actionCell}>
                       {entry.role !== "owner" && (
-                        <button
+                        <Button
                           type="button"
-                          className={styles.actionPromote}
+                          size="1"
+                          variant="ghost"
+                          color="indigo"
                           onClick={() => openPromoteModal(entry)}
                         >
                           Promote to Owner
-                        </button>
+                        </Button>
                       )}
-                      <button
+                      <Button
                         type="button"
-                        className={styles.actionRemove}
+                        size="1"
+                        variant="ghost"
+                        color="red"
                         onClick={() => openRemoveModal(entry)}
                       >
                         Remove
-                      </button>
+                      </Button>
                     </div>
-                  </td>
-                </tr>
+                  </Table.Cell>
+                </Table.Row>
               ))}
               {collaborators.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={3}
-                    style={{
-                      textAlign: "center",
-                      color: "#797775",
-                      padding: "16px 0",
-                    }}
-                  >
-                    No collaborators yet.
-                  </td>
-                </tr>
+                <Table.Row>
+                  <Table.Cell colSpan={3} className={styles.emptyCell}>
+                    <Text as="span" size="2" color="gray">
+                      No collaborators yet.
+                    </Text>
+                  </Table.Cell>
+                </Table.Row>
               )}
-            </tbody>
-          </table>
+            </Table.Body>
+          </Table.Root>
         </div>
       )}
 
-      {/* Invite modal */}
-      <Modal
-        isOpen={showInviteModal}
-        onDismiss={closeInviteModal}
-        isBlocking={false}
-        styles={{ main: { maxWidth: 440, width: "90%" } }}
+      {/* Invite dialog */}
+      <Dialog.Root
+        open={showInviteModal}
+        onOpenChange={(open) => {
+          if (!open) closeInviteModal();
+        }}
       >
-        <div style={{ padding: 24 }}>
-          <div
-            style={{
-              fontSize: 18,
-              fontWeight: 600,
-              color: "#323130",
-              marginBottom: 20,
-            }}
-          >
-            Invite Portal Admin
-          </div>
-          <div className={styles.inviteModalBody}>
-            <label
-              className={styles.inviteModalLabel}
-              htmlFor="portal-admin-invite-email"
-            >
-              Email
-            </label>
+        <Dialog.Content maxWidth="440px" size="3" aria-describedby={undefined}>
+          <Dialog.Title>Invite Portal Admin</Dialog.Title>
+          <form className={styles.inviteForm} onSubmit={onInviteSubmit}>
             <TextField
               id="portal-admin-invite-email"
+              size="2"
               type="email"
+              label="Email"
               placeholder="Enter email address"
               value={inviteEmail}
-              onChange={(_, value) => setInviteEmail(value ?? "")}
-              styles={{
-                root: { width: "100%" },
-                field: { fontSize: 14 },
-              }}
+              onChange={(e) => setInviteEmail(e.target.value)}
             />
-          </div>
-          {actionError && (
-            <p style={{ margin: "8px 0 0", fontSize: 13, color: "#a4262c" }}>
-              {actionError}
-            </p>
-          )}
-          <div className={styles.inviteModalButtons}>
-            <DefaultButton
-              text="Cancel"
-              onClick={closeInviteModal}
-              styles={{ root: { borderColor: "#edebe9", color: "#323130" } }}
-            />
-            <PrimaryButton
-              text="Invite"
-              onClick={confirmInvite}
-              disabled={!inviteEmail.trim() || inviting}
-              styles={{
-                root: { backgroundColor: "#176df3", borderColor: "#176df3" },
-              }}
-            />
-          </div>
-        </div>
-      </Modal>
+            {actionError ? (
+              <Callout
+                type="error"
+                text={actionError}
+                showCloseButton={false}
+              />
+            ) : null}
+            <div className={styles.dialogButtons}>
+              <SecondaryButton
+                size="2"
+                text="Cancel"
+                disabled={inviting}
+                onClick={closeInviteModal}
+              />
+              <PrimaryButton
+                size="2"
+                type="submit"
+                text="Invite"
+                loading={inviting}
+                disabled={!inviteEmail.trim() || inviting}
+              />
+            </div>
+          </form>
+        </Dialog.Content>
+      </Dialog.Root>
 
-      {/* Promote confirmation modal */}
-      <Modal
-        isOpen={showPromoteModal}
-        onDismiss={closePromoteModal}
-        isBlocking={false}
-        styles={{ main: { maxWidth: 440, width: "90%" } }}
-      >
-        <div style={{ padding: 24 }}>
-          <div
-            style={{
-              fontSize: 18,
-              fontWeight: 600,
-              color: "#323130",
-              marginBottom: 12,
-            }}
-          >
-            Promote to Owner
-          </div>
-          <p className={styles.removeModalMessage}>
+      {/* Promote confirmation dialog */}
+      <ConfirmationDialog
+        open={showPromoteModal}
+        onOpenChange={(open) => {
+          if (!open) closePromoteModal();
+        }}
+        maxWidth="440px"
+        title="Promote to Owner"
+        description={
+          <>
             Are you sure you want to promote{" "}
-            <span className={styles.removeModalEmail}>
+            <span className={styles.dialogEmail}>
               {promoteTarget?.user_email ?? ""}
             </span>{" "}
             to project owner?
@@ -321,57 +308,35 @@ const PortalAdminContent: React.VFC<PortalAdminContentProps> = ({ appId }) => {
               <>
                 {" "}
                 The current owner{" "}
-                <span className={styles.removeModalEmail}>
+                <span className={styles.dialogEmail}>
                   {currentOwner.user_email}
                 </span>{" "}
                 will be demoted to editor.
               </>
             ) : null}
-          </p>
-          {actionError && (
-            <p style={{ margin: "8px 0 0", fontSize: 13, color: "#a4262c" }}>
-              {actionError}
-            </p>
-          )}
-          <div className={styles.removeModalButtons}>
-            <DefaultButton
-              text="Cancel"
-              onClick={closePromoteModal}
-              styles={{ root: { borderColor: "#edebe9", color: "#323130" } }}
-            />
-            <PrimaryButton
-              text="Promote"
-              onClick={confirmPromote}
-              disabled={promoting}
-              styles={{
-                root: { backgroundColor: "#176df3", borderColor: "#176df3" },
-              }}
-            />
-          </div>
-        </div>
-      </Modal>
+            {actionErrorNode}
+          </>
+        }
+        confirmText="Promote"
+        cancelText="Cancel"
+        confirmColor="indigo"
+        loading={promoting}
+        onConfirm={confirmPromote}
+        onCancel={closePromoteModal}
+      />
 
-      {/* Remove confirmation modal */}
-      <Modal
-        isOpen={showRemoveModal}
-        onDismiss={closeRemoveModal}
-        isBlocking={false}
-        styles={{ main: { maxWidth: 440, width: "90%" } }}
-      >
-        <div style={{ padding: 24 }}>
-          <div
-            style={{
-              fontSize: 18,
-              fontWeight: 600,
-              color: "#323130",
-              marginBottom: 12,
-            }}
-          >
-            Remove User
-          </div>
-          <p className={styles.removeModalMessage}>
+      {/* Remove confirmation dialog */}
+      <ConfirmationDialog
+        open={showRemoveModal}
+        onOpenChange={(open) => {
+          if (!open) closeRemoveModal();
+        }}
+        maxWidth="440px"
+        title="Remove User"
+        description={
+          <>
             Are you sure you want to remove{" "}
-            <span className={styles.removeModalEmail}>
+            <span className={styles.dialogEmail}>
               {removeTarget?.user_email ?? ""}
             </span>{" "}
             from the portal admins? They will no longer be able to sign in or
@@ -383,38 +348,16 @@ const PortalAdminContent: React.VFC<PortalAdminContentProps> = ({ appId }) => {
                 collaborator is promoted.
               </>
             ) : null}
-          </p>
-          {actionError && (
-            <p style={{ margin: "8px 0 0", fontSize: 13, color: "#a4262c" }}>
-              {actionError}
-            </p>
-          )}
-          <div className={styles.removeModalButtons}>
-            <DefaultButton
-              text="Cancel"
-              onClick={closeRemoveModal}
-              styles={{ root: { borderColor: "#edebe9", color: "#323130" } }}
-            />
-            <DefaultButton
-              text="Remove"
-              onClick={confirmRemove}
-              disabled={removing}
-              styles={{
-                root: {
-                  backgroundColor: "#e23d3d",
-                  borderColor: "#e23d3d",
-                  color: "#ffffff",
-                },
-                rootHovered: {
-                  backgroundColor: "#c93535",
-                  borderColor: "#c93535",
-                  color: "#ffffff",
-                },
-              }}
-            />
-          </div>
-        </div>
-      </Modal>
+            {actionErrorNode}
+          </>
+        }
+        confirmText="Remove"
+        cancelText="Cancel"
+        confirmColor="red"
+        loading={removing}
+        onConfirm={confirmRemove}
+        onCancel={closeRemoveModal}
+      />
     </div>
   );
 };

@@ -1,14 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  Dropdown,
-  IDropdownOption,
-  PrimaryButton,
-  MessageBar,
-  MessageBarType,
-  Spinner,
-  SpinnerSize,
-} from "@fluentui/react";
+import { Select, Spinner, Text } from "@radix-ui/themes";
 import { changeAppPlan, listPlans } from "../api/siteadmin";
+import { Callout } from "../components/v2/Callout/Callout";
+import { PrimaryButton } from "../components/v2/Button/PrimaryButton/PrimaryButton";
 import styles from "./PlanContent.module.css";
 
 interface PlanContentProps {
@@ -48,22 +42,18 @@ const PlanContent: React.VFC<PlanContentProps> = ({
       });
   }, []);
 
-  const dropdownOptions: IDropdownOption[] = React.useMemo(() => {
+  const planOptions: string[] = React.useMemo(() => {
     const keys = new Set<string>(plans ?? []);
     if (currentPlan) keys.add(currentPlan);
-    return Array.from(keys).map((key) => ({ key, text: key }));
+    // Radix Select items cannot have an empty-string value.
+    return Array.from(keys).filter((key) => key !== "");
   }, [plans, currentPlan]);
 
-  const onChange = useCallback(
-    (_e: React.FormEvent<HTMLDivElement>, option?: IDropdownOption) => {
-      if (option) {
-        setSelectedPlan(option.key as string);
-        setSuccess(false);
-        setSubmitError(null);
-      }
-    },
-    []
-  );
+  const onChange = useCallback((value: string) => {
+    setSelectedPlan(value);
+    setSuccess(false);
+    setSubmitError(null);
+  }, []);
 
   const onSubmit = useCallback(() => {
     if (!selectedPlan || selectedPlan === currentPlan) return;
@@ -90,60 +80,69 @@ const PlanContent: React.VFC<PlanContentProps> = ({
 
   return (
     <div className={styles.root}>
-      <div className={styles.currentPlanRow}>
-        <span className={styles.currentPlanLabel}>Current Plan</span>
-        <span className={styles.currentPlanValue}>{displayPlan}</span>
-      </div>
-      <div className={styles.selectorRow}>
-        <label htmlFor="plan-selector" className={styles.selectorLabel}>
-          Switch Plan
-        </label>
-        {plans == null && plansError == null ? (
-          <Spinner size={SpinnerSize.small} />
-        ) : (
-          <Dropdown
-            id="plan-selector"
-            options={dropdownOptions}
-            selectedKey={selectedPlan}
-            onChange={onChange}
-            disabled={submitting}
-            className={styles.planDropdown}
-            styles={{
-              title: { fontFamily: "var(--font-family-base)" },
-              dropdown: { fontFamily: "var(--font-family-base)" },
-            }}
-          />
-        )}
-        {plansError && (
-          <MessageBar messageBarType={MessageBarType.error} isMultiline={false}>
-            {plansError}
-          </MessageBar>
-        )}
-        {submitError && (
-          <MessageBar messageBarType={MessageBarType.error} isMultiline={false}>
-            {submitError}
-          </MessageBar>
-        )}
-        {success && (
-          <MessageBar
-            messageBarType={MessageBarType.success}
-            isMultiline={false}
+      <div className={styles.card}>
+        <div className={styles.field}>
+          <Text as="p" size="2" weight="medium" className={styles.label}>
+            Current Plan
+          </Text>
+          <Text as="p" size="2" className={styles.value}>
+            {displayPlan}
+          </Text>
+        </div>
+        <div className={styles.field}>
+          <Text
+            as="label"
+            size="2"
+            weight="medium"
+            htmlFor="plan-selector"
+            className={styles.label}
           >
-            Plan updated.
-          </MessageBar>
-        )}
+            Switch Plan
+          </Text>
+          {plans == null && plansError == null ? (
+            <Spinner size="2" />
+          ) : (
+            <Select.Root
+              size="2"
+              value={selectedPlan ?? ""}
+              onValueChange={onChange}
+              disabled={submitting}
+            >
+              <Select.Trigger
+                id="plan-selector"
+                className={styles.planSelect}
+                placeholder="Select a plan"
+              />
+              <Select.Content position="popper">
+                {planOptions.map((plan) => (
+                  <Select.Item key={plan} value={plan}>
+                    {plan}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Root>
+          )}
+        </div>
+        {plansError ? (
+          <Callout type="error" text={plansError} showCloseButton={false} />
+        ) : null}
+        {submitError ? (
+          <Callout type="error" text={submitError} showCloseButton={false} />
+        ) : null}
+        {success ? (
+          <Callout
+            type="success"
+            text="Plan updated."
+            showCloseButton={false}
+          />
+        ) : null}
         <div>
           <PrimaryButton
-            text={submitting ? "Switching…" : "Switch Plan"}
+            size="2"
+            text="Switch Plan"
+            loading={submitting}
             onClick={onSubmit}
             disabled={!canSubmit}
-            styles={{
-              root: { backgroundColor: "#176df3", borderColor: "#176df3" },
-              rootHovered: {
-                backgroundColor: "#1562db",
-                borderColor: "#1562db",
-              },
-            }}
           />
         </div>
       </div>
